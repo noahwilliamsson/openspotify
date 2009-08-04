@@ -81,12 +81,12 @@ struct sp_session {
 
 #ifdef _WIN32
 	HANDLE request_mutex;
-	HANDLE thr_main;
-	HANDLE thr_network;
+	HANDLE thread_main;
+	HANDLE thread_networkwork;
 #else
 	pthread_mutex_t request_mutex;
-	pthread_t thr_main;
-	pthread_t thr_network;
+	pthread_t thread_main;
+	pthread_t thread_networkwork;
 #endif
 };
 
