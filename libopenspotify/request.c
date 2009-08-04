@@ -39,7 +39,7 @@ int request_post(sp_session *session, sp_request_type type) {
 	}
 
 	req->type = type;
-	req->state = REQ_NEW;
+	req->state = REQ_STATE_NEW;
 	req->error = 0;
 	req->private = NULL;
 	req->next = NULL;
@@ -66,9 +66,9 @@ int request_set_result(sp_session *session, sp_request *req, sp_error error) {
 #endif
 
 	req->error = error;
-	req->state = REQ_RETURNED;
+	req->state = REQ_STATE_RETURNED;
 	
-	DSFYDEBUG("Setting REQ_RETURNED and error %d on request with type %d\n", error, req->type);
+	DSFYDEBUG("Setting REQ_STATE_RETURNED and error %d on request with type %d\n", error, req->type);
 
 #ifdef _WIN32
 	ReleaseMutex(session->request_mutex);
@@ -92,8 +92,8 @@ void request_mark_processed(sp_session *session, sp_request *req) {
 	pthread_mutex_lock(&session->request_mutex);
 #endif
 
-	DSFYDEBUG("Setting REQ_PROCESSED on request with type %d and error %d\n", req->type, req->error);
-	req->state = REQ_PROCESSED;
+	DSFYDEBUG("Setting REQ_STATE_PROCESSED on request with type %d and error %d\n", req->type, req->error);
+	req->state = REQ_STATE_PROCESSED;
 
 #ifdef _WIN32
 	ReleaseMutex(session->request_mutex);
@@ -104,7 +104,7 @@ void request_mark_processed(sp_session *session, sp_request *req) {
 
 
 /*
- * Remove requests in REQ_PROCESSED state
+ * Remove requests in REQ_STATE_PROCESSED state
  *
  */
 void request_cleanup(sp_session *session) {
@@ -119,8 +119,8 @@ void request_cleanup(sp_session *session) {
 	do {
 		prev = NULL;
 		for(walker = session->requests; walker; walker = walker->next) {
-			if(walker->state == REQ_PROCESSED) {
-				DSFYDEBUG("Event with type %d has state REQ_PROCESSED, will free() it\n", walker->type);
+			if(walker->state == REQ_STATE_PROCESSED) {
+				DSFYDEBUG("Event with type %d has state REQ_STATE_PROCESSED, will free() it\n", walker->type);
 				break;
 			}
 

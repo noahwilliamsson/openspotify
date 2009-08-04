@@ -22,15 +22,15 @@
 
 
 typedef enum { 
-	REQ_NEW = 0,
-	REQ_RUNNING,
-	REQ_RETURNED,
-	REQ_PROCESSED
+	REQ_STATE_NEW = 0,
+	REQ_STATE_RUNNING,
+	REQ_STATE_RETURNED,
+	REQ_STATE_PROCESSED
 } sp_request_state;
 
 typedef enum {
-	REQ_LOGIN = 0,
-	REQ_LOGOUT
+	REQ_TYPE_LOGIN = 0,
+	REQ_TYPE_LOGOUT
 } sp_request_type;
 
 struct sp_request {

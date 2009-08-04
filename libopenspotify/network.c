@@ -58,7 +58,7 @@ void *network_thread(void *data) {
 
 		/* No locking needed since we're in control of request_cleanup() */
 		for(req = s->requests; req; req = req->next) {
-			if(req->state != REQ_NEW && req->state != REQ_RUNNING)
+			if(req->state != REQ_STATE_NEW && req->state != REQ_STATE_RUNNING)
 				continue;
 
 			DSFYDEBUG("Processing request of type %d in state %d\n", req->type, req->state);
@@ -86,11 +86,11 @@ void *network_thread(void *data) {
  */
 static int process_request(sp_session *s, sp_request *req) {
 	switch(req->type) {
-	case REQ_LOGIN:
+	case REQ_TYPE_LOGIN:
 		return process_login_request(s, req);
 		break;
 
-	case REQ_LOGOUT:
+	case REQ_TYPE_LOGOUT:
 		return process_logout_request(s, req);
 		break;
 
@@ -118,8 +118,8 @@ static int process_login_request(sp_session *s, sp_request *req) {
 	sp_error error;
 	unsigned char key_recv[32], key_send[32];
 
-	if(req->state == REQ_NEW) {
-		req->state = REQ_RUNNING;
+	if(req->state == REQ_STATE_NEW) {
+		req->state = REQ_STATE_RUNNING;
 		s->login = login_create(s->username, s->password);
 		if(s->login == NULL)
 			return request_set_result(s, req, SP_ERROR_OTHER_TRANSIENT);
