@@ -47,6 +47,8 @@ typedef struct sp_request sp_request;
 struct sp_session {
 	void *userdata;
 
+	sp_session_callbacks *callbacks;
+
 	/* Low-level network stuff */
 	int sock;
 

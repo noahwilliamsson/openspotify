@@ -33,6 +33,10 @@ SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_sess
 	memset(s, 0, sizeof(sp_session));
 	
 
+	s->callbacks = (sp_session_callbacks *)malloc(sizeof(sp_session_callbacks));
+	memcpy(s->callbacks, config->callbacks, sizeof(sp_session_callbacks));
+
+
 	s->connectionstate = SP_CONNECTION_STATE_UNDEFINED;
 	s->userdata = config->userdata;
 
@@ -103,12 +107,12 @@ sp_playlistcontainer * 	sp_session_playlistcontainer (sp_session *session)
 
 /*
  * Not present in the official library
+ * XXX - Might not be thread safe?
  *
  */
 SP_LIBEXPORT(sp_error) sp_session_release (sp_session *session) {
 
-
-	/* Terminate networking thread */
+	/* Kill networking thread */
 	DSFYDEBUG("Terminating network thread\n");
 #ifdef _WIN32
 	TerminateThread(session->thr_network, 0);
@@ -121,6 +125,8 @@ SP_LIBEXPORT(sp_error) sp_session_release (sp_session *session) {
 
 	if(session->login)
 		login_release(session->login);
+
+	free(session->callbacks);
 
 	free(session);
 
