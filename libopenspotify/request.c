@@ -80,6 +80,30 @@ int request_set_result(sp_session *session, sp_request *req, sp_error error) {
 }
 
 
+/* For the main thread: Fetch next entry with state REQ_STATE_RETURNED */
+sp_request *request_fetch_next_result(sp_session *session) {
+	struct sp_request *request;
+
+#ifdef _WIN32
+	WaitForSingleObject(session->request_mutex, INFINITE);
+#else
+	pthread_mutex_lock(&session->request_mutex);
+#endif
+
+	for(request = session->requests; request; request = request->next)
+		if(request->state == REQ_STATE_RETURNED)
+			break;
+
+#ifdef _WIN32
+	ReleaseMutex(session->request_mutex);
+#else
+	pthread_mutex_unlock(&session->request_mutex);
+#endif
+
+	return request;
+}
+
+
 /*
  * Mark an request as processed by sp_request_process_requests()
  * Data will be free'd by request_cleanup()
