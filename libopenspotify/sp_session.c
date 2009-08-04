@@ -93,16 +93,59 @@ SP_LIBEXPORT(sp_error) sp_session_logout (sp_session *session) {
 	return SP_ERROR_OK;
 }
 
-/*
-sp_user * 	sp_session_user (sp_session *session)
-void * 	sp_session_userdata (sp_session *session)
-void 	sp_session_process_events (sp_session *session, int *next_timeout)
-sp_error 	sp_session_player_load (sp_session *session, sp_track *track)
-sp_error 	sp_session_player_seek (sp_session *session, int offset)
-sp_error 	sp_session_player_play (sp_session *session, bool play)
-void 	sp_session_player_unload (sp_session *session)
-sp_playlistcontainer * 	sp_session_playlistcontainer (sp_session *session)
-*/
+
+SP_LIBEXPORT(sp_user *) sp_session_user(sp_session *session) {
+	DSFYDEBUG("FIXME: Not yet implemented\n");
+
+	return NULL;
+}
+
+
+SP_LIBEXPORT(void *) sp_session_userdata(sp_session *session) {
+	DSFYDEBUG("FIXME: Not yet implemented\n");
+
+	return NULL;
+}
+
+
+SP_LIBEXPORT(void) sp_session_process_events(sp_session *session, int *next_timeout) {
+	DSFYDEBUG("FIXME: Not yet implemented\n");
+
+}
+
+
+SP_LIBEXPORT(sp_error) sp_session_player_load(sp_session *session, sp_track *track) {
+	DSFYDEBUG("FIXME: Not yet implemented\n");
+
+	return SP_ERROR_OK;
+}
+
+
+SP_LIBEXPORT(sp_error) sp_session_player_seek(sp_session *session, int offset) {
+	DSFYDEBUG("FIXME: Not yet implemented\n");
+
+	return SP_ERROR_OK;
+}
+
+
+SP_LIBEXPORT(sp_error) sp_session_player_play(sp_session *session, bool play) {
+	DSFYDEBUG("FIXME: Not yet implemented\n");
+
+	return SP_ERROR_OK;
+}
+
+
+SP_LIBEXPORT(void) sp_session_player_unload(sp_session *session) {
+	DSFYDEBUG("FIXME: Not yet implemented\n");
+
+}
+
+
+SP_LIBEXPORT(sp_playlistcontainer *) sp_session_playlistcontainer(sp_session *session) {
+	DSFYDEBUG("FIXME: Not yet implemented\n");
+
+	return NULL;
+}
 
 
 /*
