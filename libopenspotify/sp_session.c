@@ -14,6 +14,7 @@
 #include "request.h"
 #include "login.h"
 #include "network.h"
+#include "request.h"
 #include "sp_opaque.h"
 
 
@@ -109,8 +110,39 @@ SP_LIBEXPORT(void *) sp_session_userdata(sp_session *session) {
 
 
 SP_LIBEXPORT(void) sp_session_process_events(sp_session *session, int *next_timeout) {
-	DSFYDEBUG("FIXME: Not yet implemented\n");
+	struct sp_request *request;
 
+	while((request = request_fetch_next_result(session)) != NULL) {
+		DSFYDEBUG("Processing finished request of type %d, error %d\n",
+			request->type, request->error);
+
+		/* FIXME: Verify that these callbacks are indeed called from the main thread! */
+		switch(request->type) {
+		case REQ_TYPE_LOGIN:
+			if(session->callbacks->logged_in == NULL)
+				break;
+
+			session->callbacks->logged_in(session, request->error);
+			break;
+			
+		case REQ_TYPE_LOGOUT:
+			if(session->callbacks->logged_out == NULL)
+				break;
+
+			session->callbacks->logged_out(session);
+			break;
+
+		default:
+			break;
+		}
+
+
+		/* Now that we've delievered the result, mark it for deletion */
+		request_mark_processed(session, request);
+	}
+
+
+	*next_timeout = 1000;
 }
 
 
