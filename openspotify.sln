@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual C++ Express 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "openspotify-simple", "openspotify-simple\openspotify-simple.vcproj", "{43B246CE-CE6D-4A20-B167-5D9D0174FD47}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3D9572E6-ADD5-455F-9677-51470EBDB39D} = {3D9572E6-ADD5-455F-9677-51470EBDB39D}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libopenspotify", "libopenspotify\libopenspotify.vcproj", "{3D9572E6-ADD5-455F-9677-51470EBDB39D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{43B246CE-CE6D-4A20-B167-5D9D0174FD47}.Debug|Win32.ActiveCfg = Debug|Win32
+		{43B246CE-CE6D-4A20-B167-5D9D0174FD47}.Debug|Win32.Build.0 = Debug|Win32
+		{43B246CE-CE6D-4A20-B167-5D9D0174FD47}.Release|Win32.ActiveCfg = Release|Win32
+		{43B246CE-CE6D-4A20-B167-5D9D0174FD47}.Release|Win32.Build.0 = Release|Win32
+		{3D9572E6-ADD5-455F-9677-51470EBDB39D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3D9572E6-ADD5-455F-9677-51470EBDB39D}.Debug|Win32.Build.0 = Debug|Win32
+		{3D9572E6-ADD5-455F-9677-51470EBDB39D}.Release|Win32.ActiveCfg = Release|Win32
+		{3D9572E6-ADD5-455F-9677-51470EBDB39D}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

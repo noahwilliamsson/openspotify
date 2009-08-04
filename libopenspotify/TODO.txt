@@ -1,0 +1,8 @@
+* Initialize PRNG !!!
+* Encrypt/decrypt routines for shannon
+* Protocol
+* Implement channels in a sensible way
+* Playlists
+* Tracks
+* Albums
+..
