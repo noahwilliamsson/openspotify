@@ -107,16 +107,17 @@ sp_playlistcontainer * 	sp_session_playlistcontainer (sp_session *session)
  */
 SP_LIBEXPORT(sp_error) sp_session_release (sp_session *session) {
 
-	DSFYDEBUG("Killing session\n");
 
-	/* Kill networking thread */
+	/* Terminate networking thread */
+	DSFYDEBUG("Terminating network thread\n");
 #ifdef _WIN32
 	TerminateThread(session->thr_network, 0);
+	session->thr_network = (HANDLE)0;
 #else
 	pthread_cancel(session->thr_network);
 	pthread_join(session->thr_network, NULL);
-#endif
 	session->thr_network = (pthread_t)0;
+#endif
 
 	if(session->login)
 		login_release(session->login);
