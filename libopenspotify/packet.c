@@ -72,8 +72,8 @@ int packet_read_and_process(sp_session *session) {
 
 		/* Make sure we have the entire payload aswell as the MAC */
 		header.len = ntohs(header.len);
-		DSFYDEBUG("Packet buf len=%d, header.cmd=0x%02x, header.len=%d, need %d bytes total\n",
-			session->packet->len, header.cmd, header.len, 3 + header.len + 4);
+		DSFYDEBUG("%d bytes buffered, header.cmd=0x%02x, header.len=%d\n",
+			session->packet->len, header.cmd, header.len);
 		if(session->packet->len < 3 + header.len + 4)
 			break;
 
@@ -125,13 +125,9 @@ int packet_write (sp_session * session, unsigned char cmd,
  		memcpy (ptr, payload, len);
 	}
 	
-#ifdef DEBUG_PACKETS
-	DSFYDEBUG
-		("Sending packet with command 0x%02x, length %d\n",
-		 h->cmd, ntohs (h->len));
+	DSFYDEBUG("Sending packet with command 0x%02x, length %d, IV=%d\n",
+		 h->cmd, ntohs (h->len), session->key_send_IV);
 	logdata ("send-hdr", session->key_send_IV, (unsigned char *) h, 3);
-	if (payload != NULL) logdata ("send-payload", session->key_send_IV, payload, len);
-#endif
 
 	shn_encrypt (&session->shn_send, buf, 3 + len);
 	ptr += len;
@@ -146,10 +142,8 @@ int packet_write (sp_session * session, unsigned char cmd,
 
 
 	if(ret != 3 + len + 4) {
-#ifdef DEBUG_PACKETS
 		DSFYDEBUG ("block_write() only wrote %d of %d bytes\n", ret,
 			   3 + len + 4);
-#endif
 		return -1;
 	}
 
