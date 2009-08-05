@@ -19,11 +19,15 @@ $ sudo apt-get install libssl-dev zlib1g-dev
 $ cd libopenspotify && make clean all
 $ cd openspotify-simple && make clean all
 
+If you want to test openspotify-simple with the official library:
+$ cd openspotify-simple && make libspotify=1 clean all
+
 
 NOTES for WIN32
 ===============
-Custom settings for libopenspotify
-Select the libopenspotify project, right click and choose Properties
+These are the changes that are made in Visual C++ for libopenspotify:
+
+Select the libopenspotify project, right click on it and choose Properties
 Make sure "All configurations" is selected in the top-left menu
 
 Under Configurations Properties, Project Defaults -> Configuration Type, set
@@ -33,7 +37,8 @@ Under C/C++ -> General -> Additional Include Directories, add
   ..\include, ..\openssl-0.9.8k\include
 
 Under C/C++ -> Preprocessor -> Preprocessor Definitions, add
-  /DWIN32_LEAN_AND_MEAN
+  WIN32_LEAN_AND_MEAN
+  _CRT_SECURE_NO_WARNINGS
 
 Under Librarian -> General -> Additional Dependencies, add
   dnsapi.lib ws2_32.lib ..\openssl-0.9.8k\lib\libeay32.lib ..\openssl-0.9.8k\lib\libssl32.lib

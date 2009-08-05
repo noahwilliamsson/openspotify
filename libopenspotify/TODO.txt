@@ -1,8 +1,17 @@
+TODO list
+=========
 * Initialize PRNG !!!
-* Encrypt/decrypt routines for shannon
-* Protocol
-* Implement channels in a sensible way
 * Playlists
+* Searching
 * Tracks
 * Albums
-..
+* Request and decryption of audio
+* Audio decoding to PCM
+
+
+KNOWN ISSUES
+============
+1. If connecting to server fails libopenspotify the login session fails.
+   The official libspotify will retry with the next server.
+2. In DNS only port 4070 is listed. The official library will also try 
+   port 80 and 443 I think.
