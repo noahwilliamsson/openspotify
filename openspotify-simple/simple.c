@@ -8,6 +8,7 @@
 #include <unistd.h>
 #endif
 #include <stdio.h>
+#include <string.h>
 
 #include "despotify-appkey.h"
 #include "debug.h"
@@ -189,12 +190,26 @@ int main(int argc, char **argv)
 
 	char username[256];
 	char password[256];
+	char *ptr;
 
-	printf("Username: ");
-	gets(username);
+	if(argc == 1) {
+		printf("Username: ");
+		ptr = fgets(username, sizeof(username) - 1, stdin);
+		while(*ptr) { if(*ptr == '\r' || *ptr == '\n') *ptr = 0; ptr++; }
 
-	printf("Password: ");
-	gets(password);
+		printf("Password: ");
+		ptr = fgets(password, sizeof(password) - 1, stdin);
+		while(*ptr) { if(*ptr == '\r' || *ptr == '\n') *ptr = 0; ptr++; }
+	}
+	else if(argc == 3) {
+		strcpy(username, argv[1]);
+		strcpy(password, argv[2]);
+	}
+	else {
+		printf("Usage: simple <username> <password>\n");
+	}
+
+
 
     // Setup for waking up the main thread in notify_main_thread()
     DSFYDEBUG("PING from main()\n");
