@@ -188,6 +188,14 @@
 				RelativePath="..\include\spotify\api.h"
 				>
 			</File>
+			<File
+				RelativePath=".\debug.h"
+				>
+			</File>
+			<File
+				RelativePath=".\despotify-appkey.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
