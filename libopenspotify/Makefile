@@ -3,7 +3,7 @@ CFLAGS = -Wall -ggdb -I../include -DDEBUG
 LDFLAGS = -lresolv -lcrypto
 
 CORE_OBJS = buf.o dns.o hmac.o login.o network.o request.o sha1.o shn.o util.o 
-LIB_OBJS = sp_session.o
+LIB_OBJS = sp_error.o sp_session.o sp_user.o
 
 # Linux
 LIB_NAME = libopenspotify.so

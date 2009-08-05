@@ -187,7 +187,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\sp_error.c"
+				>
+			</File>
+			<File
 				RelativePath=".\sp_session.c"
+				>
+			</File>
+			<File
+				RelativePath=".\sp_user.c"
 				>
 			</File>
 			<File
