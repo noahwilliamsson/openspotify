@@ -6,5 +6,8 @@
 #ifndef DESPOTIFY_HANDLERS_H
 #define DESPOTIFY_HANDLERS_H
 
+#include "sp_opaque.h"
+
+
 int handle_packet (sp_session *, int, unsigned char *, unsigned short);
 #endif
