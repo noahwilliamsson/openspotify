@@ -72,7 +72,7 @@ static void SP_CALLCONV logged_out(sp_session *session) {
 
 
 static void SP_CALLCONV notify_main_thread(sp_session *session) {
-	DSFYDEBUG("CALLBACK: session=%p, notifying sp_process_event()\n", session);
+	DSFYDEBUG("CALLBACK: session=%p, notifying main thread\n", session);
 
 #ifdef _WIN32
 	if(PulseEvent(notifyEvent) == 0) {
@@ -188,7 +188,7 @@ static void loop(sp_session *session) {
 
 #ifndef _WIN32
 static void sigIgn(int signo) {
-	DSFYDEBUG("SIGHANDLER: Interrupting sleeps with signal %d\n", signo);
+	DSFYDEBUG("SIGHANDLER: Interrupting sleep with signal %d\n", signo);
 }
 #endif
 
@@ -281,7 +281,9 @@ int main(int argc, char **argv)
     loop(session);
 
 
+
     DSFYDEBUG("Logged out, now trying to login again!\n");
+    g_exit_code = -1;
     error = sp_session_login(session, username, password);
 
     if (SP_ERROR_OK != error) {
