@@ -15,8 +15,9 @@ UNIX
 ====
 Requires openssl development headers and libraries
 
-$ cd libopenspotify
-$ make clean all
+$ sudo apt-get install libssl-dev zlib1g-dev
+$ cd libopenspotify && make clean all
+$ cd openspotify-simple && make clean all
 
 
 NOTES for WIN32
