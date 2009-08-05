@@ -70,14 +70,13 @@ struct sp_session {
 	struct login_ctx *login;
 
 
-        /*
-         * Stream cipher contexts
-         *
-         */
+        /* Stream cipher context */
         unsigned int key_recv_IV;
         unsigned int key_send_IV;
         shn_ctx shn_recv;
         shn_ctx shn_send;
+
+	struct buf *packet;
 
 
 	/* Requests scoreboard */

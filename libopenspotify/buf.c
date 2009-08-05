@@ -84,3 +84,17 @@ void buf_append_u32(struct buf* b, unsigned long data)
 
     b->len += 4;
 }
+
+
+struct buf* buf_consume(struct buf* b, int len) {
+	struct buf *output;
+
+	output = buf_new();
+	buf_extend(output, len);
+	buf_append_data(output, b->ptr, len);
+
+	memmove(b->ptr, b->ptr + len, b->len - len);
+	b->len -= len;
+
+	return output;
+}

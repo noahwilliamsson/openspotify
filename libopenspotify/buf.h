@@ -26,5 +26,5 @@ void buf_append_data(struct buf* b, void* data, int len);
 void buf_append_u8(struct buf* b, unsigned char data);
 void buf_append_u16(struct buf* b, unsigned short data);
 void buf_append_u32(struct buf* b, unsigned long data);
-
+struct buf* buf_consume(struct buf* b, int len);
 #endif

@@ -57,6 +57,53 @@ int request_post(sp_session *session, sp_request_type type, void *input) {
 
 
 /*
+ * Post a new request to be processed by the main thread
+ * (this is basically an "already processed" request from the net thread's PoV)
+ *
+ * If output is non-NULL, it will have to be free'd by the consumer,
+ * i.e, sp_session_process_events() or one of the callbacks
+ *
+ */
+int request_post_result(sp_session *session, sp_request_type type, sp_error error, void *output) {
+	sp_request *req;
+
+#ifdef _WIN32
+	WaitForSingleObject(session->request_mutex, INFINITE);
+#else
+	pthread_mutex_lock(&session->request_mutex);
+#endif
+
+	if(session->requests == NULL) {
+		req = session->requests = malloc(sizeof(sp_request));
+	}
+	else {
+		for(req = session->requests; req->next; req = req->next);
+		req->next = malloc(sizeof(sp_request));
+		req = req->next;
+	}
+
+	req->type = type;
+	req->state = REQ_STATE_RETURNED;
+	req->error = error;
+	req->input = NULL;
+	req->output = output;
+	req->next = NULL;
+
+	DSFYDEBUG("Posted request results with type %d and error %d\n", req->type, error);
+	session->callbacks->notify_main_thread(session);
+	DSFYDEBUG("Notified main thread via session->callbacks->notify_main_thread()\n");
+
+#ifdef _WIN32
+	ReleaseMutex(session->request_mutex);
+#else
+	pthread_mutex_unlock(&session->request_mutex);
+#endif
+
+	return 0;
+}
+
+
+/*
  * Set error and an eventual output value for the request.
  * The output value will need to be free'd by the consumer,
  * i.e. sp_session_process_events() or the callback

@@ -44,6 +44,9 @@ SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_sess
 	/* Low-level networking stuff */
 	s->sock = -1;
 
+	/* Incoming packet buffer */
+	s->packet = NULL;
+
 	/* To allow main thread to communicate with network thread */
 	s->requests = NULL;
 
@@ -206,6 +209,9 @@ SP_LIBEXPORT(sp_error) sp_session_release (sp_session *session) {
 	pthread_join(session->thread_networkwork, NULL);
 	session->thread_networkwork = (pthread_t)0;
 #endif
+
+	if(session->packet)
+		buf_free(session->packet);
 
 	if(session->login)
 		login_release(session->login);
