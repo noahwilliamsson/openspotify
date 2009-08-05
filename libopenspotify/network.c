@@ -156,6 +156,7 @@ static int process_packets(sp_session *session) {
 
 
 	/* We need a complete packet header of three bytes */
+	session->packet->len += ret;
 	while(session->packet->len >= 3) {
 
 		/* Set nonce for Shannon */
