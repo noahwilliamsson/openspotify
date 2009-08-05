@@ -44,7 +44,7 @@ typedef struct sp_request {
 } sp_request;
 
 /* sp_link.c */
-typedef struct sp_link {
+struct sp_link {
 	sp_linktype type;
 	
 	union {
