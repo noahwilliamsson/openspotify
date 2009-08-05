@@ -35,7 +35,7 @@ static pthread_t g_main_thread = (pthread_t)-1;
 /* ------------------------  BEGIN SESSION CALLBACKS  ---------------------- */
 static void SP_CALLCONV connection_error(sp_session *session, sp_error error)
 {
-    DSFYDEBUG("CALLBACK: connection_error(session=%p, error=%d)\n", session, error);
+    DSFYDEBUG("CALLBACK: session=%p, error=%d\n", session, error);
     fprintf(stderr, "connection to Spotify failed: %s\n",
                     sp_error_message(error));
     g_exit_code = 5;
@@ -59,20 +59,20 @@ static void SP_CALLCONV logged_in(sp_session *session, sp_error error) {
 
     printf("Logged in to Spotify as user %s\n", my_name);
 
-    DSFYDEBUG("CALLBACK: logged_in() calling session_ready()\n");
+    DSFYDEBUG("CALLBACK: calling session_ready()\n");
     session_ready(session);
 }
 
 
 static void SP_CALLCONV logged_out(sp_session *session) {
-	DSFYDEBUG("CALLBACK: logged_in(session=%p), g_exit_code=%d\n", session, g_exit_code);
+	DSFYDEBUG("CALLBACK: session=%p, g_exit_code=%d\n", session, g_exit_code);
 	if (g_exit_code < 0)
 		g_exit_code = 0;
 }
 
 
 static void SP_CALLCONV notify_main_thread(sp_session *session) {
-	DSFYDEBUG("CALLBACK: notify_main_thread(session=%p), will notify sp_process_event()\n", session);
+	DSFYDEBUG("CALLBACK: session=%p, notifying sp_process_event()\n", session);
 
 #ifdef _WIN32
 	if(PulseEvent(notifyEvent) == 0) {
@@ -86,13 +86,24 @@ static void SP_CALLCONV notify_main_thread(sp_session *session) {
 
 
 static void SP_CALLCONV log_message(sp_session *session, const char *data) {
-    DSFYDEBUG("CALLBACK: log_message(session=%p, data=%s)\n", session, data);
+    DSFYDEBUG("CALLBACK: session=%p, data='%s'\n", session, data);
     fprintf(stderr, "log_message: %s\n", data);
 }
 
 
 static void SP_CALLCONV metadata_updated(sp_session *session) {
-	DSFYDEBUG("CALLBACK: metadata_updated(session=%p)\n", session);
+	DSFYDEBUG("CALLBACK: session=%p\n", session);
+}
+
+
+static void SP_CALLCONV message_to_user(sp_session *session, const char *data) {
+    DSFYDEBUG("CALLBACK: session=%p, data='%s'\n", session, data);
+    fprintf(stderr, "message_to_user: %s\n", data);
+}
+
+
+static void SP_CALLCONV play_token_lost(sp_session *session) {
+	DSFYDEBUG("CALLBACK: session=%p\n", session);
 }
 
 
@@ -101,10 +112,10 @@ static sp_session_callbacks g_callbacks = {
     logged_out,
     metadata_updated,
     connection_error,
-    NULL,
+    message_to_user,
     notify_main_thread,
     NULL,
-    NULL,
+    play_token_lost,
     log_message
 };
 /* -------------------------  END SESSION CALLBACKS  ----------------------- */
