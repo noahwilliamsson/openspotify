@@ -18,6 +18,12 @@
 #include "sp_opaque.h"
 #include "util.h"
 
+/* The Visual C++ compiler doesn't know 'snprintf'... */
+#ifdef _MSC_VER
+#define snprintf _snprintf
+#endif
+
+
 /*
  * Writes to /tmp
  *
@@ -138,10 +144,11 @@ int cmd_search (sp_session * session, char *searchtext, unsigned int offset,
 	int ret;
 	char buf[100];
 	unsigned char searchtext_length;
+	struct buf *b;
 
 	assert (limit);
 
-	struct buf* b = buf_new();
+	b = buf_new();
 
 	snprintf (buf, sizeof (buf), "Search-%s", searchtext);
 	ch = channel_register (buf, callback, private);
@@ -246,7 +253,7 @@ int cmd_action (sp_session * session, unsigned char *file_id,
 
 #ifdef P2P
 	/* Request a 100 byte P2P initialization block */
-	struct buf* b = buffer_new();
+	b = buffer_new();
 	buf_append_data(b, file_id, 20);
 
 	ret = packet_write (session, 0x20, b->ptr, b->len);
@@ -278,6 +285,7 @@ int cmd_getsubstreams (sp_session * session, unsigned char *file_id,
 	char buf[512];
 	CHANNEL *ch;
 	int ret;
+	struct buf *b;
 
 	hex_bytes_to_ascii (file_id, buf, 20);
 	ch = channel_register (buf, callback, private);
@@ -285,7 +293,7 @@ int cmd_getsubstreams (sp_session * session, unsigned char *file_id,
 		("cmd_getsubstreams: allocated channel %d, retrieving song '%s'\n",
 		 ch->channel_id, ch->name);
 
-        struct buf* b = buf_new();
+        b = buf_new();
 	buf_append_u16(b, ch->channel_id);
 
 	/* I have no idea wtf these 10 bytes are for */
@@ -334,6 +342,7 @@ int cmd_browse (sp_session * session, unsigned char kind, unsigned char *idlist,
 	CHANNEL *ch;
 	char buf[256];
 	int i, ret;
+	struct buf *b;
 
 	assert (((kind == BROWSE_ARTIST || kind == BROWSE_ALBUM) && num == 1)
 		|| kind == BROWSE_TRACK);
@@ -342,7 +351,7 @@ int cmd_browse (sp_session * session, unsigned char kind, unsigned char *idlist,
 	hex_bytes_to_ascii(idlist, buf + 7, 16);
 	ch = channel_register (buf, callback, private);
 
-	struct buf* b = buf_new();
+	b = buf_new();
 	buf_append_u16(b, ch->channel_id);
 	buf_append_u8(b, kind);
 
@@ -377,13 +386,14 @@ int cmd_getplaylist (sp_session * session, unsigned char *playlist_id,
 	CHANNEL *ch;
 	char buf[256];
 	int ret;
+	struct buf *b;
 
 	strcpy (buf, "playlist-");
 	hex_bytes_to_ascii (playlist_id, buf + 9, 17);
 	buf[9 + 2 * 17] = 0;
 	ch = channel_register (buf, callback, private);
 
-	struct buf* b = buf_new();
+	b = buf_new();
 	buf_append_u16(b, ch->channel_id);
 	buf_append_data(b, playlist_id, 17);
 	buf_append_u32(b, revision);
@@ -415,13 +425,14 @@ int cmd_changeplaylist (sp_session * session, unsigned char *playlist_id,
 	CHANNEL *ch;
 	char buf[256];
 	int ret;
+	struct buf *b;
 
 	strcpy (buf, "chplaylist-");
 	hex_bytes_to_ascii (playlist_id, buf + 11, 17);
 	buf[11 + 2 * 17] = 0;
 	ch = channel_register (buf, callback, private);
 
-	struct buf* b = buf_new();
+	b = buf_new();
 	buf_append_u16(b, ch->channel_id);
 	buf_append_data(b, playlist_id, 17);
 	buf_append_u32(b, revision);
