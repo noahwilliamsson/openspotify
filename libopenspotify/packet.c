@@ -50,8 +50,6 @@ int packet_read_and_process(sp_session *session) {
 	ret = recv(session->sock,
 			session->packet->ptr + session->packet->len, 
 			session->packet->size - session->packet->len, 0);
-
-	DSFYDEBUG("Read %d bytes from socket %d\n", ret, session->sock);
 	if(ret <= 0)
 		return -1;
 
