@@ -52,9 +52,11 @@ SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_sess
 
 	/* Spawn networking thread */
 #ifdef _WIN32
+	s->request_mutex = CreateMutex(NULL, false, NULL);
 	s->thread_main = GetCurrentThread();
 	s->thread_network = CreateThread(NULL, 0, network_thread, s, 0, NULL);
 #else
+	pthread_mutex_init(&s->request_mutex, NULL);
 	s->thread_main = pthread_self();
 	if(pthread_create(&s->thread_network, NULL, network_thread, s))
 		return SP_ERROR_OTHER_TRANSIENT;
@@ -204,10 +206,12 @@ SP_LIBEXPORT(sp_error) sp_session_release (sp_session *session) {
 #ifdef _WIN32
 	TerminateThread(session->thread_network, 0);
 	session->thread_network = (HANDLE)0;
+	CloseHandle(session->request_mutex);
 #else
 	pthread_cancel(session->thread_network);
 	pthread_join(session->thread_network, NULL);
 	session->thread_network = (pthread_t)0;
+	pthread_mutex_destroy(&session->request_mutex);
 #endif
 
 	if(session->packet)
