@@ -12,6 +12,7 @@
 #else
 #include <unistd.h>
 #include <sys/socket.h>
+#include <sys/select.h>
 #endif
 #include <ctype.h>
 #include <errno.h>
@@ -106,14 +107,24 @@ ssize_t block_read (int fd, void *buf, size_t nbyte)
 {
 	unsigned int idx;
 	ssize_t n;
+	fd_set rfds;
 
 	idx = 0;
 	while (idx < nbyte) {
 		if ((n = recv (fd, (char *)buf + idx, nbyte - idx, 0)) <= 0) {
-			#ifdef __use_posix__
-			if (errno == EINTR)
+#ifdef _WIN32
+			if(n == -1 && WSAGetLastError() != WSAEWOULDBLOCK) {
+#else
+			if(n == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+#endif
+				FD_ZERO(&rfds);
+				FD_SET(fd, &rfds);
+				if(select(fd + 1, &rfds, NULL, NULL, NULL) < 0)
+					return -1;
+
 				continue;
-			#endif
+			}
+
 			return n;
 		}
 		idx += n;
@@ -125,14 +136,24 @@ ssize_t block_write (int fd, void *buf, size_t nbyte)
 {
 	unsigned int idx;
 	ssize_t n;
+	fd_set wfds;
 
 	idx = 0;
 	while (idx < nbyte) {
 		if ((n = send (fd, (char *)buf + idx, nbyte - idx, 0)) <= 0) {
-			#ifdef __use_posix__
-			if (errno == EINTR)
+#ifdef _WIN32
+			if(n == -1 && WSAGetLastError() != WSAEWOULDBLOCK) {
+#else
+			if(n == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+#endif
+				FD_ZERO(&wfds);
+				FD_SET(fd, &wfds);
+				if(select(fd + 1, NULL, &wfds, NULL, NULL) < 0)
+					return -1;
+
 				continue;
-			#endif
+			}
+
 			return n;
 		}
 		idx += n;
