@@ -150,7 +150,6 @@ int login_process(struct login_ctx *l) {
 	fd_set wfds;
 	struct timeval tv;
 
-	DSFYDEBUG("Processing login, current state is %d\n", l->state);
 	switch(l->state) {
 
 	case 0:
@@ -490,7 +489,7 @@ static int receive_server_parameters(struct login_ctx *l) {
         /* read 2 status bytes */
         ret = block_read(l->sock, l->server_random_16, 2);
 	if(ret < 2) {
-       		DSFYDEBUG("Failed to read status bytes\n");
+       		DSFYDEBUG("Failed to read status bytes, return value was %d, errno is %d\n", ret, errno);
 		l->error = SP_LOGIN_ERROR_SOCKET_ERROR;
 		return -1;
 	}
