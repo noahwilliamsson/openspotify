@@ -97,8 +97,6 @@ struct sp_session {
 	/* Requests scoreboard */
 	sp_request *requests;
 
-	/* Keeps track of the login state */
-	int login_state;
 
 	/* High level connection state */
 	sp_connectionstate connectionstate;
