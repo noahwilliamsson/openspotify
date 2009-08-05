@@ -71,9 +71,8 @@ void *network_thread(void *data) {
 		if(s->connectionstate != SP_CONNECTION_STATE_LOGGED_IN)
 			continue;
 
-		DSFYDEBUG("Processing packets\n");
-		ret = process_packets(s);
 
+		ret = process_packets(s);
 		if(ret < 0) {
 			DSFYDEBUG("process_packets() returned %d, disconnecting!\n", ret);
 #ifdef _WIN32
@@ -129,8 +128,6 @@ static int process_packets(sp_session *session) {
 	PHEADER header;
 	unsigned char nonce[4];
 
-	DSFYDEBUG("Processing packets on socket %d\n", session->sock);
-
 
 	if(session->packet == NULL)
 		session->packet = buf_new();
@@ -153,6 +150,7 @@ static int process_packets(sp_session *session) {
 			session->packet->ptr + session->packet->len, 
 			session->packet->size - session->packet->len, 0);
 
+	DSFYDEBUG("Read %d bytes from socket %d\n", session->sock);
 	if(ret <= 0)
 		return -1;
 
