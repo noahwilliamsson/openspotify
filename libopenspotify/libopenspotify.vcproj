@@ -159,7 +159,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\channel.c"
+				>
+			</File>
+			<File
+				RelativePath=".\commands.c"
+				>
+			</File>
+			<File
 				RelativePath=".\dns.c"
+				>
+			</File>
+			<File
+				RelativePath=".\handlers.c"
 				>
 			</File>
 			<File
@@ -225,11 +237,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\channel.h"
+				>
+			</File>
+			<File
+				RelativePath=".\commands.h"
+				>
+			</File>
+			<File
 				RelativePath=".\debug.h"
 				>
 			</File>
 			<File
 				RelativePath=".\dns.h"
+				>
+			</File>
+			<File
+				RelativePath=".\handlers.h"
 				>
 			</File>
 			<File
