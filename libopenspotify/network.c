@@ -1,6 +1,8 @@
 /*
+ * This file handles libopenspotify's communication with Spotify's service
+ * and is run in a seperate thread.
  *
- *
+ * Communication with the main thread is done via calls in request.c
  *
  */
 
@@ -28,9 +30,8 @@ static int process_logout_request(sp_session *s, sp_request *req);
 
 
 /*
- * Network thread
- * Main thread can communicate using the primitives in request.c
- * Results from operations are also returned using stuff in request.c
+ * The thread routine started by sp_session_init()
+ * It does not return but can be terminated by sp_session_release()
  *
  */
 
@@ -44,6 +45,7 @@ void *network_thread(void *data) {
 	int ret;
 
 #ifdef _WIN32
+	/* Initialize Winsock */
 	WSADATA wsadata;
 	WSAStartup(MAKEWORD(2,2), &wsadata);
 #endif
@@ -67,6 +69,8 @@ void *network_thread(void *data) {
 			DSFYDEBUG("Got return value %d from processing of event of type %d in state %d\n", ret, req->type, req->state);
 		}
 
+
+		/* Packets can only be processed once we're logged in */
 		if(s->connectionstate != SP_CONNECTION_STATE_LOGGED_IN)
 			continue;
 
@@ -93,10 +97,7 @@ void *network_thread(void *data) {
 
 
 /*
- * Process requests posted by request.c routines
- *
- * Also notify main thread when we're calling
- * request_set_result()
+ * Route request handling to the appropriate handlers
  *
  */
 static int process_request(sp_session *s, sp_request *req) {
@@ -117,6 +118,11 @@ static int process_request(sp_session *s, sp_request *req) {
 }
 
 
+/*
+ * High-level handling of login requests
+ * Uses login specific routines from login.c
+ *
+ */
 static int process_login_request(sp_session *s, sp_request *req) {
 	int ret;
 	sp_error error;
@@ -186,6 +192,11 @@ static int process_login_request(sp_session *s, sp_request *req) {
 }
 
 
+/*
+ * High-level handling of logout requests
+ * FIXME: Do we need to send some kind of "goodbye" packet first?
+ *
+ */
 static int process_logout_request(sp_session *session, sp_request *req) {
 
 	if(session->sock != -1) {
