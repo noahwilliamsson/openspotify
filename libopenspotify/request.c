@@ -74,6 +74,8 @@ int request_set_result(sp_session *session, sp_request *req, sp_error error, voi
 	req->state = REQ_STATE_RETURNED;
 	
 	DSFYDEBUG("Setting REQ_STATE_RETURNED and error %d on request with type %d\n", error, req->type);
+	session->callbacks->notify_main_thread(session);
+	DSFYDEBUG("Notified main thread via session->callbacks->notify_main_thread()\n");
 
 #ifdef _WIN32
 	ReleaseMutex(session->request_mutex);
