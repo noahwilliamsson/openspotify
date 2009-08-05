@@ -36,7 +36,7 @@ struct dns_srv_records *dns_get_service_list(char *hostname) {
 
 		entry = list_insert_by_prio(&root, p->Data.SRV.wPriority);
 
-		entry->host = strdup(p->Data.SRV.pNameTarget);
+		entry->host = _strdup((char *)p->Data.SRV.pNameTarget);
 		entry->port = malloc(6);
 		sprintf(entry->port, "%u", p->Data.SRV.wPort);
 		entry->prio = p->Data.SRV.wPriority;
