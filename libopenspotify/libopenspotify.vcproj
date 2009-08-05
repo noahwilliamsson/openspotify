@@ -175,6 +175,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\packet.c"
+				>
+			</File>
+			<File
 				RelativePath=".\request.c"
 				>
 			</File>
@@ -234,6 +238,10 @@
 			</File>
 			<File
 				RelativePath=".\network.h"
+				>
+			</File>
+			<File
+				RelativePath=".\packet.h"
 				>
 			</File>
 			<File
