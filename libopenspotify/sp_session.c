@@ -114,7 +114,7 @@ SP_LIBEXPORT(sp_user *) sp_session_user(sp_session *session) {
 
 SP_LIBEXPORT(void *) sp_session_userdata(sp_session *session) {
 
-	return NULL;
+	return session->userdata;
 }
 
 
