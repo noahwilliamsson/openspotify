@@ -150,7 +150,7 @@ static int process_packets(sp_session *session) {
 			session->packet->ptr + session->packet->len, 
 			session->packet->size - session->packet->len, 0);
 
-	DSFYDEBUG("Read %d bytes from socket %d\n", session->sock);
+	DSFYDEBUG("Read %d bytes from socket %d\n", ret, session->sock);
 	if(ret <= 0)
 		return -1;
 
