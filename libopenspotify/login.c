@@ -949,6 +949,7 @@ static void puzzle_solve (struct login_ctx *l) {
 	unsigned char digest[20];
 	unsigned int *nominator_from_hash;
 	unsigned int denominator;
+	unsigned int seed;
 	int i;
 
 	/*
@@ -967,7 +968,12 @@ static void puzzle_solve (struct login_ctx *l) {
 	 *
 	 */
 
-	srandom (*(unsigned int *) &ctx);
+#ifdef _WIN32
+	seed = GetTickCount() ^ (GetTickCount() << 9);
+#else
+	seed = time(NULL) ^ (time(NULL) << 9);
+#endif
+	srandom(seed);
 	nominator_from_hash = (unsigned int *) (digest + 16);
 	do {
 		SHA1Init (&ctx);
