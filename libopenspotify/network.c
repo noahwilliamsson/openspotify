@@ -268,18 +268,18 @@ static int process_login_request(sp_session *s, sp_request *req) {
 }
 
 
-static int process_logout_request(sp_session *s, sp_request *req) {
+static int process_logout_request(sp_session *session, sp_request *req) {
 
-	if(s->sock != -1) {
+	if(session->sock != -1) {
 #ifdef _WIN32
-		closesocket(s->sock);
+		closesocket(session->sock);
 #else
-		close(s->sock);
+		close(session->sock);
 #endif
+		session->sock = -1;
 	}
 
+	session->connectionstate = SP_CONNECTION_STATE_LOGGED_OUT;
 
-	s->connectionstate = SP_CONNECTION_STATE_LOGGED_OUT;
-
-	return request_set_result(s, req, SP_ERROR_OK, NULL);
+	return request_set_result(session, req, SP_ERROR_OK, NULL);
 }
