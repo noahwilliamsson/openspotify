@@ -7,7 +7,7 @@
 #include "sp_opaque.h"
 
 /* The Visual C++ compiler doesn't know 'snprintf'... */
-#ifndef snprintf
+#ifdef _MSC_VER
 #define snprintf _snprintf
 #endif
 
@@ -64,7 +64,8 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 	}
 	/* Link probably refers to a playlist. */
 	else if(strncmp("user:", ptr, 5) == 0){
-		char username[256], len;
+		char username[256];
+		unsigned char len;
 		
 		ptr += 5;
 		len  = strchr(ptr, ':') - ptr;
