@@ -10,8 +10,10 @@
 #include <string.h>
 #ifdef _WIN32
 #include <ws2tcpip.h>
+#include <windows.h>
 #else
 #include <unistd.h>
+#include <pthread.h>
 #endif
 #include <spotify/api.h>
 
@@ -39,6 +41,7 @@ static int process_logout_request(sp_session *s, sp_request *req);
 DWORD WINAPI network_thread(LPVOID data) {
 #else
 void *network_thread(void *data) {
+	pthread_mutex_t idle_mutex;
 #endif
 	sp_session *s = (sp_session *)data;
 	sp_request *req;
@@ -51,12 +54,6 @@ void *network_thread(void *data) {
 #endif
 
 	for(;;) {
-/* FIXME: XXX - Sleep on something while we're not connected and there are no events! */
-#ifdef _WIN32
-		Sleep(300);
-#else
-		usleep(300*1000);
-#endif
 		request_cleanup(s);
 
 		/* No locking needed since we're in control of request_cleanup() */
@@ -71,8 +68,22 @@ void *network_thread(void *data) {
 
 
 		/* Packets can only be processed once we're logged in */
-		if(s->connectionstate != SP_CONNECTION_STATE_LOGGED_IN)
+		if(s->connectionstate != SP_CONNECTION_STATE_LOGGED_IN) {
+			if(s->requests == NULL) {
+				DSFYDEBUG("Sleeping because there's nothing to do\n");
+#ifdef _WIN32
+				WaitForSingleObject(s->idle_wakeup, INFINITE);
+#else
+				pthread_mutex_init(&idle_mutex, NULL);
+				pthread_mutex_lock(&idle_mutex);
+				pthread_cond_wait(&s->idle_wakeup, &idle_mutex);
+				pthread_mutex_destroy(&idle_mutex);
+#endif
+				DSFYDEBUG("Woke up, a new request was posted\n");
+			}
+
 			continue;
+		}
 
 
 		/* Read and process zero or more packets */

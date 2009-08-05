@@ -106,10 +106,12 @@ struct sp_session {
 
 #ifdef _WIN32
 	HANDLE request_mutex;
+	HANDLE idle_wakeup;
 	HANDLE thread_main;
 	HANDLE thread_network;
 #else
 	pthread_mutex_t request_mutex;
+	pthread_cond_t idle_wakeup;
 	pthread_t thread_main;
 	pthread_t thread_network;
 #endif
