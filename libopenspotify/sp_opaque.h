@@ -21,6 +21,7 @@
 
 
 
+/* For request.c */
 typedef enum { 
 	REQ_STATE_NEW = 0,
 	REQ_STATE_RUNNING,
@@ -44,7 +45,16 @@ struct sp_request {
 typedef struct sp_request sp_request;
 
 
+/* sp_user.c */
+struct sp_user {
+	char *canonical_name;
+	char *display_name;
 
+	struct sp_user *next;
+};
+
+
+/* sp_session.c and most other API functions */
 struct sp_session {
 	void *userdata;
 

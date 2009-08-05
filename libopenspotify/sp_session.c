@@ -96,14 +96,23 @@ SP_LIBEXPORT(sp_error) sp_session_logout (sp_session *session) {
 
 
 SP_LIBEXPORT(sp_user *) sp_session_user(sp_session *session) {
-	DSFYDEBUG("FIXME: Not yet implemented\n");
+	static sp_user *user;
 
-	return NULL;
+	/* FIXME: Ugly hack.. */
+	if(user == NULL)
+		user = malloc(sizeof(sp_user));
+
+	if(user) {
+		user->canonical_name = session->username;
+		user->display_name = NULL;
+		user->next = NULL;
+	}
+
+	return user;
 }
 
 
 SP_LIBEXPORT(void *) sp_session_userdata(sp_session *session) {
-	DSFYDEBUG("FIXME: Not yet implemented\n");
 
 	return NULL;
 }
