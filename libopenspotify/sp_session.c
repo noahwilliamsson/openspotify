@@ -167,7 +167,7 @@ SP_LIBEXPORT(void) sp_session_process_events(sp_session *session, int *next_time
 	}
 
 
-	*next_timeout = 1000;
+	*next_timeout = 5000;
 }
 
 
