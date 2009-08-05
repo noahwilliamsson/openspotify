@@ -103,6 +103,6 @@ struct login_ctx {
 struct login_ctx *login_create(char *username, char *password);
 void login_release(struct login_ctx *l);
 int login_process(struct login_ctx *);
-void login_export_session(struct login_ctx *l, int *sock, unsigned char *key_recv, unsigned char *key_send);
+void login_export_session(struct login_ctx *login, int *sock, unsigned char *key_recv, unsigned char *key_send);
 
 #endif

@@ -397,10 +397,10 @@ int login_process(struct login_ctx *l) {
 }
 
 
-void login_export_session(struct login_ctx *l, int *sock, unsigned char *key_recv, unsigned char *key_send) {
-	*sock = l->sock;
-	memcpy(key_recv, l->key_recv, sizeof(key_recv));
-	memcpy(key_send, l->key_send, sizeof(key_send));
+void login_export_session(struct login_ctx *login, int *sock, unsigned char *key_recv, unsigned char *key_send) {
+	*sock = login->sock;
+	memcpy(key_recv, login->key_recv, sizeof(login->key_recv));
+	memcpy(key_send, login->key_send, sizeof(login->key_send));
 }
 
 
