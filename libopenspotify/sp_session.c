@@ -52,8 +52,8 @@ SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_sess
 
 	/* Spawn networking thread */
 #ifdef _WIN32
-	s->request_mutex = CreateMutex(NULL, false, NULL);
-	s->idle_wakeup = CreateEvent(NULL, false, false, NULL);
+	s->request_mutex = CreateMutex(NULL, FALSE, NULL);
+	s->idle_wakeup = CreateEvent(NULL, FALSE, FALSE, NULL);
 	s->thread_main = GetCurrentThread();
 	s->thread_network = CreateThread(NULL, 0, network_thread, s, 0, NULL);
 #else
