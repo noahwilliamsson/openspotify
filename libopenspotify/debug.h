@@ -2,6 +2,8 @@
 #define LIBOPENSPOTIFY_DEBUG_H
 
 #ifdef DEBUG
+#include <stdio.h>
+
 #ifdef _WIN32
 #define DSFYDEBUG(...) {                                        \
         FILE *fd;                                               \

@@ -2,6 +2,8 @@
 #define LIBOPENSPOTIFY_DEBUG_H
 
 #ifdef DEBUG
+#include <stdio.h>
+
 #ifdef _WIN32
 #define DSFYDEBUG(...) {                                        \
         FILE *fd;                                               \
@@ -21,6 +23,7 @@
 	fprintf(stderr, __VA_ARGS__);				\
 }
 #else
+#include <pthread.h>
 #define DSFYDEBUG(...) {                                        \
         FILE *fd;                                               \
         if((fd = fopen("despotify.log", "at")) != NULL) {       \
