@@ -170,8 +170,8 @@ static void loop(sp_session *session) {
 #endif
 	
 
-		if(++i == 15) {
-			DSFYDEBUG("MAINLOOP: i==%d, calling sp_session_logout()\n", i);
+		if(++i == 3) {
+			DSFYDEBUG("MAINLOOP: logging OUT after %d loops\n", i);
 			error = sp_session_logout(session);
 			DSFYDEBUG("MAINLOOP: Returned from sp_session_logout(), error = %d\n", error);
 
@@ -265,6 +265,8 @@ int main(int argc, char **argv)
         return 2;
     }
 
+
+
     // Login using the credentials given on the command line.
     DSFYDEBUG("Calling sp_session_login()\n");
     error = sp_session_login(session, username, password);
@@ -276,8 +278,24 @@ int main(int argc, char **argv)
     }
 
     DSFYDEBUG("Returned from sp_session_login()\n");
-
     loop(session);
+
+
+    DSFYDEBUG("Logged out, now trying to login again!\n");
+    error = sp_session_login(session, username, password);
+
+    if (SP_ERROR_OK != error) {
+        fprintf(stderr, "failed to login: %s\n",
+                        sp_error_message(error));
+        return 3;
+    }
+
+    DSFYDEBUG("Returned from sp_session_login()\n");
+    loop(session);
+
+
+
+
     session_terminated();
 
     return 0;
