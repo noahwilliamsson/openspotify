@@ -1,8 +1,5 @@
 /*
- * $Id: packet.c 398 2009-07-28 23:16:37Z noah-w $
- *
- * Deal with reading and writing packets
- * and packet processing
+ * Read and process packets and provide a routine for writing packets
  *
  */
 
@@ -12,6 +9,7 @@
 #include <ws2tcpip.h>
 #else
 #include <unistd.h>
+#include <sys/select.h>
 #include <time.h>
 #endif
 #include <assert.h>
@@ -21,60 +19,84 @@
 #include "sp_opaque.h"
 #include "util.h"
 
-int packet_read (sp_session *session, PHEADER * h, unsigned char **payload)
-{
+
+int packet_read_and_process(sp_session *session) {
+	fd_set rfds;
+	struct timeval tv;
 	int ret;
-	int packet_len;
+	struct buf *packet;
+	PHEADER header;
 	unsigned char nonce[4];
-	unsigned char *ptr;
 
-	packet_len = 0;
-	if ((ret = block_read (session->sock, h, 3)) != 3) {
-		DSFYDEBUG ("read short count %d, expected 3 (header)\n", ret);
+
+	if(session->packet == NULL)
+		session->packet = buf_new();
+	else if(session->packet->len == session->packet->size)
+		buf_extend(session->packet, session->packet->size);
+
+
+	FD_ZERO(&rfds);
+	FD_SET(session->sock, &rfds);
+	
+	tv.tv_sec = 0;
+	tv.tv_usec = 64 * 1000;
+
+	ret = select(session->sock + 1, &rfds, NULL, NULL, &tv);
+	if(ret <= 0)
+		return ret;
+
+
+	ret = recv(session->sock,
+			session->packet->ptr + session->packet->len, 
+			session->packet->size - session->packet->len, 0);
+
+	DSFYDEBUG("Read %d bytes from socket %d\n", ret, session->sock);
+	if(ret <= 0)
 		return -1;
+
+
+	/* We need a complete packet header of three bytes */
+	session->packet->len += ret;
+	while(session->packet->len >= 3) {
+
+		/* Set nonce for Shannon */
+		*(unsigned int *)nonce = htonl(session->key_recv_IV);
+		shn_nonce(&session->shn_recv, nonce, 4);
+
+
+		/* Decrypt the packet header */
+		memcpy(&header, session->packet->ptr, 3);
+		shn_decrypt(&session->shn_recv, (unsigned char *)&header, 3);
+
+
+		/* Make sure we have the entire payload aswell as the MAC */
+		header.len = ntohs(header.len);
+		DSFYDEBUG("Packet buf len=%d, header.cmd=0x%02x, header.len=%d, need %d bytes total\n",
+			session->packet->len, header.cmd, header.len, 3 + header.len + 4);
+		if(session->packet->len < 3 + header.len + 4)
+			break;
+
+
+		/* Extract the full packet, leaving eventual additional data as is */
+		packet = buf_consume(session->packet, 3 + header.len + 4);
+
+
+		/* Copy back the decrypted header and decrypt the payload */
+		memcpy(packet->ptr, &header, 3);
+		shn_decrypt(&session->shn_recv, packet->ptr + 3, header.len);
+
+
+		/* Increment receiving IV */
+		session->key_recv_IV++;
+
+
+		/* FIXME: Add packet handling */
 	}
 
-	*(unsigned int *) nonce = htonl (session->key_recv_IV);
-	shn_nonce (&session->shn_recv, nonce, 4);
-
-	shn_decrypt (&session->shn_recv, (unsigned char *) h, 3);
-
-#ifdef DEBUG_PACKETS
-	DSFYDEBUG ("cmd=%d [0x%02x], len=%d [0x%04x]\n",
-		   h->cmd, h->cmd, ntohs (h->len), ntohs (h->len));
-	logdata ("recv-hdr", session->key_recv_IV, (unsigned char *) h, 3);
-#endif
-
-	/* Length of payload */
-	h->len = ntohs (h->len);
-	packet_len = h->len;
-
-	/* Account for MAC */
-	packet_len += 4;
-
-	ptr = (unsigned char *) malloc (packet_len);
-	if ((*payload = ptr) == NULL)
-		return -1;
-
-	if ((ret =
-	     block_read (session->sock, ptr, packet_len)) != packet_len) {
-		DSFYDEBUG
-			("block_read() for cmd=0x%02x read short count %d, expected %d\n",
-			 h->cmd, ret, packet_len);
-		return -1;
-	}
-
-	shn_decrypt (&session->shn_recv, *payload, packet_len);
-
-#ifdef DEBUG_PACKETS
-	logdata ("recv-dec", session->key_recv_IV, *payload, h->len);
-#endif
-
-	/* Increment IV */
-	session->key_recv_IV++;
 
 	return 0;
 }
+
 
 int packet_write (sp_session * session, unsigned char cmd,
 		  unsigned char *payload, unsigned short len)

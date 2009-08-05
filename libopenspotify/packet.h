@@ -30,7 +30,7 @@ struct packet_header
 } PACK_STRUCT;
 typedef struct packet_header PHEADER;
 
-/* lowlevel packet functions */
-int packet_read (sp_session * c, PHEADER *, unsigned char **);
+
+int packet_read_and_process(sp_session *session);
 int packet_write (sp_session *, unsigned char, unsigned char *, unsigned short);
 #endif

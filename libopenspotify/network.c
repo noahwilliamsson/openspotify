@@ -23,7 +23,6 @@
 
 
 static int process_request(sp_session *s, sp_request *req);
-static int process_packets(sp_session *s);
 static int process_login_request(sp_session *s, sp_request *req);
 static int process_logout_request(sp_session *s, sp_request *req);
 
@@ -72,7 +71,8 @@ void *network_thread(void *data) {
 			continue;
 
 
-		ret = process_packets(s);
+		/* Read and process zero or more packets */
+		ret = packet_read_and_process(s);
 		if(ret < 0) {
 			DSFYDEBUG("process_packets() returned %d, disconnecting!\n", ret);
 #ifdef _WIN32
@@ -83,6 +83,7 @@ void *network_thread(void *data) {
 			s->sock = -1;
 
 			s->connectionstate = SP_CONNECTION_STATE_DISCONNECTED;
+
 			request_post_result(s, REQ_TYPE_LOGOUT, SP_ERROR_OTHER_TRANSIENT, NULL);
 		}
 	}
@@ -111,88 +112,6 @@ static int process_request(sp_session *s, sp_request *req) {
 	default:
 		break;
 	}
-
-	return 0;
-}
-
-
-/*
- * Process packets once the connection has been negotiated 
- *
- */
-static int process_packets(sp_session *session) {
-	fd_set rfds;
-	struct timeval tv;
-	int ret;
-	struct buf *packet;
-	PHEADER header;
-	unsigned char nonce[4];
-
-
-	if(session->packet == NULL)
-		session->packet = buf_new();
-	else if(session->packet->len == session->packet->size)
-		buf_extend(session->packet, session->packet->size);
-
-
-	FD_ZERO(&rfds);
-	FD_SET(session->sock, &rfds);
-	
-	tv.tv_sec = 0;
-	tv.tv_usec = 64 * 1000;
-
-	ret = select(session->sock + 1, &rfds, NULL, NULL, &tv);
-	if(ret <= 0)
-		return ret;
-
-
-	ret = recv(session->sock,
-			session->packet->ptr + session->packet->len, 
-			session->packet->size - session->packet->len, 0);
-
-	DSFYDEBUG("Read %d bytes from socket %d\n", ret, session->sock);
-	if(ret <= 0)
-		return -1;
-
-
-	/* We need a complete packet header of three bytes */
-	session->packet->len += ret;
-	while(session->packet->len >= 3) {
-
-		/* Set nonce for Shannon */
-		*(unsigned int *)nonce = htonl(session->key_recv_IV);
-		shn_nonce(&session->shn_recv, nonce, 4);
-
-
-		/* Decrypt the packet header */
-		memcpy(&header, session->packet->ptr, 3);
-		shn_decrypt(&session->shn_recv, (unsigned char *)&header, 3);
-
-
-		/* Make sure we have the entire payload aswell as the MAC */
-		header.len = ntohs(header.len);
-		DSFYDEBUG("Packet buf len=%d, header.cmd=0x%02x, header.len=%d, need %d bytes total\n",
-			session->packet->len, header.cmd, header.len, 3 + header.len + 4);
-		if(session->packet->len < 3 + header.len + 4)
-			break;
-
-
-		/* Extract the full packet, leaving eventual additional data as is */
-		packet = buf_consume(session->packet, 3 + header.len + 4);
-
-
-		/* Copy back the decrypted header and decrypt the payload */
-		memcpy(packet->ptr, &header, 3);
-		shn_decrypt(&session->shn_recv, packet->ptr + 3, header.len);
-
-
-		/* Increment receiving IV */
-		session->key_recv_IV++;
-
-
-		/* FIXME: Add packet handling */
-	}
-
 
 	return 0;
 }
