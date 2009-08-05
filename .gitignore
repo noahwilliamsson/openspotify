@@ -1,0 +1,8 @@
+*.o
+*.swp
+*~
+*.orig
+*.rej
+libopenspotify.so
+libopenspotify.dylib
+simple

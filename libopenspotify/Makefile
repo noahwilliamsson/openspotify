@@ -10,8 +10,10 @@ LIB_NAME = libopenspotify.so
 SHLIB_FLAGS = -shared -lpthread
 
 # Mac OS X
-LIB_NAME = libopenspotify.dylib
-SHLIB_FLAGS = -dynamiclib -dylib
+ifeq ($(shell uname -s),Darwin)
+	LIB_NAME = libopenspotify.dylib
+	SHLIB_FLAGS = -dynamiclib -dylib
+endif
 
 all: $(CORE_OBJS) $(LIB_OBJS)
 	gcc -o $(LIB_NAME) $(SHLIB_FLAGS) $(LDFLAGS) $(CORE_OBJS) $(LIB_OBJS)
