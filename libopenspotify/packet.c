@@ -127,7 +127,6 @@ int packet_write (sp_session * session, unsigned char cmd,
 	
 	DSFYDEBUG("Sending packet with command 0x%02x, length %d, IV=%d\n",
 		 h->cmd, ntohs (h->len), session->key_send_IV);
-	logdata ("send-hdr", session->key_send_IV, (unsigned char *) h, 3);
 
 	shn_encrypt (&session->shn_send, buf, 3 + len);
 	ptr += len;
