@@ -113,7 +113,7 @@ ssize_t block_read (int fd, void *buf, size_t nbyte)
 	while (idx < nbyte) {
 		if ((n = recv (fd, (char *)buf + idx, nbyte - idx, 0)) <= 0) {
 #ifdef _WIN32
-			if(n == -1 && WSAGetLastError() != WSAEWOULDBLOCK) {
+			if(n == -1 && WSAGetLastError() == WSAEWOULDBLOCK) {
 #else
 			if(n == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
 #endif
@@ -142,7 +142,7 @@ ssize_t block_write (int fd, void *buf, size_t nbyte)
 	while (idx < nbyte) {
 		if ((n = send (fd, (char *)buf + idx, nbyte - idx, 0)) <= 0) {
 #ifdef _WIN32
-			if(n == -1 && WSAGetLastError() != WSAEWOULDBLOCK) {
+			if(n == -1 && WSAGetLastError() == WSAEWOULDBLOCK) {
 #else
 			if(n == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
 #endif
