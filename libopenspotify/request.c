@@ -46,9 +46,12 @@ int request_post(sp_session *session, sp_request_type type, void *input) {
 	req->output = NULL;
 	req->next = NULL;
 
+	/* Notify the network thread if it's waiting for something to do */
 #ifdef _WIN32
+	PulseEvent(session->idle_wakeup);
 	ReleaseMutex(session->request_mutex);
 #else
+	pthread_cond_signal(&session->idle_wakeup);
 	pthread_mutex_unlock(&session->request_mutex);
 #endif
 
