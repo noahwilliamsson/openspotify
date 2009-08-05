@@ -4,7 +4,6 @@
 #include "sp_opaque.h"
 
 SP_LIBEXPORT(const char *) sp_user_canonical_name(sp_user *user) {
-
 	return user->canonical_name;
 }
 

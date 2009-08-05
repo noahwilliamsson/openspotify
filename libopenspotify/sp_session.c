@@ -24,24 +24,39 @@ SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_sess
 	if(!config) // XXX - verify
 		return SP_ERROR_INVALID_INDATA;
 
+	/* Check if API version matches. */
 	if(config->api_version != 1)
 		return SP_ERROR_BAD_API_VERSION;
 
+	/* Maximum user-agent length is 4096 bytes (including null-terminator). */
+	if(config->user_agent == NULL || strlen(config->user_agent) > 4095)
+		return SP_ERROR_BAD_USER_AGENT;
 
+	/* Application key needs to have 321 bytes with the first byte being 0x01. */
+	if(config->application_key == NULL || config->application_key_size != 321 ||
+		((char *)config->application_key)[0] != 0x01)
+		return SP_ERROR_BAD_APPLICATION_KEY;
+
+	/* Allocate memory for our session. */
 	if((s = (sp_session *)malloc(sizeof(sp_session))) == NULL)
 		return SP_ERROR_API_INITIALIZATION_FAILED;
 
 	memset(s, 0, sizeof(sp_session));
 	
-
+	/* Allocate memory for callbacks and copy them to our session. */
 	s->callbacks = (sp_session_callbacks *)malloc(sizeof(sp_session_callbacks));
+	
 	memcpy(s->callbacks, config->callbacks, sizeof(sp_session_callbacks));
 
-
+	/* Connection state is undefined (We were never logged in).*/
 	s->connectionstate = SP_CONNECTION_STATE_UNDEFINED;
-	s->userdata = config->userdata;
+	s->userdata        = config->userdata;
 
-	/* Low-level networking stuff */
+	/* Allocate memory for user info. */
+	if((s->user = (sp_user *)malloc(sizeof(sp_user))) == NULL)
+		return SP_ERROR_API_INITIALIZATION_FAILED;
+
+	/* Low-level networking stuff. */
 	s->sock = -1;
 
 	/* Incoming packet buffer */
@@ -50,18 +65,19 @@ SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_sess
 	/* To allow main thread to communicate with network thread */
 	s->requests = NULL;
 
-	/* Spawn networking thread */
+	/* Spawn networking thread. */
 #ifdef _WIN32
-	s->thread_main = GetCurrentThread();
-	s->thread_networkwork = CreateThread(NULL, 0, network_thread, s, 0, NULL);
+	s->thread_main        = GetCurrentThread();
+	s->thread_network = CreateThread(NULL, 0, network_thread, s, 0, NULL);
 #else
 	s->thread_main = pthread_self();
-	if(pthread_create(&s->thread_networkwork, NULL, network_thread, s))
+	
+	if(pthread_create(&s->thread_network, NULL, network_thread, s))
 		return SP_ERROR_OTHER_TRANSIENT;
 #endif
 
-
 	DSFYDEBUG("Session initialized at %p\n", s);
+	
 	*sess = s;
 
 	return SP_ERROR_OK;
@@ -69,7 +85,6 @@ SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_sess
 
 
 SP_LIBEXPORT(sp_error) sp_session_login (sp_session *session, const char *username, const char *password) {
-
 	strncpy(session->username, username, sizeof(session->username) - 1);
 	session->username[sizeof(session->username) - 1] = 0;
 
@@ -99,24 +114,18 @@ SP_LIBEXPORT(sp_error) sp_session_logout (sp_session *session) {
 
 
 SP_LIBEXPORT(sp_user *) sp_session_user(sp_session *session) {
-	static sp_user *user;
-
-	/* FIXME: Ugly hack.. */
-	if(user == NULL)
-		user = malloc(sizeof(sp_user));
-
-	if(user) {
-		user->canonical_name = session->username;
-		user->display_name = NULL;
-		user->next = NULL;
+	/* TODO: fetch that info via command 0x57. */
+	if(session->user){
+		session->user->canonical_name = session->username;
+		session->user->display_name   = session->username;
+		session->user->next           = NULL;
 	}
 
-	return user;
+	return session->user;
 }
 
 
 SP_LIBEXPORT(void *) sp_session_userdata(sp_session *session) {
-
 	return session->userdata;
 }
 
@@ -202,12 +211,14 @@ SP_LIBEXPORT(sp_error) sp_session_release (sp_session *session) {
 	/* Kill networking thread */
 	DSFYDEBUG("Terminating network thread\n");
 #ifdef _WIN32
-	TerminateThread(session->thread_networkwork, 0);
-	session->thread_networkwork = (HANDLE)0;
+	TerminateThread(session->thread_network, 0);
+	
+	session->thread_network = (HANDLE)0;
 #else
-	pthread_cancel(session->thread_networkwork);
-	pthread_join(session->thread_networkwork, NULL);
-	session->thread_networkwork = (pthread_t)0;
+	pthread_cancel(session->thread_network);
+	pthread_join(session->thread_network, NULL);
+	
+	session->thread_network = (pthread_t)0;
 #endif
 
 	if(session->packet)

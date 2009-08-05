@@ -187,13 +187,14 @@ int main(int argc, char **argv)
 	sp_error error;
 	sp_session *session;
 
-	// Sending passwords on the command line is bad in general.
-	// We do it here for brevity.
-	if (argc < 3 || argv[1][0] == '-') {
-		fprintf(stderr, "usage: %s <username> <password>\n", argv[0]);
-		return 1;
-	}
+	char username[256];
+	char password[256];
 
+	printf("Username: ");
+	gets(username);
+
+	printf("Password: ");
+	gets(password);
 
     // Setup for waking up the main thread in notify_main_thread()
     DSFYDEBUG("PING from main()\n");
@@ -240,7 +241,7 @@ int main(int argc, char **argv)
 
     // Login using the credentials given on the command line.
     DSFYDEBUG("Calling sp_session_login()\n");
-    error = sp_session_login(session, argv[1], argv[2]);
+    error = sp_session_login(session, username, password);
 
     if (SP_ERROR_OK != error) {
         fprintf(stderr, "failed to login: %s\n",

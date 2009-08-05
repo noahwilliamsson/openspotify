@@ -34,16 +34,30 @@ typedef enum {
 	REQ_TYPE_LOGOUT
 } sp_request_type;
 
-struct sp_request {
+typedef struct sp_request {
 	sp_request_type type;
 	sp_request_state state;
 	void *input;
 	void *output;
 	sp_error error;
 	struct sp_request *next;
-};
-typedef struct sp_request sp_request;
+} sp_request;
 
+/* sp_link.c */
+typedef struct sp_link {
+	sp_linktype type;
+	
+	union {
+		void        *data;
+		sp_track    *track;
+		sp_album    *album;
+		sp_artist   *artist;
+		sp_search   *search;
+		sp_playlist *playlist;
+	} data;
+	
+	int refs;
+};
 
 /* sp_user.c */
 struct sp_user {
@@ -53,10 +67,11 @@ struct sp_user {
 	struct sp_user *next;
 };
 
-
 /* sp_session.c and most other API functions */
 struct sp_session {
 	void *userdata;
+
+	struct sp_user *user;
 
 	sp_session_callbacks *callbacks;
 
@@ -92,11 +107,11 @@ struct sp_session {
 #ifdef _WIN32
 	HANDLE request_mutex;
 	HANDLE thread_main;
-	HANDLE thread_networkwork;
+	HANDLE thread_network;
 #else
 	pthread_mutex_t request_mutex;
 	pthread_t thread_main;
-	pthread_t thread_networkwork;
+	pthread_t thread_network;
 #endif
 };
 

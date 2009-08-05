@@ -195,6 +195,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\sp_link.c"
+				>
+			</File>
+			<File
 				RelativePath=".\sp_session.c"
 				>
 			</File>
