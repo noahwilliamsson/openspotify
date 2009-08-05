@@ -15,6 +15,7 @@
 #include <assert.h>
 
 #include "debug.h"
+#include "handlers.h"
 #include "packet.h"
 #include "sp_opaque.h"
 #include "util.h"
@@ -90,7 +91,10 @@ int packet_read_and_process(sp_session *session) {
 		session->key_recv_IV++;
 
 
-		/* FIXME: Add packet handling */
+		if(handle_packet(session, header.cmd, packet->ptr + 3, header.len)) {
+			DSFYDEBUG("handle_packet() failed with an error\n");
+			return -1;
+		}
 	}
 
 
