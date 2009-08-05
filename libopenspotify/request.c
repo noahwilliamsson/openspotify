@@ -18,9 +18,10 @@
 
 /*
  * Post a new request to be processed by the networking thread
+ * If input is non-NULL, it will be free'd at the end of the request
  *
  */
-int request_post(sp_session *session, sp_request_type type) {
+int request_post(sp_session *session, sp_request_type type, void *input) {
 	sp_request *req;
 
 #ifdef _WIN32
@@ -41,7 +42,8 @@ int request_post(sp_session *session, sp_request_type type) {
 	req->type = type;
 	req->state = REQ_STATE_NEW;
 	req->error = 0;
-	req->private = NULL;
+	req->input = input;
+	req->output = NULL;
 	req->next = NULL;
 
 #ifdef _WIN32
@@ -55,10 +57,12 @@ int request_post(sp_session *session, sp_request_type type) {
 
 
 /*
- * Set the error to be returned by sp_session_process_requests()
+ * Set error and an eventual output value for the request.
+ * The output value will need to be free'd by the consumer,
+ * i.e. sp_session_process_events() or the callback
  *
  */
-int request_set_result(sp_session *session, sp_request *req, sp_error error) {
+int request_set_result(sp_session *session, sp_request *req, sp_error error, void *output) {
 #ifdef _WIN32
 	WaitForSingleObject(session->request_mutex, INFINITE);
 #else
@@ -66,6 +70,7 @@ int request_set_result(sp_session *session, sp_request *req, sp_error error) {
 #endif
 
 	req->error = error;
+	req->output = output;
 	req->state = REQ_STATE_RETURNED;
 	
 	DSFYDEBUG("Setting REQ_STATE_RETURNED and error %d on request with type %d\n", error, req->type);
@@ -158,6 +163,10 @@ void request_cleanup(sp_session *session) {
 			prev->next = walker->next;
 		else
 			session->requests = walker->next;
+
+		/* Free input variable, if set */
+		if(walker->input)
+			free(walker->input);
 
 		free(walker);
 	} while(1);

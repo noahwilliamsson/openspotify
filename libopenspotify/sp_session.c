@@ -74,7 +74,7 @@ SP_LIBEXPORT(sp_error) sp_session_login (sp_session *session, const char *userna
 	session->password[sizeof(session->password) - 1] = 0;
 
 	DSFYDEBUG("Posting REQ_TYPE_LOGIN\n");
-	request_post(session, REQ_TYPE_LOGIN);
+	request_post(session, REQ_TYPE_LOGIN, NULL);
 
 	return SP_ERROR_OK;
 }
@@ -89,7 +89,7 @@ SP_LIBEXPORT(sp_connectionstate) sp_session_connectionstate (sp_session *session
 SP_LIBEXPORT(sp_error) sp_session_logout (sp_session *session) {
 
 	DSFYDEBUG("Posting REQ_TYPE_LOGOUT\n");
-	request_post(session, REQ_TYPE_LOGOUT);
+	request_post(session, REQ_TYPE_LOGOUT, NULL);
 
 	return SP_ERROR_OK;
 }

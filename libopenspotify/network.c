@@ -122,7 +122,7 @@ static int process_login_request(sp_session *s, sp_request *req) {
 		req->state = REQ_STATE_RUNNING;
 		s->login = login_create(s->username, s->password);
 		if(s->login == NULL)
-			return request_set_result(s, req, SP_ERROR_OTHER_TRANSIENT);
+			return request_set_result(s, req, SP_ERROR_OTHER_TRANSIENT, NULL);
 	}
 
 	ret = login_process(s->login);
@@ -141,7 +141,7 @@ static int process_login_request(sp_session *s, sp_request *req) {
 
 		s->connectionstate = SP_CONNECTION_STATE_LOGGED_IN;
 
-		return request_set_result(s, req, SP_ERROR_OK);
+		return request_set_result(s, req, SP_ERROR_OK, NULL);
 	}
 
 	switch(s->login->error) {
@@ -178,7 +178,7 @@ static int process_login_request(sp_session *s, sp_request *req) {
 	login_release(s->login);
 	s->login = NULL;
 
-	return request_set_result(s, req, error);
+	return request_set_result(s, req, error, NULL);
 }
 
 
@@ -195,5 +195,5 @@ static int process_logout_request(sp_session *s, sp_request *req) {
 
 	s->connectionstate = SP_CONNECTION_STATE_LOGGED_OUT;
 
-	return request_set_result(s, req, SP_ERROR_OK);
+	return request_set_result(s, req, SP_ERROR_OK, NULL);
 }

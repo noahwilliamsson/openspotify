@@ -35,8 +35,9 @@ typedef enum {
 
 struct sp_request {
 	sp_request_type type;
-	void *private;
 	sp_request_state state;
+	void *input;
+	void *output;
 	sp_error error;
 	struct sp_request *next;
 };

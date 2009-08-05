@@ -9,8 +9,8 @@
 #include <spotify/api.h>
 #include "sp_opaque.h"
 
-int request_post(sp_session *session, sp_request_type type);
-int request_set_result(sp_session *session, sp_request *req, sp_error error);
+int request_post(sp_session *session, sp_request_type type, void *input);
+int request_set_result(sp_session *session, sp_request *req, sp_error error, void *output);
 sp_request *request_fetch_next_result(sp_session *session);
 void request_mark_processed(sp_session *session, sp_request *req);
 void request_cleanup(sp_session *session);
