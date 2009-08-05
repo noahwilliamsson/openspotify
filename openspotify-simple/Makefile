@@ -1,6 +1,11 @@
 CC = gcc
 CFLAGS = -Wall -ggdb -I../include -DDEBUG
+
+ifndef libspotify
 LDFLAGS = -L../libopenspotify -lopenspotify
+else
+LDFLAGS = -lspotify
+endif
 
 CORE_OBJS = simple.o
 OUTPUT = simple
