@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -Wall -ggdb -I../include -DDEBUG
 LDFLAGS = -lresolv -lcrypto
 
-CORE_OBJS = buf.o dns.o hmac.o login.o network.o packet.o request.o sha1.o shn.o util.o
+CORE_OBJS = buf.o channel.o commands.o dns.o handlers.o hmac.o login.o network.o packet.o request.o sha1.o shn.o util.o
 LIB_OBJS = sp_error.o sp_link.o sp_session.o sp_user.o
 
 # Linux
