@@ -59,12 +59,11 @@ int cmd_send_cache_hash (sp_session * session)
 	int ret;
         struct buf* buf = buf_new();
 	/* FIXME */
-	char *cache_hash = "\xf4\xc2\xaa\x05\xe8\x25\xa7\xb5\xe4\xe6\x59\x0f\x3d\xd0\xbe\x0a\xef\x20\x51\x95";
+	char cache_hash[] = "\xf4\xc2\xaa\x05\xe8\x25\xa7\xb5\xe4\xe6\x59\x0f\x3d\xd0\xbe\x0a\xef\x20\x51\x95";
 
 	buf_append_data(buf, cache_hash, sizeof (cache_hash));
 
 	ret = packet_write (session, 0x0f, buf->ptr, buf->len);
-	DSFYDEBUG ("packet_write() returned %d\n", ret);
 	buf_free(buf);
 
 	return ret;
