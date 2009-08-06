@@ -86,6 +86,7 @@ struct playlist_ctx *playlist_create(void) {
 	playlist_ctx->container = malloc(sizeof(sp_playlistcontainer));
 	playlist_ctx->container->playlists = NULL;
 
+	/* FIXME: Should be an array of callbacks and userdatas */
 	playlist_ctx->container->userdata = NULL;
 	playlist_ctx->container->callbacks = malloc(sizeof(sp_playlistcontainer_callbacks));
 	memset(playlist_ctx->container->callbacks, 0, sizeof(sp_playlistcontainer_callbacks));
@@ -427,9 +428,10 @@ static int playlist_parse_playlist_xml(sp_playlist *playlist) {
 		playlist->state = PLAYLIST_STATE_LISTED;
 		
 		/* FIXME: Post a request instead? */
+		/* FIXME: Need to support callbacks for multiple "listeners" */
 		if(playlist->callbacks && playlist->callbacks->tracks_added)
 			playlist->callbacks->tracks_added(playlist, playlist->tracks,
-								playlist->num_tracks,
+								1,
 								playlist->num_tracks - 1,
 								playlist->userdata);
 	}

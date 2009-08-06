@@ -89,6 +89,7 @@ struct sp_playlist {
 #endif
 	enum playlist_state state;
 
+	/* FIXME: Convert to  an array of userdata and callbacks */
 	void *userdata;
 	sp_playlist_callbacks *callbacks;
 
@@ -97,6 +98,7 @@ struct sp_playlist {
 };
 
 struct sp_playlistcontainer {
+	/* FIXME: Might be an array of userdata and callbacks */
 	void *userdata;
 	sp_playlistcontainer_callbacks *callbacks;
 
