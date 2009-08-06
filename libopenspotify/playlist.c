@@ -378,7 +378,7 @@ static int playlist_load_playlists(sp_session *session) {
 
 
 		ret =  cmd_getplaylist(session, playlist->id, ~0, 
-				playlist_container_callback, playlist);
+				playlist_callback, playlist);
 
 		if(ret < 0) {
 			DSFYDEBUG("cmd_getplaylist() failed for playlist with ID '%s'\n", idstr);
