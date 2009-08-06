@@ -52,6 +52,9 @@ SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_sess
 	s->connectionstate = SP_CONNECTION_STATE_UNDEFINED;
 	s->userdata        = config->userdata;
 
+	/* Login context, needed by network.c and login.c */
+	s->login = NULL;
+
 	/* Allocate memory for user info. */
 	if((s->user = (sp_user *)malloc(sizeof(sp_user))) == NULL)
 		return SP_ERROR_API_INITIALIZATION_FAILED;
