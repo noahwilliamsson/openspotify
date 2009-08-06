@@ -211,6 +211,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\sp_playlist.c"
+				>
+			</File>
+			<File
 				RelativePath=".\sp_session.c"
 				>
 			</File>
