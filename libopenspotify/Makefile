@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -ggdb -I../include -DDEBUG
+CFLAGS = -Wall -ggdb -I../include -fPIC -DDEBUG
 LDFLAGS = -lresolv -lcrypto
 
 CORE_OBJS = buf.o channel.o commands.o dns.o handlers.o hmac.o login.o network.o packet.o request.o sha1.o shn.o util.o
