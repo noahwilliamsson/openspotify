@@ -108,7 +108,7 @@ struct sp_playlistcontainer {
 
 /* sp_track.c */
 struct sp_track {
-	unsigned char id[17];
+	unsigned char id[16];
 
 	char *name;
 	int duration;
