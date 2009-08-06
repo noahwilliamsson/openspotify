@@ -103,7 +103,7 @@ void logdata (char *prefix, int id, void *data, int datalen)
 		   datalen, filename);
 }
 
-size_t block_read (int fd, void *buf, size_t nbyte)
+int block_read (int fd, void *buf, int nbyte)
 {
 	unsigned int idx;
 	ssize_t n;
@@ -132,7 +132,7 @@ size_t block_read (int fd, void *buf, size_t nbyte)
 	return idx;
 }
 
-size_t block_write (int fd, void *buf, size_t nbyte)
+int block_write (int fd, void *buf, int nbyte)
 {
 	unsigned int idx;
 	ssize_t n;
