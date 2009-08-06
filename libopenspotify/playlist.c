@@ -76,6 +76,9 @@ unsigned long playlist_checksum(sp_playlist *playlist) {
 	unsigned long checksum = 1L;
 	int i;
 
+	if(playlist == NULL)
+		return 1L;
+
 	/* Loop over all tracks (make sure the last byte is 0x01). */
 	for(i = 0; i < playlist->num_tracks; i++){
 		playlist->tracks[i]->id[16] = 0x01;
@@ -90,6 +93,9 @@ unsigned long playlist_checksum(sp_playlist *playlist) {
 unsigned long playlistcontainer_checksum(sp_playlistcontainer *container) {
 	unsigned long checksum = 1L;
 	sp_playlist *playlist;
+
+	if(container == NULL)
+		return 1L;
 
 	/* Loop over all playlists (make sure the last byte is 0x02). */
 	for(playlist = container->playlists; playlist != NULL; playlist = playlist->next){
