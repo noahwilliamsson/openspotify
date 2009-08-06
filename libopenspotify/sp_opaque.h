@@ -32,7 +32,8 @@ typedef enum {
 typedef enum {
 	REQ_TYPE_LOGIN = 0,
 	REQ_TYPE_LOGOUT,
-	REQ_TYPE_PLAY_TOKEN_LOST
+	REQ_TYPE_PLAY_TOKEN_LOST,
+	REQ_TYPE_NOTIFY,
 } sp_request_type;
 
 typedef struct sp_request {

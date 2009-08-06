@@ -14,8 +14,10 @@
 #include "commands.h"
 #include "debug.h"
 #include "packet.h"
+#include "request.h"
 #include "sp_opaque.h"
 #include "util.h"
+
 
 int handle_secret_block (sp_session * session, unsigned char *payload, int len)
 {
@@ -123,6 +125,39 @@ static int handle_prodinfo (sp_session * session, unsigned char *payload, int le
 	return 0;
 }
 
+
+static int handle_notify (sp_session * session, unsigned char *payload, int len) {
+	unsigned char *ptr;
+	unsigned short notify_len;
+	int i;
+
+	ptr = payload;
+	for(i = 0; len && i < 9; i++, len--)
+		payload++;
+
+	if(len < 2) {
+		DSFYDEBUG("Failed to handle NOTIFY message\n");
+		return -1;
+	}
+
+	notify_len = ntohs(*(unsigned short *)payload);
+	payload += 2;
+	len -= 2;
+	if(notify_len > len) {
+		DSFYDEBUG("Failed to handle NOTIFY message. Parsed length=%d, avail=%d\n",
+				notify_len, len);
+		return -1;
+	}
+
+	/* Needs to be free'd by the consumer */
+	ptr = malloc(notify_len + 1);
+	memcpy(ptr, payload, notify_len);
+	ptr[notify_len] = 0;
+
+	return request_post_result(session, REQ_TYPE_NOTIFY, SP_ERROR_OK, ptr);
+}
+
+
 int handle_packet (sp_session * session,
 		   int cmd, unsigned char *payload, int len)
 {
@@ -162,6 +197,7 @@ int handle_packet (sp_session * session,
 
 	case CMD_NOTIFY:
 		/* HTML-notification, shown in a yellow bar in the official client */
+		error = handle_notify (session, payload, len);
 		break;
 
 	case CMD_PRODINFO:

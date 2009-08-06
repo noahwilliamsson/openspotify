@@ -157,6 +157,14 @@ SP_LIBEXPORT(void) sp_session_process_events(sp_session *session, int *next_time
 			session->callbacks->logged_out(session);
 			break;
 
+		case REQ_TYPE_NOTIFY:
+			if(session->callbacks->message_to_user == NULL)
+				break;
+
+			/* We'll leak memory here for each login made :( */
+			session->callbacks->message_to_user(session, request->output);
+			break;
+
 		default:
 			break;
 		}
