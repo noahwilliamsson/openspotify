@@ -389,7 +389,7 @@ static int playlist_load_playlists(sp_session *session) {
 				idstr, playlist->lastrequest / 1000, GetTickCount() / 1000 - PLAYLIST_RETRY_TIMEOUT);
 		playlist->lastrequest = GetTickCount();
 #else
-		DSFYDEBUG("Requested playlist with ID '%s' since last request at %ds (since 1970) is less than %d\n",
+		DSFYDEBUG("Requested playlist with ID '%s' since last request at %lds (since 1970) is less than %ld\n",
 				idstr, playlist->lastrequest, time(NULL) - PLAYLIST_RETRY_TIMEOUT);
 		playlist->lastrequest = time(NULL);
 #endif
