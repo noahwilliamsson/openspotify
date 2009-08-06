@@ -12,11 +12,13 @@
 #include <pthread.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <time.h>
 #endif
 
 #include <spotify/api.h>
 
 #include "login.h"
+#include "playlist.h"
 #include "shn.h"
 
 
@@ -61,6 +63,60 @@ struct sp_link {
 	int refs;
 };
 
+
+/* sp_playlist.c */
+enum playlist_state {
+	PLAYLIST_STATE_NEW = 0,	/* Initial state */
+	PLAYLIST_STATE_ADDED,	/* Just added */
+	PLAYLIST_STATE_LISTED,	/* Have track IDs */
+	PLAYLIST_STATE_LOADED	/* Have loaded tracks */
+};
+struct sp_playlist {
+	unsigned char id[17];
+	char *name;
+	sp_user *owner;
+	int position;
+
+	sp_track **tracks;
+	int num_tracks;
+
+#ifdef _WIN32
+	DWORD lastrequest;
+#else
+	time_t lastrequest;
+#endif
+	enum playlist_state state;
+
+	void *userdata;
+	sp_playlist_callbacks *callbacks;
+
+	struct buf *buf;
+	struct sp_playlist *next;
+};
+
+struct sp_playlistcontainer {
+	void *userdata;
+	sp_playlistcontainer_callbacks *callbacks;
+
+	/* List of individual playlists */
+	sp_playlist *playlists;
+};
+
+/* sp_track.c */
+struct sp_track {
+	unsigned char id[17];
+
+	char *name;
+	int duration;
+	int index;
+
+
+	/* FIXME: Need more members */
+	int loaded;
+	sp_error error;
+};
+
+
 /* sp_user.c */
 struct sp_user {
 	char *canonical_name;
@@ -68,6 +124,19 @@ struct sp_user {
 
 	struct sp_user *next;
 };
+
+
+struct playlist_ctx {
+        /* For the finite state machine that loads playlists */
+        int state;
+
+        /* For retrieving the container playlist */
+        struct buf *buf;
+
+        /* Callbacks and list of playlists */
+        sp_playlistcontainer *container;
+};
+
 
 /* sp_session.c and most other API functions */
 struct sp_session {
@@ -102,6 +171,10 @@ struct sp_session {
 
 	/* High level connection state */
 	sp_connectionstate connectionstate;
+
+
+	/* For keeping track of playlists and related states */
+	struct playlist_ctx *playlist_ctx;
 
 
 #ifdef _WIN32

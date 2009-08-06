@@ -55,6 +55,9 @@ SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_sess
 	/* Login context, needed by network.c and login.c */
 	s->login = NULL;
 
+	/* Playlist context, needed by playlist.c */
+	s->playlist_ctx = NULL;
+
 	/* Allocate memory for user info. */
 	if((s->user = (sp_user *)malloc(sizeof(sp_user))) == NULL)
 		return SP_ERROR_API_INITIALIZATION_FAILED;
@@ -243,6 +246,9 @@ SP_LIBEXPORT(sp_error) sp_session_release (sp_session *session) {
 
 	if(session->login)
 		login_release(session->login);
+
+	if(session->playlist_ctx)
+		playlist_release(session->playlist_ctx);
 
 	free(session->callbacks);
 
