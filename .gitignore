@@ -1,8 +1,13 @@
+Debug
+Release
 *.o
 *.swp
 *~
 *.orig
 *.rej
+*.ncb
+*.suo
+*.user
 libopenspotify.so
 libopenspotify.dylib
 simple
