@@ -206,6 +206,8 @@ int handle_packet (sp_session * session,
 		break;
 
 	case CMD_WELCOME:
+		/* Trigger loading of playlists */
+		request_post(session, REQ_TYPE_LOAD_PLAYLISTS, NULL);
 		break;
 
 	case CMD_PAUSE:

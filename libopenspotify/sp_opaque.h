@@ -36,6 +36,7 @@ typedef enum {
 	REQ_TYPE_LOGOUT,
 	REQ_TYPE_PLAY_TOKEN_LOST,
 	REQ_TYPE_NOTIFY,
+	REQ_TYPE_LOAD_PLAYLISTS,
 } sp_request_type;
 
 typedef struct sp_request {
@@ -71,6 +72,7 @@ enum playlist_state {
 	PLAYLIST_STATE_LISTED,	/* Have track IDs */
 	PLAYLIST_STATE_LOADED	/* Have loaded tracks */
 };
+
 struct sp_playlist {
 	unsigned char id[17];
 	char *name;
