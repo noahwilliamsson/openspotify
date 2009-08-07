@@ -24,5 +24,6 @@ void fhexdump8x32 (FILE *, char *, void *, int);
 void logdata (char *, int, void *, int);
 ssize_t block_read (int, void *, size_t);
 ssize_t block_write (int, void *, size_t);
+int get_millisecs(void);
 
 #endif

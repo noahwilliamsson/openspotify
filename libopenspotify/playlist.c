@@ -352,11 +352,7 @@ static int playlist_load_playlists(sp_session *session) {
 
 		need_load_track_ids = 0;
 		if(playlist->state == PLAYLIST_STATE_ADDED) {
-#ifdef _WIN32
-			if(playlist->lastrequest + PLAYLIST_RETRY_TIMEOUT*1000 < GetTickCount()) {
-#else
-			if(playlist->lastrequest + PLAYLIST_RETRY_TIMEOUT < time(NULL)) {
-#endif
+			if(playlist->lastrequest + PLAYLIST_RETRY_TIMEOUT*1000 < get_millisecs()) {
 				need_load_track_ids = 1;
 			}
 		}
@@ -373,15 +369,10 @@ static int playlist_load_playlists(sp_session *session) {
 			DSFYDEBUG("cmd_getplaylist() failed for playlist with ID '%s'\n", idstr);
 			return ret;
 		}
-#ifdef _WIN32
-		DSFYDEBUG("Requested playlist with ID '%s' since last request at %ds (since boot) is less than %d\n",
-				idstr, playlist->lastrequest / 1000, GetTickCount() / 1000 - PLAYLIST_RETRY_TIMEOUT);
-		playlist->lastrequest = GetTickCount();
-#else
-		DSFYDEBUG("Requested playlist with ID '%s' since last request at %lds (since 1970) is less than %ld\n",
-				idstr, playlist->lastrequest, time(NULL) - PLAYLIST_RETRY_TIMEOUT);
-		playlist->lastrequest = time(NULL);
-#endif
+
+		DSFYDEBUG("Requested playlist with ID '%s' since last request at %d seconds is less than current %d\n",
+				idstr, playlist->lastrequest / 1000, get_millisecs() / 1000 - PLAYLIST_RETRY_TIMEOUT);
+		playlist->lastrequest = get_millisecs();
 	}
 
 	return 0;

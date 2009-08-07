@@ -967,11 +967,7 @@ static void puzzle_solve (struct login_ctx *l) {
 	 *
 	 */
 
-#ifdef _WIN32
-	seed = GetTickCount() ^ (GetTickCount() << 9);
-#else
-	seed = time(NULL) ^ (time(NULL) << 9);
-#endif
+	seed = get_millisecs() ^ (get_millisecs() << 9);
 	srandom(seed);
 	nominator_from_hash = (unsigned int *) (digest + 16);
 	do {

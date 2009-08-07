@@ -9,10 +9,12 @@
 #include <string.h>
 #ifdef _MSC_VER
 #include <ws2tcpip.h>
+#include <windows.h>
 #else
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/select.h>
+#include <time.h>
 #endif
 #include <ctype.h>
 #include <errno.h>
@@ -159,4 +161,44 @@ ssize_t block_write (int fd, void *buf, size_t nbyte)
 		idx += n;
 	}
 	return idx;
+}
+
+
+#ifdef __APPLE__
+#include <mach/mach_time.h>
+#include <sys/types.h>
+#include <sys/time.h>
+#endif
+
+int get_millisecs(void) {
+#ifdef _WIN32
+	/* FIXME: Affected by timezone and DST */
+	return GetTickCount();
+#elif __linux__
+	struct timespec ts;
+	clock_gettime(CLOCK_MONOTONIC, &ts);
+	return ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+#elif __APPLE__
+	static mach_timebase_info_data_t mtid;
+	static struct timeval tv;
+	static uint64_t first_mat;
+	int ret;
+	uint64_t elapsed_ns;
+	
+	if(!mtid.denom) {
+		mach_timebase_info(&mtid);
+		gettimeofday(&tv, NULL);
+		first_mat = mach_absolute_time();
+	}
+	
+	elapsed_ns = (mach_absolute_time() - first_mat) * mtid.numer / mtid.denom;
+	ret = 1000*tv.tv_sec + (long)elapsed_ns / 1000000000;
+	ret += tv.tv_usec*1000 + elapsed_ns % 1000000000;
+
+	return ret;
+#else
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	return tv.tv_sec * 1000 + tv.tv_usec/1000;
+#endif
 }

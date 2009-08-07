@@ -50,11 +50,7 @@ typedef struct sp_request {
 	void *input;
 	void *output;
 	sp_error error;
-#ifdef _WIN32
-	DWORD next_timeout;
-#else
-	time_t next_timeout;
-#endif
+	int next_timeout;
 	struct sp_request *next;
 } sp_request;
 
@@ -92,11 +88,8 @@ struct sp_playlist {
 	sp_track **tracks;
 	int num_tracks;
 
-#ifdef _WIN32
-	DWORD lastrequest;
-#else
-	time_t lastrequest;
-#endif
+	int lastrequest;
+
 	enum playlist_state state;
 
 	/* FIXME: Convert to  an array of userdata and callbacks */

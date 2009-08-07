@@ -181,11 +181,8 @@ sp_request *request_fetch_next_result(sp_session *session, int *next_timeout) {
 		if(walker->next_timeout == 0)
 			continue;
 
-#ifdef _WIN32
-		timeout = (int) (walker->next_timeout - GetTickCount()) / 1000;
-#else
-		timeout = (int)walker->next_timeout;
-#endif
+		timeout = (int) (walker->next_timeout - get_millisecs());
+
 		/* FIXME: Sensible to always sleep one second? */
 		if(timeout < 1000)
 			timeout = 1000;
