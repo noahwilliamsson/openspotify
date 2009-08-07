@@ -126,6 +126,10 @@ static int process_request(sp_session *s, sp_request *req) {
 	case REQ_TYPE_LOGOUT:
 		return process_logout_request(s, req);
 		break;
+	
+	case REQ_TYPE_LOAD_PLAYLISTS:
+		/* FIXME: Unify calls here? */
+		return playlist_process(s);
 
 	default:
 		break;
