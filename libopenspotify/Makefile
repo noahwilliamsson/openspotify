@@ -1,8 +1,8 @@
 CC = gcc
 CFLAGS = -Wall -ggdb -I../include -fPIC -DDEBUG
-LDFLAGS = -lcrypto -lresolv
+LDFLAGS = -lcrypto -lresolv -lz
 
-CORE_OBJS = adler32.o buf.o channel.o commands.o dns.o ezxml.o handlers.o hmac.o login.o network.o packet.o playlist.o request.o sha1.o shn.o util.o
+CORE_OBJS = adler32.o browse.o buf.o channel.o commands.o dns.o ezxml.o handlers.o hmac.o login.o network.o packet.o playlist.o request.o sha1.o shn.o util.o
 LIB_OBJS = sp_error.o sp_link.o sp_playlist.o sp_session.o sp_user.o
 
 # Linux

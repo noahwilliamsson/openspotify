@@ -19,10 +19,13 @@
 #include <ctype.h>
 #include <errno.h>
 
+#include <zlib.h>
+
+#include "buf.h"
 #include "debug.h"
 #include "util.h"
 
-unsigned char *hex_ascii_to_bytes (char *ascii, unsigned char *bytes, int len)
+unsigned char *hex_ascii_to_bytes (const char *ascii, unsigned char *bytes, int len)
 {
 	int i;
 	unsigned int value;
@@ -37,7 +40,7 @@ unsigned char *hex_ascii_to_bytes (char *ascii, unsigned char *bytes, int len)
 	return bytes;
 }
 
-char *hex_bytes_to_ascii (unsigned char *bytes, char *ascii, int len)
+char *hex_bytes_to_ascii (const unsigned char *bytes, char *ascii, int len)
 {
 	int i;
 
@@ -206,4 +209,69 @@ int get_millisecs(void) {
 	tv.tv_usec -= first_tv.tv_usec;
 	return tv.tv_sec * 1000 + tv.tv_usec/1000;
 #endif
+}
+
+
+struct buf* despotify_inflate(unsigned char* data, int len) {
+	int done, offset, rc;
+	struct buf *b;
+	struct z_stream_s z;
+
+	if(!len)
+		return NULL;
+
+	memset(&z, 0, sizeof z);
+
+	rc = inflateInit2(&z, -MAX_WBITS);
+	if (rc != Z_OK) {
+		DSFYDEBUG("error: inflateInit() returned %d\n", rc);
+		return NULL;
+	}
+
+	z.next_in = data;
+	z.avail_in = len;
+
+	b = buf_new();
+	buf_extend(b, 4096);
+
+	offset = 1;
+	done = 0;
+	while(!done) {
+		z.avail_out = b->size - offset;
+		z.next_out = b->ptr + offset;
+
+		rc = inflate(&z, Z_NO_FLUSH);
+		switch (rc) {
+		case Z_OK:
+	                /* inflated fine */
+	                if (z.avail_out == 0) {
+				/* zlib needs more output buffer */
+				offset = b->size;
+				buf_extend(b, b->size * 2);
+	                }
+                break;
+
+		case Z_STREAM_END:
+	                /* end of input */
+	                done = 1;
+                break;
+
+		default:
+	                /* error */
+	                DSFYDEBUG("error: inflate() returned %d\n", rc);
+	                done = 1;
+	                buf_free(b);
+	                b = NULL;
+	                break;
+		}
+	}
+
+	if (b) {
+		b->len = b->size - z.avail_out;
+		buf_append_u8(b, 0); /* null terminate string */
+	}
+
+	inflateEnd(&z);
+
+	return b;
 }

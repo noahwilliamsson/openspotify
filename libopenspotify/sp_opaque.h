@@ -43,7 +43,7 @@ typedef enum {
 	REQ_TYPE_NOTIFY,
 	REQ_TYPE_PLAYLIST_LOAD_CONTAINER,
 	REQ_TYPE_PLAYLIST_LOAD_PLAYLIST,
-	REQ_TYPE_PLAYLIST_LOAD_TRACKS
+	REQ_TYPE_BROWSE_TRACK,
 } sp_request_type;
 
 typedef struct sp_request {
@@ -114,11 +114,17 @@ struct sp_playlistcontainer {
 /* sp_track.c */
 struct sp_track {
 	unsigned char id[16];
+	unsigned char file_id[20];
+	unsigned char album_id[16];
+	unsigned char cover_id[20];
 
-	char *name;
+	char *title;
+	char *album;
+
 	int duration;
-	int index;
+	int playable;
 
+	int index;
 
 	/* FIXME: Need more members */
 	int loaded;

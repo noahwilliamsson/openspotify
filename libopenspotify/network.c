@@ -17,6 +17,7 @@
 #endif
 #include <spotify/api.h>
 
+#include "browse.h"
 #include "debug.h"
 #include "login.h"
 #include "network.h"
@@ -144,8 +145,11 @@ static int process_request(sp_session *s, sp_request *req) {
 	
 	case REQ_TYPE_PLAYLIST_LOAD_CONTAINER:
 	case REQ_TYPE_PLAYLIST_LOAD_PLAYLIST:
-	case REQ_TYPE_PLAYLIST_LOAD_TRACKS:
 		return playlist_process(s, req);
+		break;
+
+	case REQ_TYPE_BROWSE_TRACK:
+		return browse_process(s, req);
 		break;
 
 	default:

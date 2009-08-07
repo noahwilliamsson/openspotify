@@ -39,19 +39,10 @@
  * |            +--+ CHANNEL_END:
  * |               +--- playlist_parse_playlist_xml()
  * |               +--+ playlist_post_track_requests()
- * |               |  +--- request_post(REQ_TYPE_PLAYLIST_LOAD_TRACKS)
+ * |               |  +--- request_post(REQ_TYPE_BROWSE_TRACK)
  * |               +--- request_post_set_result(REQ_TYPE_PLAYLIST_LOAD_PLAYLIST)
  * .  .
  * .  .
- * +--+ playlist_process(REQ_TYPE_PLAYLIST_LOAD_TRACKS)
- * |  +--+ playlist_request_tracks()
- * |  |  +-- request_post_set_result(REQ_TYPE_PLAYLIST_LOAD_PLAYLIST)
- * |  |  +--+ TBD: cmd_browsetrack()
- * |  |     +--+ TBD: channel_register() with callback playlist_tracks_callback()
- * |  +--- Update request->next_timeout
- * |
- * .
- * .
  * +--- DONE
  * |
  *     
@@ -60,6 +51,7 @@
 #include <string.h>
 
 #include "adler32.h"
+#include "buf.h"
 #include "channel.h"
 #include "commands.h"
 #include "debug.h"
@@ -80,7 +72,6 @@ static int playlist_callback(CHANNEL *ch, unsigned char *payload, unsigned short
 static int playlist_parse_playlist_xml(sp_playlist *playlist);
 
 static void playlist_post_track_request(sp_session *session, sp_playlist *);
-static int playlist_request_tracks(sp_session *session, sp_request *req);
 
 unsigned long playlist_checksum(sp_playlist *playlist);
 unsigned long playlistcontainer_checksum(sp_playlistcontainer *container);
@@ -118,6 +109,7 @@ struct playlist_ctx *playlist_create(void) {
 /* Release resources held by the playlist context, called by sp_session_release() */
 void playlist_release(struct playlist_ctx *playlist_ctx) {
 	sp_playlist *playlist, *next_playlist;
+	sp_track *track;
 	int i;
 
 	if(playlist_ctx->container) {
@@ -135,7 +127,14 @@ void playlist_release(struct playlist_ctx *playlist_ctx) {
 			}
 
 			for(i = 0; i < playlist->num_tracks; i++) {
-				/* FIXME: Unload track */
+				track = playlist->tracks[i];
+
+				if(track->title)
+					free(track->title);
+
+				if(track->album)
+					free(track->album);
+
 				free(playlist->tracks[i]);
 			}
 
@@ -176,13 +175,6 @@ int playlist_process(sp_session *session, sp_request *req) {
 		/* Send request (CMD_GETPLAYLIST) to load playlist */
 		ret = playlist_send_playlist_request(session, req);
 	}
-	else if(req->type == REQ_TYPE_PLAYLIST_LOAD_TRACKS) {
-		req->next_timeout = get_millisecs() + PLAYLIST_RETRY_TIMEOUT*1000;
-
-		/* Send request (CMD_GETPLAYLIST) to load playlist */
-		ret = playlist_request_tracks(session, req);
-	}
-
 
 	return ret;
 }
@@ -437,7 +429,6 @@ static int playlist_parse_playlist_xml(sp_playlist *playlist) {
 	
 	for(id = strtok(id_list, ",\n"); id; id = strtok(NULL, ",\n")) {
 		hex_bytes_to_ascii((unsigned char *)id, idstr, 17);
-		DSFYDEBUG("Track ID '%s'\n", idstr);
 	
 		position = 0;
 		playlist->tracks = (sp_track **)realloc(playlist->tracks, (playlist->num_tracks + 1) * sizeof(sp_track *));
@@ -446,11 +437,13 @@ static int playlist_parse_playlist_xml(sp_playlist *playlist) {
 		playlist->num_tracks++;
 		
 		memcpy(track->id, id, sizeof(track->id));
-		track->index = position;
+		track->title = NULL;
+		track->album = NULL;
+		track->playable = 0;
+		track->duration = 0;
 		track->index = position;
 		track->error = SP_ERROR_OK;
 		track->loaded = 0;
-		track->duration = 0;
 
 		playlist->state = PLAYLIST_STATE_LISTED;
 	}
@@ -469,18 +462,7 @@ void playlist_post_track_request(sp_session *session, sp_playlist *playlist) {
 	ptr = (sp_playlist **)malloc(sizeof(sp_playlist *));
 	*ptr = playlist;
 
-	request_post(session, REQ_TYPE_PLAYLIST_LOAD_TRACKS, ptr);
-}
-
-
-/* Request (CMD_BROWSETRACK) loading of tracks from Spotifys servers */
-static int playlist_request_tracks(sp_session *session, sp_request *req) {
-	DSFYDEBUG("Not yet implemented\n");
-
-	/* Finish request */
-	request_set_result(session, req, SP_ERROR_OTHER_PERMAMENT, NULL);
-
-	return 0;
+	request_post(session, REQ_TYPE_BROWSE_TRACK, ptr);
 }
 
 

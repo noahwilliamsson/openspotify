@@ -251,10 +251,8 @@ void request_cleanup(sp_session *session) {
 	do {
 		prev = NULL;
 		for(walker = session->requests; walker; walker = walker->next) {
-			if(walker->state == REQ_STATE_PROCESSED) {
-				DSFYDEBUG("Event with type %d has state REQ_STATE_PROCESSED, will free() it\n", walker->type);
+			if(walker->state == REQ_STATE_PROCESSED)
 				break;
-			}
 
 			prev = walker;
 		}

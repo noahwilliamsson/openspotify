@@ -17,13 +17,14 @@
 #define DSFYstrncat(target, data, size) do { strncat(target, data, size-1); ((unsigned char*)target)[size-1] = 0; } while (0)
 #define DSFYstrncpy(target, data, size) do { strncpy(target, data, size-1); ((unsigned char*)target)[size-1] = 0; } while (0)
 
-unsigned char *hex_ascii_to_bytes (char *, unsigned char *, int);
-char *hex_bytes_to_ascii (unsigned char *, char *, int);
+unsigned char *hex_ascii_to_bytes (const char *, unsigned char *, int);
+char *hex_bytes_to_ascii (const unsigned char *, char *, int);
 void hexdump8x32 (char *, void *, int);
 void fhexdump8x32 (FILE *, char *, void *, int);
 void logdata (char *, int, void *, int);
 ssize_t block_read (int, void *, size_t);
 ssize_t block_write (int, void *, size_t);
 int get_millisecs(void);
+struct buf* despotify_inflate(unsigned char* data, int len);
 
 #endif
