@@ -41,7 +41,9 @@ typedef enum {
 	REQ_TYPE_LOGOUT,
 	REQ_TYPE_PLAY_TOKEN_LOST,
 	REQ_TYPE_NOTIFY,
-	REQ_TYPE_LOAD_PLAYLISTS,
+	REQ_TYPE_PLAYLIST_LOAD_CONTAINER,
+	REQ_TYPE_PLAYLIST_LOAD_PLAYLIST,
+	REQ_TYPE_PLAYLIST_LOAD_TRACKS
 } sp_request_type;
 
 typedef struct sp_request {
@@ -134,9 +136,6 @@ struct sp_user {
 
 
 struct playlist_ctx {
-        /* For the finite state machine that loads playlists */
-        int state;
-
         /* For retrieving the container playlist */
         struct buf *buf;
 

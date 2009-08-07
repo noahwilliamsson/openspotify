@@ -3,8 +3,8 @@ TODO list
 * Initialize PRNG !!!
 * Searching
 * Playlists
-  - Smarter loading with the use of requests, perhaps?
   - Rewrite callback stuff as arrays instead of a single pointer
+  - Support loading of tracks (BrowseTrack requests)
 * Tracks
 * Albums
 * Request and decryption of audio

@@ -24,6 +24,7 @@
 #include "playlist.h"
 #include "request.h"
 #include "sp_opaque.h"
+#include "util.h"
 #include "shn.h"
 
 
@@ -61,9 +62,22 @@ void *network_thread(void *data) {
 			if(req->state != REQ_STATE_NEW && req->state != REQ_STATE_RUNNING)
 				continue;
 
-			DSFYDEBUG("Processing request of type %d in state %d\n", req->type, req->state);
+			if(req->next_timeout != 0 && req->next_timeout > get_millisecs())
+				continue;
+
+			DSFYDEBUG("Processing request %p <state %d, timeout %d> with <type %d, input %p>\n",
+					req, req->state, req->next_timeout, req->type, req->input);
 			ret = process_request(s, req);
-			DSFYDEBUG("Got return value %d from processing of event of type %d in state %d\n", ret, req->type, req->state);
+			DSFYDEBUG("Request processing returned %d\n", ret);
+
+			/* FIXME: Drop connection on errors! */
+			if(ret != 0) {
+				DSFYDEBUG("Request failed, good bye\n");
+#ifdef _WIN32
+#else
+				exit(1);
+#endif
+			}
 		}
 
 
@@ -128,7 +142,9 @@ static int process_request(sp_session *s, sp_request *req) {
 		return process_logout_request(s, req);
 		break;
 	
-	case REQ_TYPE_LOAD_PLAYLISTS:
+	case REQ_TYPE_PLAYLIST_LOAD_CONTAINER:
+	case REQ_TYPE_PLAYLIST_LOAD_PLAYLIST:
+	case REQ_TYPE_PLAYLIST_LOAD_TRACKS:
 		return playlist_process(s, req);
 		break;
 

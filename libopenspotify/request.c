@@ -130,7 +130,8 @@ int request_set_result(sp_session *session, sp_request *req, sp_error error, voi
 	req->output = output;
 	req->state = REQ_STATE_RETURNED;
 	
-	DSFYDEBUG("Setting REQ_STATE_RETURNED and error %d on request with type %d\n", error, req->type);
+	DSFYDEBUG("Setting REQ_STATE_RETURNED with <error %d, output %p> on request <type %d, input %p>\n",
+			error, req->output, req->type, req->input);
 	request_notify_main_thread(session, req);
 
 #ifdef _WIN32
@@ -152,6 +153,14 @@ static void request_notify_main_thread(sp_session *session, sp_request *request)
 	case REQ_TYPE_NOTIFY:
 		session->callbacks->notify_main_thread(session);
 		DSFYDEBUG("Notified main thread via session->callbacks->notify_main_thread()\n");
+		break;
+
+	case REQ_TYPE_PLAYLIST_LOAD_CONTAINER:
+		/* FIXME: Callback processing here? */
+		break;
+
+	case REQ_TYPE_PLAYLIST_LOAD_PLAYLIST:
+		/* FIXME: Callback processing here? */
 		break;
 
 	default:
