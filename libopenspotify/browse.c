@@ -18,9 +18,8 @@
  * |            +--- CHANNEL_DATA: Buffer XML-data
  * |            +--+ CHANNEL_END:
  * |               +--- browse_parse_compressed_xml()
- * |               +--+ playlist_post_playlist_requests() (REQ_TYPE_PLAYLIST_LOAD_PLAYLIST)
- * |               |  +--- request_post(REQ_TYPE_PLAYLIST_LOAD_PLAYLIST)
- * |               +-- request_post_set_result(REQ_TYPE_PLAYLIST_LOAD_CONTAINER)
+ * |               +--+ browse_send_browsetrack_request()
+ * |                  +-- Will do request_post_set_result(REQ_TYPE_BROWSE_TRACKS) when done
  * .
  * .
  * +--- DONE
@@ -28,6 +27,7 @@
  *     
  */
 
+#include <assert.h>
 #include <string.h>
 
 #include "buf.h"
@@ -39,6 +39,7 @@
 #include "request.h"
 #include "sp_opaque.h"
 #include "util.h"
+
 
 
 static int browse_send_browsetrack_request(sp_session *session, sp_request *req, int offset);
@@ -76,7 +77,7 @@ int browse_process(sp_session *session, sp_request *req) {
 static int browse_send_browsetrack_request(sp_session *session, sp_request *req, int offset) {
 	sp_playlist *playlist = *(sp_playlist **)req->input;
 	struct callback_ctx *callback_ctx;
-	int i, count, requested, ret;
+	int i, count, ret;
 	unsigned char *tracklist;
 
 
@@ -87,7 +88,7 @@ static int browse_send_browsetrack_request(sp_session *session, sp_request *req,
 	}
 
 
-	count = playlist->num_tracks - requested;
+	count = playlist->num_tracks - offset;
 	if(count > MAX_TRACKS_PER_REQUEST)
 		count = MAX_TRACKS_PER_REQUEST;
 
@@ -98,6 +99,7 @@ static int browse_send_browsetrack_request(sp_session *session, sp_request *req,
 
 
 	/* This is where the gzip'd XML will be stored */
+	assert(playlist->buf == NULL);
 	playlist->buf = buf_new();
 
 	/* Free'd by the callback */
@@ -109,6 +111,7 @@ static int browse_send_browsetrack_request(sp_session *session, sp_request *req,
 	callback_ctx->next_offset = offset + count;
 
 	/* The channel callback will call this function again with offset + count as the new offset */
+	DSFYDEBUG("Requesting BrowseTrack for %d tracks (at offset %d)\n", count, offset);
 	ret = cmd_browse(session, BROWSE_TRACK, tracklist, count, browse_callback, callback_ctx);
 
 	free(tracklist);
@@ -121,10 +124,24 @@ static int browse_send_browsetrack_request(sp_session *session, sp_request *req,
 static int browse_callback(CHANNEL *ch, unsigned char *payload, unsigned short len) {
 	struct callback_ctx *callback_ctx = (struct callback_ctx *)ch->private;
 	sp_playlist *playlist = callback_ctx->playlist;
-	int ret;
+	int ret, skip_len;
 
 	switch(ch->state) {
 	case CHANNEL_DATA:
+		/* Skip a minimal gzip header */
+		if (ch->total_data_len < 10) {
+			skip_len = 10 - ch->total_data_len;
+			while(skip_len && len) {
+				skip_len--;
+				len--;
+				payload++;
+			}
+
+			if (len == 0)
+				break;
+		}
+
+
 		buf_append_data(playlist->buf, payload, len);
 		break;
 
@@ -144,7 +161,9 @@ static int browse_callback(CHANNEL *ch, unsigned char *payload, unsigned short l
 			ret = browse_parse_compressed_xml(callback_ctx->session,
 							callback_ctx->playlist);
 			if(ret == 0)
-				ret = browse_send_browsetrack_request(callback_ctx->session, callback_ctx->req, callback_ctx->next_offset);
+				ret = browse_send_browsetrack_request(callback_ctx->session,
+									callback_ctx->req,
+									callback_ctx->next_offset);
 
 			break;
 
@@ -156,10 +175,6 @@ static int browse_callback(CHANNEL *ch, unsigned char *payload, unsigned short l
 			ret = -1;
 			break;
 		}
-
-		/* FIXME: How do we handle multiple requests?
-		request_set_result(callback_ctx->session, callback_ctx->req, SP_ERROR_OK, NULL);
-		*/
 
 
 		free(callback_ctx);
@@ -191,13 +206,15 @@ static int browse_parse_compressed_xml(sp_session *session, sp_playlist *playlis
 
 	root = ezxml_parse_str((char *)uncompressed->ptr, uncompressed->len);
 
-	for(track_node = ezxml_get(root, "track", -1); track_node; track_node = track_node->next) {
+	for(track_node = ezxml_get(root, "tracks", 0, "track", -1); track_node; track_node = track_node->next) {
 		node = ezxml_get(track_node, "id", -1);
 		if(node == NULL)
 			continue;
 
 		hex_ascii_to_bytes(node->txt, track_id, sizeof(track_id));
 		for(i = 0; i < playlist->num_tracks; i++) {
+			track = playlist->tracks[i];
+
 			if(memcmp(playlist->tracks[i]->id, track_id, sizeof(track_id)))
 				continue;
 
@@ -229,12 +246,6 @@ static int browse_parse_compressed_xml(sp_session *session, sp_playlist *playlis
 				track->duration = atoi(node->txt);
 
 			/* FIXME: Handle all the other elements and attribuets */
-
-			{
-				char idstr[33];
-				hex_bytes_to_ascii(track->id, idstr, 16);
-				DSFYDEBUG("Added track '%s' - '%s' (ID '%s')\n", track->title, track->album, idstr);
-			}
 		}
 	}
 
