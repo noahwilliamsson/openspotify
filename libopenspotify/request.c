@@ -15,6 +15,7 @@
 #endif
 
 #include "debug.h"
+#include "util.h"
 
 
 static void request_notify_main_thread(sp_session *session, sp_request *request);
