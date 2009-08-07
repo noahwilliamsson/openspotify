@@ -208,10 +208,6 @@ int handle_packet (sp_session * session,
 
 	case CMD_WELCOME:
 		/* Trigger loading of playlists */
-		if(session->playlist_ctx)
-			playlist_release(session->playlist_ctx);
-
-		session->playlist_ctx = playlist_create();
 		request_post(session, REQ_TYPE_LOAD_PLAYLISTS, NULL);
 		break;
 
