@@ -18,7 +18,6 @@
 #include <spotify/api.h>
 
 #include "login.h"
-#include "playlist.h"
 #include "shn.h"
 
 
@@ -31,6 +30,12 @@ typedef enum {
 	REQ_STATE_PROCESSED
 } sp_request_state;
 
+/*
+ * When adding new types, have a look at request.c:request_notify_main_thread()
+ * and session.c:sp_session_process_events() and add them to the
+ * switch() statements if necessary
+ *
+ */
 typedef enum {
 	REQ_TYPE_LOGIN = 0,
 	REQ_TYPE_LOGOUT,

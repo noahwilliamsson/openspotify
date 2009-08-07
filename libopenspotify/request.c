@@ -16,6 +16,9 @@
 #include "debug.h"
 
 
+static void request_notify_main_thread(sp_session *session, sp_request *request);
+
+
 /*
  * Post a new request to be processed by the networking thread
  * If input is non-NULL, it will be free'd at the end of the request
@@ -94,8 +97,7 @@ int request_post_result(sp_session *session, sp_request_type type, sp_error erro
 	req->next = NULL;
 
 	DSFYDEBUG("Posted request results with type %d and error %d\n", req->type, error);
-	session->callbacks->notify_main_thread(session);
-	DSFYDEBUG("Notified main thread via session->callbacks->notify_main_thread()\n");
+	request_notify_main_thread(session, req);
 
 #ifdef _WIN32
 	ReleaseMutex(session->request_mutex);
@@ -125,8 +127,7 @@ int request_set_result(sp_session *session, sp_request *req, sp_error error, voi
 	req->state = REQ_STATE_RETURNED;
 	
 	DSFYDEBUG("Setting REQ_STATE_RETURNED and error %d on request with type %d\n", error, req->type);
-	session->callbacks->notify_main_thread(session);
-	DSFYDEBUG("Notified main thread via session->callbacks->notify_main_thread()\n");
+	request_notify_main_thread(session, req);
 
 #ifdef _WIN32
 	ReleaseMutex(session->request_mutex);
@@ -135,6 +136,23 @@ int request_set_result(sp_session *session, sp_request *req, sp_error error, voi
 #endif
 
 	return 0;
+}
+
+
+/* For selecting which requests we should notify the main thread about */
+static void request_notify_main_thread(sp_session *session, sp_request *request) {
+	switch(request->type) {
+	case REQ_TYPE_LOGIN:
+	case REQ_TYPE_LOGOUT:
+	case REQ_TYPE_PLAY_TOKEN_LOST:
+	case REQ_TYPE_NOTIFY:
+		session->callbacks->notify_main_thread(session);
+		DSFYDEBUG("Notified main thread via session->callbacks->notify_main_thread()\n");
+		break;
+
+	default:
+		break;
+	}
 }
 
 
