@@ -50,7 +50,6 @@
 
 #include <string.h>
 
-#include "adler32.h"
 #include "buf.h"
 #include "channel.h"
 #include "commands.h"
@@ -61,6 +60,7 @@
 #include "sp_opaque.h"
 #include "util.h"
 
+#include <zlib.h>
 
 static int playlist_send_playlist_container_request(sp_session *session, sp_request *req);
 static int playlist_container_callback(CHANNEL *ch, unsigned char *payload, unsigned short len);
@@ -478,7 +478,7 @@ unsigned long playlist_checksum(sp_playlist *playlist) {
 	for(i = 0; i < playlist->num_tracks; i++){
 		playlist->tracks[i]->id[16] = 0x01;
 
-		checksum = adler32_update(checksum, playlist->tracks[i]->id, 17);
+		checksum = adler32(checksum, playlist->tracks[i]->id, 17);
 	}
 
 	return checksum;
@@ -497,7 +497,7 @@ unsigned long playlistcontainer_checksum(sp_playlistcontainer *container) {
 	for(playlist = container->playlists; playlist != NULL; playlist = playlist->next){
 		playlist->id[16] = 0x02;
 
-		checksum = adler32_update(checksum, playlist->id, 17);
+		checksum = adler32(checksum, playlist->id, 17);
 	}
 
 	return checksum;
