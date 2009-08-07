@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;C:\Documents and Settings\user\Skrivbord\repo\openspotify\zlib\include&quot;;..\include;&quot;..\openssl-0.9.8k\include&quot;"
+				AdditionalIncludeDirectories="&quot;C:\Documents and Settings\user\Skrivbord\repo\openspotify\zlib\include&quot;;..\include;..\zlib\include;&quot;..\openssl-0.9.8k\include&quot;"
 				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;WIN32_LEAN_AND_MEAN;DEBUG"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -107,7 +107,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="&quot;C:\Documents and Settings\user\Skrivbord\repo\openspotify\zlib\include&quot;;..\include;&quot;..\openssl-0.9.8k\include&quot;"
+				AdditionalIncludeDirectories="&quot;C:\Documents and Settings\user\Skrivbord\repo\openspotify\zlib\include&quot;;..\include;..\zlib\include;&quot;..\openssl-0.9.8k\include&quot;"
 				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;WIN32_LEAN_AND_MEAN"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -154,10 +154,6 @@
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
-			<File
-				RelativePath=".\adler32.c"
-				>
-			</File>
 			<File
 				RelativePath=".\browse.c"
 				>
@@ -248,10 +244,6 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<File
-				RelativePath=".\adler32.h"
-				>
-			</File>
 			<File
 				RelativePath="..\include\spotify\api.h"
 				>
