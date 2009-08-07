@@ -14,6 +14,9 @@ ifeq ($(shell uname -s),Darwin)
 	LIB_NAME = libopenspotify.dylib
 	SHLIB_FLAGS = -dynamiclib -dylib
 endif
+ifeq ($(shell uname -s),Linux)
+	LDFLAGS += -lrt
+endif
 
 all: $(CORE_OBJS) $(LIB_OBJS)
 	gcc -o $(LIB_NAME) $(SHLIB_FLAGS) $(LDFLAGS) $(CORE_OBJS) $(LIB_OBJS)
