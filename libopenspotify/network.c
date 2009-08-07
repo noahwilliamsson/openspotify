@@ -41,7 +41,6 @@ static int process_logout_request(sp_session *s, sp_request *req);
 DWORD WINAPI network_thread(LPVOID data) {
 #else
 void *network_thread(void *data) {
-	pthread_mutex_t idle_mutex;
 #endif
 	sp_session *s = (sp_session *)data;
 	sp_request *req;
@@ -69,18 +68,25 @@ void *network_thread(void *data) {
 
 		/* Packets can only be processed once we're logged in */
 		if(s->connectionstate != SP_CONNECTION_STATE_LOGGED_IN) {
+#ifdef _WIN32
+			WaitForSingleObject(s->request_mutex, INFINITE);
+#else
+			pthread_mutex_lock(&s->request_mutex);
+#endif
 			if(s->requests == NULL) {
 				DSFYDEBUG("Sleeping because there's nothing to do\n");
 #ifdef _WIN32
 				WaitForSingleObject(s->idle_wakeup, INFINITE);
 #else
-				pthread_mutex_init(&idle_mutex, NULL);
-				pthread_mutex_lock(&idle_mutex);
-				pthread_cond_wait(&s->idle_wakeup, &idle_mutex);
-				pthread_mutex_destroy(&idle_mutex);
+				pthread_cond_wait(&s->idle_wakeup, &s->request_mutex);
 #endif
 				DSFYDEBUG("Woke up, a new request was posted\n");
 			}
+#ifdef _WIN32
+			ReleaseMutex(s->request_mutex);
+#else
+			pthread_mutex_unlock(&s->request_mutex);
+#endif
 
 			continue;
 		}
