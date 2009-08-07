@@ -436,7 +436,7 @@ static int playlist_parse_playlist_xml(sp_playlist *playlist) {
 		track = playlist->tracks[playlist->num_tracks];
 		playlist->num_tracks++;
 		
-		memcpy(track->id, id, sizeof(track->id));
+		hex_ascii_to_bytes(id, track->id, sizeof(track->id));
 		track->title = NULL;
 		track->album = NULL;
 		track->playable = 0;
