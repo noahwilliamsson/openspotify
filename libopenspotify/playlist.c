@@ -61,7 +61,7 @@
 #include "ezxml.h"
 #include "sp_opaque.h"
 #include "util.h"
-
+#include "adler32.h"
 
 static int playlist_request_container(sp_session *session);
 static int playlist_container_callback(CHANNEL *ch, unsigned char *payload, unsigned short len);
@@ -71,6 +71,41 @@ static int playlist_load_playlists(sp_session *session);
 static int playlist_callback(CHANNEL *ch, unsigned char *payload, unsigned short len);
 static int playlist_parse_playlist_xml(sp_playlist *playlist);
 
+/* Calculate a playlist checksum. */
+unsigned long playlist_checksum(sp_playlist *playlist) {
+	unsigned long checksum = 1L;
+	int i;
+
+	if(playlist == NULL)
+		return 1L;
+
+	/* Loop over all tracks (make sure the last byte is 0x01). */
+	for(i = 0; i < playlist->num_tracks; i++){
+		playlist->tracks[i]->id[16] = 0x01;
+
+		checksum = adler32_update(checksum, playlist->tracks[i]->id, 17);
+	}
+
+	return checksum;
+}
+
+/* Calculate a playlists container checksum. */
+unsigned long playlistcontainer_checksum(sp_playlistcontainer *container) {
+	unsigned long checksum = 1L;
+	sp_playlist *playlist;
+
+	if(container == NULL)
+		return 1L;
+
+	/* Loop over all playlists (make sure the last byte is 0x02). */
+	for(playlist = container->playlists; playlist != NULL; playlist = playlist->next){
+		playlist->id[16] = 0x02;
+
+		checksum = adler32_update(checksum, playlist->id, 17);
+	}
+
+	return checksum;
+}
 
 /* For initializing the playlist context, called by sp_session_init() */
 struct playlist_ctx *playlist_create(void) {
@@ -155,6 +190,8 @@ int playlist_process(sp_session *session) {
 
 	case 1:
 		/* Do nothing, the channel callback will increase state */
+		/* FIXME: Should sleep while waiting channel handler */
+		sleep(1);
 		break;
 		
 
@@ -169,8 +206,11 @@ int playlist_process(sp_session *session) {
 	case 3:
 		/* Update playlists (track IDs and track data) and retry fails ones */
 		ret = playlist_load_playlists(session);
-		if(ret < 0 || ret == 0)
+		if(ret < 0 || ret == 0) {
+			/* FIXME: Should sleep while waiting channel handlers */
+			usleep(500000);
 			break;
+		}
 
 		session->playlist_ctx->state++;
 		ret = 0;
@@ -178,6 +218,8 @@ int playlist_process(sp_session *session) {
 
 	case 4:
 		/* FIXME: Done loading playlists */
+		/* FIXME: Should sleep while waiting channel handlers */
+		sleep(1);
 		break;
 	
 	default:
@@ -191,10 +233,15 @@ int playlist_process(sp_session *session) {
 /* Request playlist container */
 static int playlist_request_container(sp_session *session) {
 	unsigned char container_id[17];
+	static const char* decl_and_root =
+		"<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n<playlist>\n";
+
+
 
 	DSFYDEBUG("Requesting available playlist\n");
 
 	session->playlist_ctx->buf = buf_new();
+	buf_append_data(session->playlist_ctx->buf, (char*)decl_and_root, strlen(decl_and_root));
 
 	memset(container_id, 0, 17);
 	return cmd_getplaylist(session, container_id, ~0, 
@@ -231,6 +278,7 @@ static int playlist_container_callback(CHANNEL *ch, unsigned char *payload, unsi
 
 
 static int playlist_parse_container_xml(sp_session *session) {
+	static char *end_element = "</playlist>";
 	char *id_list, *id;
 	char idstr[35];
 	int position;
@@ -238,13 +286,16 @@ static int playlist_parse_container_xml(sp_session *session) {
 	sp_playlist *playlist;
 	sp_playlistcontainer *container;
 
-	/* NULL-terminate XML */
+	buf_append_data(session->playlist_ctx->buf, end_element, strlen(end_element));
 	buf_append_u8(session->playlist_ctx->buf, 0);
+	printf("CONTAINER XML[%s]\n", session->playlist_ctx->buf->ptr);
 
 	root = ezxml_parse_str((char *)session->playlist_ctx->buf->ptr, session->playlist_ctx->buf->len);
 
 	node = ezxml_get(root, "next-change", 0, "change", 0, "ops", 0, "add", 0, "items", -1);
 	id_list = node->txt;
+
+	DSFYDEBUG("Returned IDs are '%s'\n", id_list);
 	
 	container = session->playlist_ctx->container;
 	for(id = strtok(id_list, ",\n"); id; id = strtok(NULL, ",\n")) {
@@ -274,6 +325,9 @@ static int playlist_parse_container_xml(sp_session *session) {
 
 		playlist->lastrequest = 0;
 		playlist->state = PLAYLIST_STATE_ADDED;
+
+		playlist->callbacks = NULL;
+		playlist->userdata = NULL;
 
 		playlist->buf = NULL;
 		playlist->next = NULL;
@@ -343,7 +397,7 @@ static int playlist_load_playlists(sp_session *session) {
 
 
 		ret =  cmd_getplaylist(session, playlist->id, ~0, 
-				playlist_container_callback, playlist);
+				playlist_callback, playlist);
 
 		if(ret < 0) {
 			DSFYDEBUG("cmd_getplaylist() failed for playlist with ID '%s'\n", idstr);
@@ -353,8 +407,8 @@ static int playlist_load_playlists(sp_session *session) {
 		DSFYDEBUG("Requested playlist with ID '%s' since last request at %ds (since boot) is less than %d\n",
 				idstr, playlist->lastrequest / 1000, GetTickCount() / 1000 - PLAYLIST_RETRY_TIMEOUT);
 		playlist->lastrequest = GetTickCount();
-#els
-		DSFYDEBUG("Requested playlist with ID '%s' since last request at %ds (since 1970) is less than %d\n",
+#else
+		DSFYDEBUG("Requested playlist with ID '%s' since last request at %lds (since 1970) is less than %ld\n",
 				idstr, playlist->lastrequest, time(NULL) - PLAYLIST_RETRY_TIMEOUT);
 		playlist->lastrequest = time(NULL);
 #endif
@@ -394,6 +448,7 @@ static int playlist_callback(CHANNEL *ch, unsigned char *payload, unsigned short
 
 
 static int playlist_parse_playlist_xml(sp_playlist *playlist) {
+	static char *end_element = "</playlist>";
 	char *id_list, *id;
 	char idstr[35];
 	int position;
@@ -401,7 +456,9 @@ static int playlist_parse_playlist_xml(sp_playlist *playlist) {
 	sp_track *track;
 
 	/* NULL-terminate XML */
+	buf_append_data(playlist->buf, end_element, strlen(end_element));
 	buf_append_u8(playlist->buf, 0);
+	printf("PLAYLIST XML[%s]\n", playlist->buf->ptr);
 
 	root = ezxml_parse_str((char *)playlist->buf->ptr, playlist->buf->len);
 

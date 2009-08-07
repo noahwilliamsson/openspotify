@@ -27,12 +27,21 @@
 #include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
+#ifdef _MSC_VER
+#include <basetsd.h>
+#define ssize_t SSIZE_T
+#define snprintf _snprintf
+#define strdup _strdup
+#define EZXML_NOMMAP
+#else
 #include <unistd.h>
+#endif
 #include <sys/types.h>
 #ifndef EZXML_NOMMAP
 #include <sys/mman.h>
 #endif // EZXML_NOMMAP
 #include <sys/stat.h>
+
 #include "ezxml.h"
 
 #define EZXML_WS   "\t\r\n "  // whitespace

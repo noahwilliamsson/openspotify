@@ -14,6 +14,7 @@
 #include "commands.h"
 #include "debug.h"
 #include "packet.h"
+#include "playlist.h"
 #include "request.h"
 #include "sp_opaque.h"
 #include "util.h"
@@ -90,8 +91,7 @@ int handle_aeskey (unsigned char *payload, int len)
 
 	DSFYDEBUG ("Server said 0x0d (AES key) for channel %d\n",
 		   ntohs (*(unsigned short *) (payload + 2)))
-		if ((ch =
-		     channel_by_id (ntohs
+	if ((ch = channel_by_id (ntohs
 				    (*(unsigned short *) (payload + 2)))) !=
 			   NULL) {
 		ret = ch->callback (ch, payload + 4, len - 4);
@@ -101,6 +101,7 @@ int handle_aeskey (unsigned char *payload, int len)
 		DSFYDEBUG
 			("Command 0x0d: Failed to find channel with ID %d\n",
 			 ntohs (*(unsigned short *) (payload + 2)));
+		ret = -1;
 	}
 
 	return ret;
@@ -207,6 +208,10 @@ int handle_packet (sp_session * session,
 
 	case CMD_WELCOME:
 		/* Trigger loading of playlists */
+		if(session->playlist_ctx)
+			playlist_release(session->playlist_ctx);
+
+		session->playlist_ctx = playlist_create();
 		request_post(session, REQ_TYPE_LOAD_PLAYLISTS, NULL);
 		break;
 

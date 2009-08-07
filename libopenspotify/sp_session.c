@@ -14,7 +14,7 @@
 #include "request.h"
 #include "login.h"
 #include "network.h"
-#include "request.h"
+#include "playlist.h"
 #include "sp_opaque.h"
 
 
