@@ -155,10 +155,6 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\adler32.c"
-				>
-			</File>
-			<File
 				RelativePath=".\buf.c"
 				>
 			</File>
@@ -172,10 +168,6 @@
 			</File>
 			<File
 				RelativePath=".\dns.c"
-				>
-			</File>
-			<File
-				RelativePath=".\ezxml.c"
 				>
 			</File>
 			<File
@@ -199,10 +191,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\playlist.c"
-				>
-			</File>
-			<File
 				RelativePath=".\request.c"
 				>
 			</File>
@@ -223,10 +211,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\sp_playlist.c"
-				>
-			</File>
-			<File
 				RelativePath=".\sp_session.c"
 				>
 			</File>
@@ -244,10 +228,6 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<File
-				RelativePath=".\adler32.h"
-				>
-			</File>
 			<File
 				RelativePath="..\include\spotify\api.h"
 				>
@@ -273,10 +253,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ezxml.h"
-				>
-			</File>
-			<File
 				RelativePath=".\handlers.h"
 				>
 			</File>
@@ -294,10 +270,6 @@
 			</File>
 			<File
 				RelativePath=".\packet.h"
-				>
-			</File>
-			<File
-				RelativePath=".\playlist.h"
 				>
 			</File>
 			<File
