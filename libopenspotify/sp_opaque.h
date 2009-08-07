@@ -50,6 +50,11 @@ typedef struct sp_request {
 	void *input;
 	void *output;
 	sp_error error;
+#ifdef _WIN32
+	DWORD next_timeout;
+#else
+	time_t next_timeout;
+#endif
 	struct sp_request *next;
 } sp_request;
 

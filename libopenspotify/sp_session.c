@@ -143,7 +143,7 @@ SP_LIBEXPORT(void *) sp_session_userdata(sp_session *session) {
 SP_LIBEXPORT(void) sp_session_process_events(sp_session *session, int *next_timeout) {
 	struct sp_request *request;
 
-	while((request = request_fetch_next_result(session)) != NULL) {
+	while((request = request_fetch_next_result(session, next_timeout)) != NULL) {
 		DSFYDEBUG("Processing finished request of type %d, error %d\n",
 			request->type, request->error);
 
@@ -180,8 +180,6 @@ SP_LIBEXPORT(void) sp_session_process_events(sp_session *session, int *next_time
 		request_mark_processed(session, request);
 	}
 
-
-	*next_timeout = 5000;
 }
 
 

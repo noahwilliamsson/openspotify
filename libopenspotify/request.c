@@ -11,6 +11,7 @@
 #include <windows.h>
 #else
 #include <pthread.h>
+#include <time.h>
 #endif
 
 #include "debug.h"
@@ -52,6 +53,7 @@ int request_post(sp_session *session, sp_request_type type, void *input) {
 	req->input = input;
 	req->output = NULL;
 	req->next = NULL;
+	req->next_timeout = 0;
 
 #ifdef _WIN32
 	ReleaseMutex(session->request_mutex);
@@ -95,6 +97,7 @@ int request_post_result(sp_session *session, sp_request_type type, sp_error erro
 	req->input = NULL;
 	req->output = output;
 	req->next = NULL;
+	req->next_timeout = 0;
 
 	DSFYDEBUG("Posted request results with type %d and error %d\n", req->type, error);
 	request_notify_main_thread(session, req);
@@ -157,8 +160,9 @@ static void request_notify_main_thread(sp_session *session, sp_request *request)
 
 
 /* For the main thread: Fetch next entry with state REQ_STATE_RETURNED */
-sp_request *request_fetch_next_result(sp_session *session) {
-	struct sp_request *request;
+sp_request *request_fetch_next_result(sp_session *session, int *next_timeout) {
+	struct sp_request *walker, *request;
+	int timeout;
 
 #ifdef _WIN32
 	WaitForSingleObject(session->request_mutex, INFINITE);
@@ -166,9 +170,30 @@ sp_request *request_fetch_next_result(sp_session *session) {
 	pthread_mutex_lock(&session->request_mutex);
 #endif
 
-	for(request = session->requests; request; request = request->next)
-		if(request->state == REQ_STATE_RETURNED)
-			break;
+	/* Default timeout (milliseconds) */
+	*next_timeout = 5000;
+
+	request = NULL;
+	for(walker = session->requests; walker; walker = walker->next) {
+		if(!request && walker->state == REQ_STATE_RETURNED)
+			request = walker;
+
+		if(walker->next_timeout == 0)
+			continue;
+
+#ifdef _WIN32
+		timeout = (int) (walker->next_timeout - GetTickCount()) / 1000;
+#else
+		timeout = (int)walker->next_timeout;
+#endif
+		/* FIXME: Sensible to always sleep one second? */
+		if(timeout < 1000)
+			timeout = 1000;
+
+		if(timeout < *next_timeout)
+			*next_timeout = timeout;
+	}
+
 
 #ifdef _WIN32
 	ReleaseMutex(session->request_mutex);
