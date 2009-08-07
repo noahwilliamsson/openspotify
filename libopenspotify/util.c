@@ -180,25 +180,30 @@ int get_millisecs(void) {
 	return ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
 #elif __APPLE__
 	static mach_timebase_info_data_t mtid;
-	static struct timeval tv;
 	static uint64_t first_mat;
-	int ret;
 	uint64_t elapsed_ns;
 	
 	if(!mtid.denom) {
 		mach_timebase_info(&mtid);
-		gettimeofday(&tv, NULL);
 		first_mat = mach_absolute_time();
 	}
 	
 	elapsed_ns = (mach_absolute_time() - first_mat) * mtid.numer / mtid.denom;
-	ret = 1000*tv.tv_sec + (long)elapsed_ns / 1000000000;
-	ret += tv.tv_usec*1000 + elapsed_ns % 1000000000;
-
-	return ret;
+	return elapsed_ns / 1000000;
 #else
+	static struct timeval first_tv;
 	struct timeval tv;
+
+	if(first_tv.tv_sec == 0)
+		gettimeofday(&first_tv, NULL);
+
 	gettimeofday(&tv, NULL);
+	tv.tv_sec -= first_tv.tv_sec;
+	if(tv.tv_usec < first_tv.tv_usec) {
+		tv.tv_sec--;
+		tv.tv_usec += 1000000;
+	}
+	tv.tv_usec -= first_tv.tv_usec;
 	return tv.tv_sec * 1000 + tv.tv_usec/1000;
 #endif
 }
