@@ -56,7 +56,7 @@ SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_sess
 	s->login = NULL;
 
 	/* Playlist context, needed by playlist.c */
-	s->playlist_ctx = NULL;
+	s->playlist_ctx = playlist_create();
 
 	/* Allocate memory for user info. */
 	if((s->user = (sp_user *)malloc(sizeof(sp_user))) == NULL)

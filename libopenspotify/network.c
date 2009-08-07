@@ -21,6 +21,7 @@
 #include "login.h"
 #include "network.h"
 #include "packet.h"
+#include "playlist.h"
 #include "request.h"
 #include "sp_opaque.h"
 #include "shn.h"
@@ -128,8 +129,8 @@ static int process_request(sp_session *s, sp_request *req) {
 		break;
 	
 	case REQ_TYPE_LOAD_PLAYLISTS:
-		/* FIXME: Unify calls here? */
-		return playlist_process(s);
+		return playlist_process(s, req);
+		break;
 
 	default:
 		break;

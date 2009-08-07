@@ -55,13 +55,15 @@
 
 #include <string.h>
 
+#include "adler32.h"
 #include "channel.h"
 #include "commands.h"
 #include "debug.h"
 #include "ezxml.h"
+#include "playlist.h"
 #include "sp_opaque.h"
 #include "util.h"
-#include "adler32.h"
+
 
 static int playlist_request_container(sp_session *session);
 static int playlist_container_callback(CHANNEL *ch, unsigned char *payload, unsigned short len);
@@ -71,41 +73,9 @@ static int playlist_load_playlists(sp_session *session);
 static int playlist_callback(CHANNEL *ch, unsigned char *payload, unsigned short len);
 static int playlist_parse_playlist_xml(sp_playlist *playlist);
 
-/* Calculate a playlist checksum. */
-unsigned long playlist_checksum(sp_playlist *playlist) {
-	unsigned long checksum = 1L;
-	int i;
+unsigned long playlist_checksum(sp_playlist *playlist);
+unsigned long playlistcontainer_checksum(sp_playlistcontainer *container);
 
-	if(playlist == NULL)
-		return 1L;
-
-	/* Loop over all tracks (make sure the last byte is 0x01). */
-	for(i = 0; i < playlist->num_tracks; i++){
-		playlist->tracks[i]->id[16] = 0x01;
-
-		checksum = adler32_update(checksum, playlist->tracks[i]->id, 17);
-	}
-
-	return checksum;
-}
-
-/* Calculate a playlists container checksum. */
-unsigned long playlistcontainer_checksum(sp_playlistcontainer *container) {
-	unsigned long checksum = 1L;
-	sp_playlist *playlist;
-
-	if(container == NULL)
-		return 1L;
-
-	/* Loop over all playlists (make sure the last byte is 0x02). */
-	for(playlist = container->playlists; playlist != NULL; playlist = playlist->next){
-		playlist->id[16] = 0x02;
-
-		checksum = adler32_update(checksum, playlist->id, 17);
-	}
-
-	return checksum;
-}
 
 /* For initializing the playlist context, called by sp_session_init() */
 struct playlist_ctx *playlist_create(void) {
@@ -176,7 +146,7 @@ void playlist_release(struct playlist_ctx *playlist_ctx) {
 
 
 /* Playlist FSM */
-int playlist_process(sp_session *session) {
+int playlist_process(sp_session *session, sp_request *req) {
 	int ret;
 
 	switch(session->playlist_ctx->state) {
@@ -502,3 +472,40 @@ static int playlist_parse_playlist_xml(sp_playlist *playlist) {
 	return 0;
 }
 
+
+/* Calculate a playlist checksum. */
+unsigned long playlist_checksum(sp_playlist *playlist) {
+	unsigned long checksum = 1L;
+	int i;
+
+	if(playlist == NULL)
+		return 1L;
+
+	/* Loop over all tracks (make sure the last byte is 0x01). */
+	for(i = 0; i < playlist->num_tracks; i++){
+		playlist->tracks[i]->id[16] = 0x01;
+
+		checksum = adler32_update(checksum, playlist->tracks[i]->id, 17);
+	}
+
+	return checksum;
+}
+
+
+/* Calculate a playlists container checksum. */
+unsigned long playlistcontainer_checksum(sp_playlistcontainer *container) {
+	unsigned long checksum = 1L;
+	sp_playlist *playlist;
+
+	if(container == NULL)
+		return 1L;
+
+	/* Loop over all playlists (make sure the last byte is 0x02). */
+	for(playlist = container->playlists; playlist != NULL; playlist = playlist->next){
+		playlist->id[16] = 0x02;
+
+		checksum = adler32_update(checksum, playlist->id, 17);
+	}
+
+	return checksum;
+}
