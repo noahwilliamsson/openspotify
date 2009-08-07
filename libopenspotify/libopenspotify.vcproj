@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\include;..\openssl-0.9.8k\include"
+				AdditionalIncludeDirectories="&quot;C:\Documents and Settings\user\Skrivbord\repo\openspotify\zlib\include&quot;;..\include;&quot;..\openssl-0.9.8k\include&quot;"
 				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;WIN32_LEAN_AND_MEAN;DEBUG"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -61,7 +61,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="dnsapi.lib ws2_32.lib ..\openssl-0.9.8k\lib\libeay32.lib ..\openssl-0.9.8k\lib\ssleay32.lib"
+				AdditionalDependencies="dnsapi.lib ws2_32.lib ..\openssl-0.9.8k\lib\libeay32.lib ..\openssl-0.9.8k\lib\ssleay32.lib ..\zlib\lib\zlib.lib"
 				OutputFile="$(OutDir)\$(ProjectName).lib"
 			/>
 			<Tool
@@ -107,7 +107,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="..\include;..\openssl-0.9.8k\include"
+				AdditionalIncludeDirectories="&quot;C:\Documents and Settings\user\Skrivbord\repo\openspotify\zlib\include&quot;;..\include;&quot;..\openssl-0.9.8k\include&quot;"
 				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;WIN32_LEAN_AND_MEAN"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -126,7 +126,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="dnsapi.lib ws2_32.lib ..\openssl-0.9.8k\lib\libeay32.lib ..\openssl-0.9.8k\lib\ssleay32.lib"
+				AdditionalDependencies="dnsapi.lib ws2_32.lib ..\openssl-0.9.8k\lib\libeay32.lib ..\openssl-0.9.8k\lib\ssleay32.lib ..\zlib\lib\zlib.lib"
 				OutputFile="$(OutDir)\$(ProjectName).lib"
 			/>
 			<Tool
@@ -155,6 +155,14 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\adler32.c"
+				>
+			</File>
+			<File
+				RelativePath=".\browse.c"
+				>
+			</File>
+			<File
 				RelativePath=".\buf.c"
 				>
 			</File>
@@ -168,6 +176,10 @@
 			</File>
 			<File
 				RelativePath=".\dns.c"
+				>
+			</File>
+			<File
+				RelativePath=".\ezxml.c"
 				>
 			</File>
 			<File
@@ -191,6 +203,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\playlist.c"
+				>
+			</File>
+			<File
 				RelativePath=".\request.c"
 				>
 			</File>
@@ -208,6 +224,10 @@
 			</File>
 			<File
 				RelativePath=".\sp_link.c"
+				>
+			</File>
+			<File
+				RelativePath=".\sp_playlist.c"
 				>
 			</File>
 			<File
@@ -229,7 +249,15 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\adler32.h"
+				>
+			</File>
+			<File
 				RelativePath="..\include\spotify\api.h"
+				>
+			</File>
+			<File
+				RelativePath=".\browse.h"
 				>
 			</File>
 			<File
@@ -253,6 +281,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ezxml.h"
+				>
+			</File>
+			<File
 				RelativePath=".\handlers.h"
 				>
 			</File>
@@ -270,6 +302,10 @@
 			</File>
 			<File
 				RelativePath=".\packet.h"
+				>
+			</File>
+			<File
+				RelativePath=".\playlist.h"
 				>
 			</File>
 			<File
