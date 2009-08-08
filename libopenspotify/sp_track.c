@@ -36,6 +36,9 @@ SP_LIBEXPORT(sp_artist *) sp_track_artist(sp_track *track, int index) {
 SP_LIBEXPORT(sp_album *) sp_track_album(sp_track *track) {
 	DSFYDEBUG("Not yet implemented\n");
 
+	/* FIXME: Resolve track->album_id */
+
+	return NULL;
 }
 
 

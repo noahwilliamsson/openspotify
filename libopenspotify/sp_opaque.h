@@ -148,11 +148,12 @@ struct sp_track {
 	char *name;
 
 	int num_artists;
-	sp_artist *artists;
+	sp_artist **artists;
 
 	int index;
 	int disc;
 	int duration;
+	int popularity;
 
 	/* FIXME: Need more members */
 	int is_loaded;
