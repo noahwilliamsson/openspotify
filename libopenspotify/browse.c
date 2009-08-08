@@ -220,12 +220,14 @@ static int browse_parse_compressed_xml(sp_session *session, sp_playlist *playlis
 
 			node = ezxml_get(track_node, "title", -1);
 			if(node)
-				track->title = strdup(node->txt);
+				track->name = strdup(node->txt);
 
 			node = ezxml_get(track_node, "album", -1);
-			if(node)
-				track->album = strdup(node->txt);
-
+			if(node) {
+				track->name = realloc(track->name, strlen(track->name) + 3 + strlen(node->txt) + 1);
+				if(track->name)
+					strcat(track->name, node->txt);
+			}
 
 			node = ezxml_get(track_node, "album-id", -1);
 			if(node)
@@ -245,7 +247,11 @@ static int browse_parse_compressed_xml(sp_session *session, sp_playlist *playlis
 			if(node)
 				track->duration = atoi(node->txt);
 
-			/* FIXME: Handle all the other elements and attribuets */
+			node = ezxml_get(track_node, "disc", -1);
+			if(node)
+				track->disc = atoi(node->txt);
+
+			track->is_loaded = 1;
 		}
 	}
 

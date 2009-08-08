@@ -145,17 +145,21 @@ struct sp_track {
 	unsigned char album_id[16];
 	unsigned char cover_id[20];
 
-	char *title;
-	char *album;
+	char *name;
 
-	int duration;
-	int playable;
+	int num_artists;
+	sp_artist *artists;
 
 	int index;
+	int disc;
+	int duration;
 
 	/* FIXME: Need more members */
-	int loaded;
+	int is_loaded;
+	int playable;
 	sp_error error;
+
+	int ref_count;
 };
 
 

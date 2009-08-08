@@ -129,11 +129,8 @@ void playlist_release(struct playlist_ctx *playlist_ctx) {
 			for(i = 0; i < playlist->num_tracks; i++) {
 				track = playlist->tracks[i];
 
-				if(track->title)
-					free(track->title);
-
-				if(track->album)
-					free(track->album);
+				if(track->name)
+					free(track->name);
 
 				free(playlist->tracks[i]);
 			}
@@ -437,13 +434,24 @@ static int playlist_parse_playlist_xml(sp_playlist *playlist) {
 		playlist->num_tracks++;
 		
 		hex_ascii_to_bytes(id, track->id, sizeof(track->id));
-		track->title = NULL;
-		track->album = NULL;
-		track->playable = 0;
+		memset(track->file_id, 0, sizeof(track->file_id));
+		memset(track->album_id, 0, sizeof(track->album_id));
+		memset(track->cover_id, 0, sizeof(track->cover_id));
+
+		track->name = NULL;
+
+		track->num_artists = 0;
+		track->artists = NULL;
+
+		track->index = 0;
+		track->disc = 0;
 		track->duration = 0;
-		track->index = position;
+
+		track->is_loaded = 0;
+		track->playable = 0;
 		track->error = SP_ERROR_OK;
-		track->loaded = 0;
+
+		track->ref_count = 0;
 
 		playlist->state = PLAYLIST_STATE_LISTED;
 	}
