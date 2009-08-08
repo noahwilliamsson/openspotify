@@ -56,6 +56,22 @@ typedef struct sp_request {
 	struct sp_request *next;
 } sp_request;
 
+
+/* sp_album.c */
+struct sp_album {
+	unsigned char id[16];
+	unsigned char image_id[20];
+
+	char *name;
+	int year;
+
+	sp_artist *artist;
+
+	int is_loaded;
+	int ref_count;
+};
+
+
 /* sp_link.c */
 struct sp_link {
 	sp_linktype type;
