@@ -72,6 +72,17 @@ struct sp_album {
 };
 
 
+/* sp_artist.c */
+struct sp_artist {
+	unsigned char id[16];
+
+	char *name;
+
+	int is_loaded;
+	int ref_count;
+};
+
+
 /* sp_link.c */
 struct sp_link {
 	sp_linktype type;
