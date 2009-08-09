@@ -20,24 +20,19 @@
 
 sp_track *track_add(sp_session *session, unsigned char *id) {
 	sp_track *track;
-	struct hashentry *entry;
 
 	if(session == NULL) {
 		DSFYDEBUG("Called with NULL session, failing\n");
 		return NULL;
 	}
 
-	if((entry = hashtable_find(session->hashtable_tracks, id)) != NULL) {
-		track = entry->value;
-
+	if((track = (sp_track *)hashtable_find(session->hashtable_tracks, id)) != NULL)
 		return track;
-	}
+
 
 	track = (sp_track *)malloc(sizeof(sp_track));
 	if(track == NULL)
 		return NULL;
-
-	DSFYDEBUG("Allocated track at %p\n", track);
 
 	hashtable_insert(session->hashtable_tracks, id, track);
 
