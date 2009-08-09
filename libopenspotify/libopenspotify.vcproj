@@ -163,6 +163,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\cache.c"
+				>
+			</File>
+			<File
 				RelativePath=".\channel.c"
 				>
 			</File>
@@ -180,6 +184,10 @@
 			</File>
 			<File
 				RelativePath=".\handlers.c"
+				>
+			</File>
+			<File
+				RelativePath=".\hashtable.c"
 				>
 			</File>
 			<File
@@ -235,6 +243,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\track.c"
+				>
+			</File>
+			<File
 				RelativePath=".\util.c"
 				>
 			</File>
@@ -254,6 +266,10 @@
 			</File>
 			<File
 				RelativePath=".\buf.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cache.h"
 				>
 			</File>
 			<File
@@ -278,6 +294,10 @@
 			</File>
 			<File
 				RelativePath=".\handlers.h"
+				>
+			</File>
+			<File
+				RelativePath=".\hashtable.h"
 				>
 			</File>
 			<File
@@ -314,6 +334,10 @@
 			</File>
 			<File
 				RelativePath=".\sp_opaque.h"
+				>
+			</File>
+			<File
+				RelativePath=".\track.h"
 				>
 			</File>
 			<File
