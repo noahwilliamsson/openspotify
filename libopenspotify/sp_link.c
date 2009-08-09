@@ -3,6 +3,8 @@
 
 #include <spotify/api.h>
 
+#include "artist.h"
+#include "album.h"
 #include "debug.h"
 #include "link.h"
 #include "util.h"
@@ -56,7 +58,7 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 		id_uri_to_bytes(ptr, id);
 
 		lnk->type       = SP_LINKTYPE_TRACK;
-		lnk->data.track = track_add(session, id);
+		lnk->data.track = osfy_track_add(session, id);
 	}
 	/* Link refers to an album. */
 	else if(strncmp("album:", ptr, 6) == 0){
@@ -65,7 +67,7 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 		id_uri_to_bytes(ptr, id);
 
 		lnk->type       = SP_LINKTYPE_ALBUM;
-		lnk->data.album = NULL; //FIXME: album_add
+		lnk->data.album = sp_album_add(session, id);
 	}
 	/* Link refers to an artist. */
 	else if(strncmp("artist:", ptr, 7) == 0){
@@ -74,7 +76,7 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 		id_uri_to_bytes(ptr, id);
 
 		lnk->type        = SP_LINKTYPE_ARTIST;
-		lnk->data.artist = NULL; //FIXME: artist_add
+		lnk->data.artist = osfy_artist_add(session, id);
 	}
 	/* Link is a search query. */
 	else if(strncmp("search:", ptr, 7) == 0){
@@ -112,7 +114,7 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 			return NULL;
 		}
 	}
-	else{
+	else {
 		sp_link_release(lnk);
 		
 		return NULL;
@@ -137,6 +139,7 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_track (sp_track *track, int offset) 
 	
 	link->type       = SP_LINKTYPE_TRACK;
 	link->data.track = track;
+	sp_track_add_ref(track);
 	link->refs       = 1;
 	
 	return link;
@@ -153,6 +156,7 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_album (sp_album *album) {
 	
 	link->type       = SP_LINKTYPE_ALBUM;
 	link->data.album = album;
+	sp_album_add_ref(album);
 	link->refs       = 1;
 	
 	return link;
@@ -169,6 +173,7 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_artist (sp_artist *artist) {
 	
 	link->type        = SP_LINKTYPE_ARTIST;
 	link->data.artist = artist;
+	sp_artist_add_ref(artist);
 	link->refs        = 1;
 	
 	return link;
@@ -271,8 +276,23 @@ SP_LIBEXPORT(void) sp_link_add_ref (sp_link *link) {
 }
 
 SP_LIBEXPORT(void) sp_link_release (sp_link *link) {
-	if(link != NULL && --(link->refs) <= 0)
+	if(link != NULL && --(link->refs) <= 0) {
+		switch(link->type) {
+		case SP_LINKTYPE_ALBUM:
+			sp_album_release(link->data.album);
+			break;
+		case SP_LINKTYPE_ARTIST:
+			sp_artist_release(link->data.artist);
+			break;
+		case SP_LINKTYPE_TRACK:
+			sp_track_release(link->data.track);
+			break;
+		default:
+			break;
+		}
+
 		free(link);
+	}
 }
 
 static void baseconvert(const char *src, char *dest, int frombase, int tobase, int padlen) {
