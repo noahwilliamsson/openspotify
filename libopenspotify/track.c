@@ -13,6 +13,7 @@
 #include <arpa/inet.h>
 #endif
 
+#include "debug.h"
 #include "hashtable.h"
 #include "sp_opaque.h"
 
@@ -20,6 +21,12 @@
 sp_track *track_add(sp_session *session, unsigned char *id) {
 	sp_track *track;
 	struct hashentry *entry;
+
+	if(session == NULL) {
+		DSFYDEBUG("Called with NULL session, failing\n");
+		return NULL;
+	}
+
 
 	if((entry = hashtable_find(session->hashtable_tracks, id)) != NULL) {
 		track = entry->value;
