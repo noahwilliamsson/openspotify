@@ -35,12 +35,12 @@ void hashtable_insert(struct hashtable *hashtable, void *key, void *value) {
 
 	index = *(unsigned int *)key & (hashtable->size - 1u);
 	if((entry = hashtable->entries[index]) == NULL)
-		entry = hashtable->entries[index] = malloc(sizeof(struct hashentry *));
+		entry = hashtable->entries[index] = malloc(sizeof(struct hashentry));
 	else {
 		while(entry->next)
 			entry = entry->next;
 
-		entry->next = malloc(sizeof(struct hashentry *));
+		entry->next = malloc(sizeof(struct hashentry));
 		entry = entry->next;
 	}
 
@@ -147,4 +147,3 @@ void hashtable_free(struct hashtable *hashtable) {
 
 	free(hashtable);
 }
-
