@@ -15,6 +15,7 @@
 #endif
 
 #include "debug.h"
+#include "request.h"
 #include "util.h"
 
 
@@ -100,7 +101,10 @@ int request_post_result(sp_session *session, request_type type, sp_error error, 
 	req->next = NULL;
 	req->next_timeout = 0;
 
-	DSFYDEBUG("Posted request results with type %d and error %d\n", req->type, error);
+	DSFYDEBUG("Posted results for <type %s, state %s, input %p, timeout %d> with output <error %d, output %p>\n",
+		REQUEST_TYPE_STR(req->type), REQUEST_STATE_STR(req->state), req->input, req->next_timeout,
+		req->error, req->output);
+
 	request_notify_main_thread(session, req);
 
 #ifdef _WIN32
@@ -130,8 +134,9 @@ int request_set_result(sp_session *session, struct request *req, sp_error error,
 	req->output = output;
 	req->state = REQ_STATE_RETURNED;
 	
-	DSFYDEBUG("Setting REQ_STATE_RETURNED with <error %d, output %p> on request <type %d, input %p>\n",
-			error, req->output, req->type, req->input);
+	DSFYDEBUG("Returned results for <type %s, state %s, input %p, timeout %d> with output <error %d, output %p>\n",
+		REQUEST_TYPE_STR(req->type), REQUEST_STATE_STR(req->state), req->input, req->next_timeout,
+		req->error, req->output);
 	request_notify_main_thread(session, req);
 
 #ifdef _WIN32
@@ -224,8 +229,10 @@ void request_mark_processed(sp_session *session, struct request *req) {
 	pthread_mutex_lock(&session->request_mutex);
 #endif
 
-	DSFYDEBUG("Setting REQ_STATE_PROCESSED on request with type %d and error %d\n", req->type, req->error);
 	req->state = REQ_STATE_PROCESSED;
+	DSFYDEBUG("Finished processing for <type %s, state %s, input %p, timeout %d> with output <error %d, output %p>\n",
+		REQUEST_TYPE_STR(req->type), REQUEST_STATE_STR(req->state), req->input, req->next_timeout,
+		req->error, req->output);
 
 #ifdef _WIN32
 	ReleaseMutex(session->request_mutex);

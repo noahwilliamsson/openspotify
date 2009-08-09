@@ -68,8 +68,9 @@ void *network_thread(void *data) {
 			if(req->next_timeout != 0 && req->next_timeout > get_millisecs())
 				continue;
 
-			DSFYDEBUG("Processing request %p <state %d, timeout %d> with <type %d, input %p>\n",
-					req, req->state, req->next_timeout, req->type, req->input);
+			DSFYDEBUG("Processing request <type %s, state %s, input %p, timeout %d>\n",
+					REQUEST_TYPE_STR(req->type), REQUEST_STATE_STR(req->state),
+					req->input, req->next_timeout);
 			ret = process_request(s, req);
 			DSFYDEBUG("Request processing returned %d\n", ret);
 
@@ -140,15 +141,15 @@ static int process_request(sp_session *session, struct request *req) {
 	if(session->connectionstate != SP_CONNECTION_STATE_LOGGED_IN
 		&& (req->type != REQ_TYPE_LOGIN && req->type != REQ_TYPE_LOGOUT)) {
 		if(req->state == REQ_STATE_NEW) {
-			DSFYDEBUG("Postponing request <type %d, input %p, state %d> 10 seconds due to not logged in\n",
-					req->type, req->input, req->state);
+			DSFYDEBUG("Postponing request <type %s, state %s, input %p> 10 seconds due to not logged in\n",
+					REQUEST_TYPE_STR(req->type), REQUEST_STATE_STR(req->state), req->input);
 			req->next_timeout = get_millisecs() + 10*1000;
 
 			return 0;
 		}
 		else if(req->state == REQ_STATE_RUNNING) {
-			DSFYDEBUG("Failing request <type %d, input %p, state %d> due to not logged in\n",
-					req->type, req->input, req->state);
+			DSFYDEBUG("Failing request <type %s, state %s, input %p> due to not logged in\n",
+					REQUEST_TYPE_STR(req->type), REQUEST_STATE_STR(req->state), req->input);
 			return request_set_result(session, req, SP_ERROR_OTHER_TRANSIENT, NULL);
 		}
 	}
