@@ -134,10 +134,6 @@ SP_LIBEXPORT(sp_error) sp_session_logout (sp_session *session) {
 		session->login = NULL;
 	}
 
-	if(session->playlist_ctx) {
-		playlist_release(session->playlist_ctx);
-		session->playlist_ctx = playlist_create();
-	}
 
 	DSFYDEBUG("Posting REQ_TYPE_LOGOUT\n");
 	request_post(session, REQ_TYPE_LOGOUT, NULL);
