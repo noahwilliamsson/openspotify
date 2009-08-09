@@ -17,6 +17,7 @@
 
 #include <spotify/api.h>
 
+#include "channel.h"
 #include "hashtable.h"
 #include "login.h"
 #include "shn.h"
@@ -212,6 +213,9 @@ struct sp_session {
 
 	struct buf *packet;
 
+	/* Channels */
+	CHANNEL *channels;
+	int next_channel_id;
 
 	/* Requests scoreboard */
 	struct request *requests;

@@ -82,7 +82,7 @@ int cmd_requestad (sp_session * session, unsigned char ad_type)
         struct buf* b = buf_new();
 
 	snprintf (buf, sizeof (buf), "RequestAd-with-type-%d", ad_type);
-	ch = channel_register (buf, dump_generic, NULL);
+	ch = channel_register (session, buf, dump_generic, NULL);
 
 	DSFYDEBUG
 		("allocated channel %d, retrieving ads with type id %d\n",
@@ -115,7 +115,7 @@ int cmd_request_image (sp_session * session, unsigned char *hash,
 	strcpy (buf, "image-");
 	hex_bytes_to_ascii (hash, buf + 6, 20);
 
-	ch = channel_register (buf, callback, private);
+	ch = channel_register (session, buf, callback, private);
 	DSFYDEBUG
 		("allocated channel %d, retrieving img with UUID %s\n",
 		 ch->channel_id, buf + 6);
@@ -150,7 +150,7 @@ int cmd_search (sp_session * session, char *searchtext, unsigned int offset,
 	b = buf_new();
 
 	snprintf (buf, sizeof (buf), "Search-%s", searchtext);
-	ch = channel_register (buf, callback, private);
+	ch = channel_register (session, buf, callback, private);
 
 	DSFYDEBUG ("allocated channel %d, searching for '%s'\n",
 		   ch->channel_id, searchtext);
@@ -206,7 +206,7 @@ int cmd_aeskey (sp_session * session, unsigned char *file_id,
 	/* Allocate a channel and set its name to key-<file id> */
 	strcpy (buf, "key-");
 	hex_bytes_to_ascii (file_id, buf + 4, 20);
-	ch = channel_register (buf, callback, private);
+	ch = channel_register (session, buf, callback, private);
 	DSFYDEBUG
 		("allocated channel %d, retrieving AES key for file '%.40s'\n",
 		 ch->channel_id, buf);
@@ -287,7 +287,7 @@ int cmd_getsubstreams (sp_session * session, unsigned char *file_id,
 	struct buf *b;
 
 	hex_bytes_to_ascii (file_id, buf, 20);
-	ch = channel_register (buf, callback, private);
+	ch = channel_register (session, buf, callback, private);
 	DSFYDEBUG
 		("cmd_getsubstreams: allocated channel %d, retrieving song '%s'\n",
 		 ch->channel_id, ch->name);
@@ -320,7 +320,7 @@ int cmd_getsubstreams (sp_session * session, unsigned char *file_id,
 	buf_free(b);
 
 	if (ret != 0) {
-		channel_unregister (ch);
+		channel_unregister (session, ch);
 		DSFYDEBUG
 			("packet_write(cmd=0x08) returned %d, aborting!\n",
 			 ret);
@@ -348,7 +348,7 @@ int cmd_browse (sp_session * session, unsigned char kind, unsigned char *idlist,
 
 	strcpy (buf, "browse-");
 	hex_bytes_to_ascii(idlist, buf + 7, 16);
-	ch = channel_register (buf, callback, private);
+	ch = channel_register (session, buf, callback, private);
 
 	b = buf_new();
 	buf_append_u16(b, ch->channel_id);
@@ -390,7 +390,7 @@ int cmd_getplaylist (sp_session * session, unsigned char *playlist_id,
 	strcpy (buf, "playlist-");
 	hex_bytes_to_ascii (playlist_id, buf + 9, 17);
 	buf[9 + 2 * 17] = 0;
-	ch = channel_register (buf, callback, private);
+	ch = channel_register (session, buf, callback, private);
 
 	b = buf_new();
 	buf_append_u16(b, ch->channel_id);
@@ -429,7 +429,7 @@ int cmd_changeplaylist (sp_session * session, unsigned char *playlist_id,
 	strcpy (buf, "chplaylist-");
 	hex_bytes_to_ascii (playlist_id, buf + 11, 17);
 	buf[11 + 2 * 17] = 0;
-	ch = channel_register (buf, callback, private);
+	ch = channel_register (session, buf, callback, private);
 
 	b = buf_new();
 	buf_append_u16(b, ch->channel_id);

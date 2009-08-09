@@ -72,7 +72,7 @@ int handle_ping (sp_session * session, unsigned char *payload, int len)
 	return cmd_ping_reply (session);
 }
 
-int handle_channel (int cmd, unsigned char *payload, int len)
+int handle_channel (sp_session *session, int cmd, unsigned char *payload, int len)
 {
 	if (cmd == CMD_CHANNELERR) {
 		DSFYDEBUG ("Channel %d got error %d (0x%02x)\n",
@@ -81,21 +81,21 @@ int handle_channel (int cmd, unsigned char *payload, int len)
 			 ntohs (*(unsigned short *) (payload + 2)))
 	}
 	
-	return channel_process (payload, len, cmd == CMD_CHANNELERR);
+	return channel_process (session, payload, len, cmd == CMD_CHANNELERR);
 }
 
-int handle_aeskey (unsigned char *payload, int len)
+int handle_aeskey (sp_session *session, unsigned char *payload, int len)
 {
 	CHANNEL *ch;
 	int ret;
 
 	DSFYDEBUG ("Server said 0x0d (AES key) for channel %d\n",
 		   ntohs (*(unsigned short *) (payload + 2)))
-	if ((ch = channel_by_id (ntohs
+	if ((ch = channel_by_id (session, ntohs
 				    (*(unsigned short *) (payload + 2)))) !=
 			   NULL) {
 		ret = ch->callback (ch, payload + 4, len - 4);
-		channel_unregister (ch);
+		channel_unregister (session, ch);
 	}
 	else {
 		DSFYDEBUG
@@ -174,15 +174,12 @@ int handle_packet (sp_session * session,
 		break;
 
 	case CMD_CHANNELDATA:
-		error = handle_channel (cmd, payload, len);
-		break;
-
 	case CMD_CHANNELERR:
-		error = handle_channel (cmd, payload, len);
+		error = handle_channel (session, cmd, payload, len);
 		break;
 
 	case CMD_AESKEY:
-		error = handle_aeskey (payload, len);
+		error = handle_aeskey (session, payload, len);
 		break;
 
 	case CMD_SHAHASH:

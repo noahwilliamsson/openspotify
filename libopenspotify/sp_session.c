@@ -243,6 +243,10 @@ SP_LIBEXPORT(sp_playlistcontainer *) sp_session_playlistcontainer(sp_session *se
  */
 SP_LIBEXPORT(sp_error) sp_session_release (sp_session *session) {
 
+	/* Unregister channels */
+	DSFYDEBUG("Unregistering any active channels\n");
+	channel_fail_and_unregister_all(session);
+
 	/* Kill networking thread */
 	DSFYDEBUG("Terminating network thread\n");
 #ifdef _WIN32

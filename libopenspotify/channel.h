@@ -6,6 +6,8 @@
 #ifndef DESPOTIFY_CHANNEL_H
 #define DESPOTIFY_CHANNEL_H
 
+#include <spotify/api.h>
+
 enum channel_state
 {
 	/* Channel headers */
@@ -47,9 +49,9 @@ struct _channel
 	struct _channel *next;
 };
 
-CHANNEL *channel_register (char *, channel_callback, void *);
-void channel_unregister (CHANNEL *);
-CHANNEL *channel_by_id (unsigned short);
-int channel_process (unsigned char *, unsigned short, int);
-void channel_fail_and_unregister_all(void);
+CHANNEL *channel_register (sp_session *session, char *, channel_callback, void *);
+void channel_unregister (sp_session *session, CHANNEL *);
+CHANNEL *channel_by_id (sp_session *session, unsigned short);
+int channel_process (sp_session *session, unsigned char *, unsigned short, int);
+void channel_fail_and_unregister_all(sp_session *session);
 #endif

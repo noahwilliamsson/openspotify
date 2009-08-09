@@ -16,10 +16,7 @@
 #include "sp_opaque.h"
 #include "util.h"
 
-static CHANNEL *head;
-static int next_channel_id;
-
-CHANNEL *channel_register (char *name, channel_callback callback,
+CHANNEL *channel_register (sp_session *session, char *name, channel_callback callback,
 			   void *private)
 {
 	CHANNEL *ch;
@@ -28,11 +25,11 @@ CHANNEL *channel_register (char *name, channel_callback callback,
 	/*
 	 * Pick a channel id and lazily set next to last available + 1
 	 */
-	id = next_channel_id++;
-	if ((ch = head) != NULL) {
+	id = session->next_channel_id++;
+	if ((ch = session->channels) != NULL) {
 		for (; ch; ch = ch->next) {
-			if (ch->channel_id >= next_channel_id)
-				next_channel_id = ch->channel_id + 1;
+			if (ch->channel_id >= session->next_channel_id)
+				session->next_channel_id = ch->channel_id + 1;
 		}
 	}
 
@@ -56,13 +53,13 @@ CHANNEL *channel_register (char *name, channel_callback callback,
 	ch->callback = callback;
 	ch->private = private;
 
-	ch->next = head;
-	head = ch;
+	ch->next = session->channels;
+	session->channels = ch;
 
 	return ch;
 }
 
-void channel_unregister (CHANNEL * ch)
+void channel_unregister (sp_session *session, CHANNEL * ch)
 {
 	CHANNEL *tmp;
 
@@ -71,10 +68,10 @@ void channel_unregister (CHANNEL * ch)
 		 ch->channel_id, ch->header_id, ch->total_header_len,
 		 ch->total_data_len);
 
-	if (ch == head)
-		head = ch->next;
+	if (ch == session->channels)
+		session->channels = ch->next;
 	else {
-		for (tmp = head; tmp; tmp = tmp->next)
+		for (tmp = session->channels; tmp; tmp = tmp->next)
 			if (tmp->next == ch)
 				break;
 
@@ -83,24 +80,24 @@ void channel_unregister (CHANNEL * ch)
 		tmp->next = ch->next;
 	}
 
-	if (ch->channel_id < next_channel_id)
-		next_channel_id = ch->channel_id;
+	if (ch->channel_id < session->next_channel_id)
+		session->next_channel_id = ch->channel_id;
 
 	free (ch);
 }
 
-CHANNEL *channel_by_id (unsigned short channel_id)
+CHANNEL *channel_by_id (sp_session *session, unsigned short channel_id)
 {
 	CHANNEL *ch;
 
-	for (ch = head; ch; ch = ch->next)
+	for (ch = session->channels; ch; ch = ch->next)
 		if (ch->channel_id == channel_id)
 			break;
 
 	return ch;
 }
 
-int channel_process (unsigned char *buf, unsigned short len, int error)
+int channel_process (sp_session *session, unsigned char *buf, unsigned short len, int error)
 {
 	CHANNEL *ch;
 	unsigned short channel_id;
@@ -115,7 +112,7 @@ int channel_process (unsigned char *buf, unsigned short len, int error)
 	len -= 2;
 
 	/* Find a matching channel */
-	for (ch = head; ch; ch = ch->next) {
+	for (ch = session->channels; ch; ch = ch->next) {
 		if (ch->channel_id == channel_id)
 			break;
 	}
@@ -203,26 +200,26 @@ int channel_process (unsigned char *buf, unsigned short len, int error)
 
 	/* Deallocate channel if in END or ERROR state */
 	if (ch->state & (CHANNEL_END | CHANNEL_ERROR))
-		channel_unregister (ch);
+		channel_unregister (session, ch);
 
 	return ret;
 }
 
 
-void channel_fail_and_unregister_all(void) {
+void channel_fail_and_unregister_all(sp_session *session) {
 	CHANNEL *ch;
 
-	while(head) {
+	while((ch = session->channels) != NULL) {
 		DSFYDEBUG
 			("channel %d: Forcing failure via callback (current state: %s) for channel '%s'\n",
 			 ch->channel_id,
 			 ch->state == CHANNEL_HEADER ? "header":
 			 ch->state == CHANNEL_DATA ? "data":
 			 ch->state == CHANNEL_ERROR ? "error": "end", ch->name);
-		head->state = CHANNEL_ERROR;
 
-		head->callback(head, NULL, 0);
+		ch->state = CHANNEL_ERROR;
+		ch->callback(ch, NULL, 0);
 
-		channel_unregister(head);
+		channel_unregister(session, ch);
 	}
 }

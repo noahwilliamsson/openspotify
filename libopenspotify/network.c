@@ -19,6 +19,7 @@
 
 #include "browse.h"
 #include "cache.h"
+#include "channel.h"
 #include "debug.h"
 #include "login.h"
 #include "network.h"
@@ -134,27 +135,44 @@ void *network_thread(void *data) {
  * Route request handling to the appropriate handlers
  *
  */
-static int process_request(sp_session *s, struct request *req) {
+static int process_request(sp_session *session, struct request *req) {
+
+	if(session->connectionstate != SP_CONNECTION_STATE_LOGGED_IN
+		&& (req->type != REQ_TYPE_LOGIN && req->type != REQ_TYPE_LOGOUT)) {
+		if(req->state == REQ_STATE_NEW) {
+			DSFYDEBUG("Postponing request <type %d, input %p, state %d> 10 seconds due to not logged in\n",
+					req->type, req->input, req->state);
+			req->next_timeout = get_millisecs() + 10*1000;
+
+			return 0;
+		}
+		else if(req->state == REQ_STATE_RUNNING) {
+			DSFYDEBUG("Failing request <type %d, input %p, state %d> due to not logged in\n",
+					req->type, req->input, req->state);
+			return request_set_result(session, req, SP_ERROR_OTHER_TRANSIENT, NULL);
+		}
+	}
+
 	switch(req->type) {
 	case REQ_TYPE_LOGIN:
-		return process_login_request(s, req);
+		return process_login_request(session, req);
 		break;
 
 	case REQ_TYPE_LOGOUT:
-		return process_logout_request(s, req);
+		return process_logout_request(session, req);
 		break;
 	
 	case REQ_TYPE_PLAYLIST_LOAD_CONTAINER:
 	case REQ_TYPE_PLAYLIST_LOAD_PLAYLIST:
-		return playlist_process(s, req);
+		return playlist_process(session, req);
 		break;
 
 	case REQ_TYPE_BROWSE_TRACK:
-		return browse_process(s, req);
+		return browse_process(session, req);
 		break;
 
 	case REQ_TYPE_CACHE_PERIODIC:
-		return cache_process(s, req);
+		return cache_process(session, req);
 		break;
 
 	default:
@@ -177,6 +195,7 @@ static int process_login_request(sp_session *s, struct request *req) {
 
 	if(req->state == REQ_STATE_NEW) {
 		req->state = REQ_STATE_RUNNING;
+
 		s->login = login_create(s->username, s->password);
 		if(s->login == NULL)
 			return request_set_result(s, req, SP_ERROR_OTHER_TRANSIENT, NULL);
@@ -256,6 +275,9 @@ static int process_logout_request(sp_session *session, struct request *req) {
 	}
 
 	session->connectionstate = SP_CONNECTION_STATE_LOGGED_OUT;
+
+	/* Unregister all channels */
+	channel_fail_and_unregister_all(session);
 
 	return request_set_result(session, req, SP_ERROR_OK, NULL);
 }
