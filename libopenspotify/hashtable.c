@@ -84,7 +84,7 @@ void hashtable_remove(struct hashtable *hashtable, void *key) {
 }
 
 
-void *hashtable_find(struct hashtable *hashtable, void *key) {
+void *hashtable_find(struct hashtable *hashtable, const void *key) {
 	struct hashentry *entry;
 	int index;
 

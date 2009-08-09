@@ -23,7 +23,7 @@ struct hashiterator {
 
 struct hashtable *hashtable_create(int keysize);
 void hashtable_insert(struct hashtable *hashtable, void *key, void *value);
-void *hashtable_find(struct hashtable *hashtable, void *key);
+void *hashtable_find(struct hashtable *hashtable, const void *key);
 void hashtable_insert(struct hashtable *hashtable, void *key, void *value);
 void hashtable_remove(struct hashtable *hashtable, void *key);
 struct hashiterator *hashtable_iterator_init(struct hashtable *hashtable);
