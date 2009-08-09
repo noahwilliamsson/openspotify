@@ -6,6 +6,7 @@
 #ifndef DESPOTIFY_UTIL_H
 #define DESPOTIFY_UTIL_H
 
+#include <stdio.h>
 #ifdef _WIN32
 #include <basetsd.h>
 #define ssize_t SSIZE_T
