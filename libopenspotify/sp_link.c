@@ -5,6 +5,7 @@
 
 #include "debug.h"
 #include "link.h"
+#include "util.h"
 #include "sp_opaque.h"
 #include "track.h"
 
@@ -13,19 +14,16 @@
 #define snprintf _snprintf
 #endif
 
-
 static void baseconvert(const char *src, char *dest, int frombase, int tobase, int padlen);
-static void despotify_id2uri(const char *id, char *uri);
-static void despotify_uri2id(const char *uri, char *id);
-
+static void id_bytes_to_uri(const unsigned char* id, char* uri);
+static void id_uri_to_bytes(const char* uri, unsigned char* id);
 
 SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 	const char *ptr;
 	sp_link *lnk;
-	unsigned char track_id[16];
+	unsigned char id[16];
 	sp_session *session;
 	
-
 	if(link == NULL)
 		return NULL;
 	
@@ -37,12 +35,12 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 
 	ptr += 8;
 	
-
+	/* Get session. */
 	session = libopenspotify_link_get_session();
+	
 	if(session == NULL)
 		return NULL;
-
-
+	
 	/* Allocate memory for link. */
 	if((lnk = (sp_link *)malloc(sizeof(sp_link))) == NULL)
 		return NULL;
@@ -55,31 +53,35 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 	if(strncmp("track:", ptr, 6) == 0){
 		ptr += 6;
 
-		lnk->type       = SP_LINKTYPE_TRACK;
-		despotify_uri2id(ptr + 6, (char *)track_id);
+		id_uri_to_bytes(ptr, id);
 
-		lnk->data.track = track_add(session, track_id);
+		lnk->type       = SP_LINKTYPE_TRACK;
+		lnk->data.track = track_add(session, id);
 	}
 	/* Link refers to an album. */
 	else if(strncmp("album:", ptr, 6) == 0){
 		ptr += 6;
 
+		id_uri_to_bytes(ptr, id);
+
 		lnk->type       = SP_LINKTYPE_ALBUM;
-		lnk->data.album = NULL; //FIXME: create album / base 64 encoded id is @ ptr
+		lnk->data.album = NULL; //FIXME: album_add
 	}
 	/* Link refers to an artist. */
 	else if(strncmp("artist:", ptr, 7) == 0){
 		ptr += 7;
-		
+
+		id_uri_to_bytes(ptr, id);
+
 		lnk->type        = SP_LINKTYPE_ARTIST;
-		lnk->data.artist = NULL; //FIXME: create artist / base 64 encoded id is @ ptr
+		lnk->data.artist = NULL; //FIXME: artist_add
 	}
 	/* Link is a search query. */
 	else if(strncmp("search:", ptr, 7) == 0){
 		ptr += 7;
 
 		lnk->type        = SP_LINKTYPE_SEARCH;
-		lnk->data.search = NULL; //FIXME: create search / query is @ ptr
+		lnk->data.search = NULL; //FIXME: search_add / query is @ ptr
 	}
 	/* Link probably refers to a playlist. */
 	else if(strncmp("user:", ptr, 5) == 0){
@@ -98,9 +100,11 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 		/* Link actually refers to a playlist. */
 		if(strncmp("playlist:", ptr, 9) == 0){
 			ptr += 9;
-			
+
+			id_uri_to_bytes(ptr, id);
+
 			lnk->type          = SP_LINKTYPE_PLAYLIST;
-			lnk->data.playlist = NULL; //FIXME: create playlist / base 64 encoded id is @ ptr
+			lnk->data.playlist = NULL; //FIXME: playlist_add
 		}
 		else{
 			sp_link_release(lnk);
@@ -203,25 +207,31 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_playlist (sp_playlist *playlist) {
 }
 
 SP_LIBEXPORT(int) sp_link_as_string (sp_link *link, char *buffer, int buffer_size) {
+	unsigned char uri[23];
+
 	if(link == NULL || buffer == NULL || buffer_size < 0)
 		return -1;
-	
+
 	switch(link->type){
 		case SP_LINKTYPE_TRACK:
-			//return snprintf(buffer, buffer_size, "spotify:track:%s", link->data.track->id);
-			return snprintf(buffer, buffer_size, "spotify:track:TODO");
+			id_bytes_to_uri(link->data.track->id, uri);
+
+			return snprintf(buffer, buffer_size, "spotify:track:%s", uri);
 		case SP_LINKTYPE_ALBUM:
-			//return snprintf(buffer, buffer_size, "spotify:album:%s", link->data.album->id);
-			return snprintf(buffer, buffer_size, "spotify:album:TODO");
+			id_bytes_to_uri(link->data.album->id, uri);
+
+			return snprintf(buffer, buffer_size, "spotify:album:%s", uri);
 		case SP_LINKTYPE_ARTIST:
-			//return snprintf(buffer, buffer_size, "spotify:artist:%s", link->data.artist->id);
-			return snprintf(buffer, buffer_size, "spotify:artist:TODO");
+			id_bytes_to_uri(link->data.artist->id, uri);
+
+			return snprintf(buffer, buffer_size, "spotify:artist:%s", uri);
 		case SP_LINKTYPE_SEARCH:
 			//return snprintf(buffer, buffer_size, "spotify:search:%s", link->data.search->query);
-			return snprintf(buffer, buffer_size, "spotify:search:TODO");
+			return snprintf(buffer, buffer_size, "spotify:search:TODO"); // struct sp_search not defined yet.
 		case SP_LINKTYPE_PLAYLIST:
-			//return snprintf(buffer, buffer_size, "spotify:playlist:%s", link->data.playlist->id);
-			return snprintf(buffer, buffer_size, "spotify:playlist:TODO");
+			id_bytes_to_uri(link->data.playlist->id, uri);
+
+			return snprintf(buffer, buffer_size, "spotify:playlist:%s", uri);
 		case SP_LINKTYPE_INVALID:
 		default:
 			return -1;
@@ -265,8 +275,6 @@ SP_LIBEXPORT(void) sp_link_release (sp_link *link) {
 		free(link);
 }
 
-
-
 static void baseconvert(const char *src, char *dest, int frombase, int tobase, int padlen) {
     static const char alphabet[] =
         "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/";
@@ -302,12 +310,39 @@ static void baseconvert(const char *src, char *dest, int frombase, int tobase, i
     } while (newlen != 0);
 }
 
+/* 
+ * Convert an id (16 bytes) to a base62 encoded string.
+ * URI buffer needs to have at least 23 bytes and is
+ * automatically null-terminated by this function.
+ */
+static void id_bytes_to_uri(const unsigned char* id, char* uri){
+	char hex[33];
 
-static void despotify_id2uri(const char *id, char *uri) {
-	baseconvert(id, uri, 16, 62, 22);
+	if(id == NULL || uri == NULL)
+		return;
+
+	hex_bytes_to_ascii(id, hex, 16);
+
+	hex[32] = 0;
+
+    baseconvert(hex, uri, 16, 62, 22);
+
+	uri[22] = 0;
 }
 
-static void despotify_uri2id(const char *uri, char *id) {
-	baseconvert(uri, id, 62, 16, 32);
-}
+/* 
+ * Convert a URI (22 character string, null-terminated) to an id.
+ * id buffer needs to have at least 16 bytes.
+ */
+static void id_uri_to_bytes(const char* uri, unsigned char* id){
+	char hex[33];
 
+	if(uri == NULL || id == NULL)
+		return;
+
+    baseconvert(uri, hex, 62, 16, 32);
+
+	hex[32] = 0;
+
+	hex_ascii_to_bytes(hex, id, 16);
+}
