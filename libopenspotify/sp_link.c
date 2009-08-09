@@ -5,15 +5,23 @@
 
 #include "debug.h"
 #include "sp_opaque.h"
+#include "track.h"
 
 /* The Visual C++ compiler doesn't know 'snprintf'... */
 #ifdef _MSC_VER
 #define snprintf _snprintf
 #endif
 
+
+static void baseconvert(const char *src, char *dest, int frombase, int tobase, int padlen);
+static void despotify_id2uri(const char *id, char *uri);
+static void despotify_uri2id(const char *uri, char *id);
+
+
 SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 	const char *ptr;
 	sp_link *lnk;
+	unsigned char track_id[16];
 	
 	if(link == NULL)
 		return NULL;
@@ -39,7 +47,9 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 		ptr += 6;
 
 		lnk->type       = SP_LINKTYPE_TRACK;
-		lnk->data.track = NULL; //FIXME: create track / base 64 encoded id is @ ptr
+		despotify_uri2id(ptr + 6, (char *)track_id);
+
+		lnk->data.track = track_add(NULL, track_id);
 	}
 	/* Link refers to an album. */
 	else if(strncmp("album:", ptr, 6) == 0){
@@ -245,3 +255,50 @@ SP_LIBEXPORT(void) sp_link_release (sp_link *link) {
 	if(link != NULL && --(link->refs) <= 0)
 		free(link);
 }
+
+
+
+static void baseconvert(const char *src, char *dest, int frombase, int tobase, int padlen) {
+    static const char alphabet[] =
+        "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/";
+    int number[128];
+    int i, len, newlen, divide;
+
+    len = strlen(src);
+
+    for (i = 0; i < len; i++)
+        number[i] = strchr(alphabet, src[i]) - alphabet;
+
+    memset(dest, '0', padlen);
+    dest[padlen] = 0;
+
+    padlen--;
+
+    do {
+        divide = 0;
+        newlen = 0;
+
+        for (i = 0; i < len; i++) {
+            divide = divide * frombase + number[i];
+            if (divide >= tobase) {
+                number[newlen++] = divide / tobase;
+                divide = divide % tobase;
+            } else if (newlen > 0) {
+                number[newlen++] = 0;
+            }
+        }
+        len = newlen;
+
+        dest[padlen--] = alphabet[divide];
+    } while (newlen != 0);
+}
+
+
+static void despotify_id2uri(const char *id, char *uri) {
+	baseconvert(id, uri, 16, 62, 22);
+}
+
+static void despotify_uri2id(const char *uri, char *id) {
+	baseconvert(uri, id, 62, 16, 32);
+}
+
