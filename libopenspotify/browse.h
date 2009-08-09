@@ -6,6 +6,6 @@
 
 #define BROWSE_RETRY_TIMEOUT	30
 
-int browse_process(sp_session *session, sp_request *req);
+int browse_process(sp_session *session, struct request *req);
 
 #endif

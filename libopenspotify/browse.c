@@ -43,7 +43,7 @@
 
 
 
-static int browse_send_browsetrack_request(sp_session *session, sp_request *req, int offset);
+static int browse_send_browsetrack_request(sp_session *session, struct request *req, int offset);
 static int browse_callback(CHANNEL *ch, unsigned char *payload, unsigned short len);
 static int browse_parse_compressed_xml(sp_session *session, sp_playlist *playlist);
 
@@ -52,14 +52,14 @@ static int browse_parse_compressed_xml(sp_session *session, sp_playlist *playlis
 #define MAX_TRACKS_PER_REQUEST 244
 struct callback_ctx {
 	sp_session *session;
-	sp_request *req;
+	struct request *req;
 	sp_playlist *playlist;
 	int browse_kind;
 	int next_offset;
 };
 
 
-int browse_process(sp_session *session, sp_request *req) {
+int browse_process(sp_session *session, struct request *req) {
 	int ret;
 
 	if(req->type == REQ_TYPE_BROWSE_TRACK) {
@@ -75,7 +75,7 @@ int browse_process(sp_session *session, sp_request *req) {
 
 
 /* Send BrowseTrack request to get information about track as compressed XML */
-static int browse_send_browsetrack_request(sp_session *session, sp_request *req, int offset) {
+static int browse_send_browsetrack_request(sp_session *session, struct request *req, int offset) {
 	sp_playlist *playlist = *(sp_playlist **)req->input;
 	struct callback_ctx *callback_ctx;
 	int i, count, ret;

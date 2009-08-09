@@ -63,12 +63,12 @@
 
 #include <zlib.h>
 
-static int playlist_send_playlist_container_request(sp_session *session, sp_request *req);
+static int playlist_send_playlist_container_request(sp_session *session, struct request *req);
 static int playlist_container_callback(CHANNEL *ch, unsigned char *payload, unsigned short len);
 static int playlist_parse_container_xml(sp_session *session);
 
 static void playlist_post_playlist_requests(sp_session *session);
-static int playlist_send_playlist_request(sp_session *session, sp_request *req);
+static int playlist_send_playlist_request(sp_session *session, struct request *req);
 static int playlist_callback(CHANNEL *ch, unsigned char *payload, unsigned short len);
 static int playlist_parse_playlist_xml(sp_session *session, sp_playlist *playlist);
 
@@ -81,7 +81,7 @@ unsigned long playlistcontainer_checksum(sp_playlistcontainer *container);
 /* For giving the channel handler access to both the session and the request */
 struct callback_ctx {
 	sp_session *session;
-	sp_request *req;
+	struct request *req;
 };
 
 
@@ -151,7 +151,7 @@ void playlist_release(struct playlist_ctx *playlist_ctx) {
 
 
 /* Playlist FSM */
-int playlist_process(sp_session *session, sp_request *req) {
+int playlist_process(sp_session *session, struct request *req) {
 	int ret;
 
 	if(req->type == REQ_TYPE_PLAYLIST_LOAD_CONTAINER) {
@@ -172,7 +172,7 @@ int playlist_process(sp_session *session, sp_request *req) {
 
 
 /* Request playlist container */
-static int playlist_send_playlist_container_request(sp_session *session, sp_request *req) {
+static int playlist_send_playlist_container_request(sp_session *session, struct request *req) {
 	unsigned char container_id[17];
 	static const char* decl_and_root =
 		"<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n<playlist>\n";
@@ -325,7 +325,7 @@ static void playlist_post_playlist_requests(sp_session *session) {
 
 
 /* Request a playlist from Spotify */
-static int playlist_send_playlist_request(sp_session *session, sp_request *req) {
+static int playlist_send_playlist_request(sp_session *session, struct request *req) {
 	int ret;
 	char idstr[35];
 	struct callback_ctx *callback_ctx;

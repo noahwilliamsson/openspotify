@@ -30,9 +30,9 @@
 #include "shn.h"
 
 
-static int process_request(sp_session *s, sp_request *req);
-static int process_login_request(sp_session *s, sp_request *req);
-static int process_logout_request(sp_session *s, sp_request *req);
+static int process_request(sp_session *s, struct request *req);
+static int process_login_request(sp_session *s, struct request *req);
+static int process_logout_request(sp_session *s, struct request *req);
 
 
 /*
@@ -47,7 +47,7 @@ DWORD WINAPI network_thread(LPVOID data) {
 void *network_thread(void *data) {
 #endif
 	sp_session *s = (sp_session *)data;
-	sp_request *req;
+	struct request *req;
 	int ret;
 
 #ifdef _WIN32
@@ -134,7 +134,7 @@ void *network_thread(void *data) {
  * Route request handling to the appropriate handlers
  *
  */
-static int process_request(sp_session *s, sp_request *req) {
+static int process_request(sp_session *s, struct request *req) {
 	switch(req->type) {
 	case REQ_TYPE_LOGIN:
 		return process_login_request(s, req);
@@ -170,7 +170,7 @@ static int process_request(sp_session *s, sp_request *req) {
  * Uses login specific routines from login.c
  *
  */
-static int process_login_request(sp_session *s, sp_request *req) {
+static int process_login_request(sp_session *s, struct request *req) {
 	int ret;
 	sp_error error;
 	unsigned char key_recv[32], key_send[32];
@@ -244,7 +244,7 @@ static int process_login_request(sp_session *s, sp_request *req) {
  * FIXME: Do we need to send some kind of "goodbye" packet first?
  *
  */
-static int process_logout_request(sp_session *session, sp_request *req) {
+static int process_logout_request(sp_session *session, struct request *req) {
 
 	if(session->sock != -1) {
 #ifdef _WIN32

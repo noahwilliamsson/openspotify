@@ -18,7 +18,7 @@
 #include "util.h"
 
 
-static void request_notify_main_thread(sp_session *session, sp_request *request);
+static void request_notify_main_thread(sp_session *session, struct request *request);
 
 
 /*
@@ -26,8 +26,8 @@ static void request_notify_main_thread(sp_session *session, sp_request *request)
  * If input is non-NULL, it will be free'd at the end of the request
  *
  */
-int request_post(sp_session *session, sp_request_type type, void *input) {
-	sp_request *req;
+int request_post(sp_session *session, request_type type, void *input) {
+	struct request *req;
 
 #ifdef _WIN32
 	/* Wake up the network thread if it's sleeping */
@@ -38,11 +38,11 @@ int request_post(sp_session *session, sp_request_type type, void *input) {
 #endif
 
 	if(session->requests == NULL) {
-		req = session->requests = malloc(sizeof(sp_request));
+		req = session->requests = malloc(sizeof(struct request));
 	}
 	else {
 		for(req = session->requests; req->next; req = req->next);
-		req->next = malloc(sizeof(sp_request));
+		req->next = malloc(sizeof(struct request));
 		req = req->next;
 	}
 
@@ -74,8 +74,8 @@ int request_post(sp_session *session, sp_request_type type, void *input) {
  * i.e, sp_session_process_events() or one of the callbacks
  *
  */
-int request_post_result(sp_session *session, sp_request_type type, sp_error error, void *output) {
-	sp_request *req;
+int request_post_result(sp_session *session, request_type type, sp_error error, void *output) {
+	struct request *req;
 
 #ifdef _WIN32
 	WaitForSingleObject(session->request_mutex, INFINITE);
@@ -84,11 +84,11 @@ int request_post_result(sp_session *session, sp_request_type type, sp_error erro
 #endif
 
 	if(session->requests == NULL) {
-		req = session->requests = malloc(sizeof(sp_request));
+		req = session->requests = malloc(sizeof(struct request));
 	}
 	else {
 		for(req = session->requests; req->next; req = req->next);
-		req->next = malloc(sizeof(sp_request));
+		req->next = malloc(sizeof(struct request));
 		req = req->next;
 	}
 
@@ -119,7 +119,7 @@ int request_post_result(sp_session *session, sp_request_type type, sp_error erro
  * i.e. sp_session_process_events() or the callback
  *
  */
-int request_set_result(sp_session *session, sp_request *req, sp_error error, void *output) {
+int request_set_result(sp_session *session, struct request *req, sp_error error, void *output) {
 #ifdef _WIN32
 	WaitForSingleObject(session->request_mutex, INFINITE);
 #else
@@ -145,7 +145,7 @@ int request_set_result(sp_session *session, sp_request *req, sp_error error, voi
 
 
 /* For selecting which requests we should notify the main thread about */
-static void request_notify_main_thread(sp_session *session, sp_request *request) {
+static void request_notify_main_thread(sp_session *session, struct request *request) {
 	switch(request->type) {
 	case REQ_TYPE_LOGIN:
 	case REQ_TYPE_LOGOUT:
@@ -170,8 +170,8 @@ static void request_notify_main_thread(sp_session *session, sp_request *request)
 
 
 /* For the main thread: Fetch next entry with state REQ_STATE_RETURNED */
-sp_request *request_fetch_next_result(sp_session *session, int *next_timeout) {
-	struct sp_request *walker, *request;
+struct request *request_fetch_next_result(sp_session *session, int *next_timeout) {
+	struct request *walker, *request;
 	int timeout;
 
 #ifdef _WIN32
@@ -213,11 +213,11 @@ sp_request *request_fetch_next_result(sp_session *session, int *next_timeout) {
 
 
 /*
- * Mark an request as processed by sp_request_process_requests()
+ * Mark an request as processed by request_process_requests()
  * Data will be free'd by request_cleanup()
  *
  */
-void request_mark_processed(sp_session *session, sp_request *req) {
+void request_mark_processed(sp_session *session, struct request *req) {
 #ifdef _WIN32
 	WaitForSingleObject(session->request_mutex, INFINITE);
 #else
@@ -240,7 +240,7 @@ void request_mark_processed(sp_session *session, sp_request *req) {
  *
  */
 void request_cleanup(sp_session *session) {
-	sp_request *prev, *walker;
+	struct request *prev, *walker;
 #ifdef _WIN32
 	WaitForSingleObject(session->request_mutex, INFINITE);
 #else

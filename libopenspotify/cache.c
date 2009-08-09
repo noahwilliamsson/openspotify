@@ -10,7 +10,7 @@ void cache_init(sp_session *session) {
 }
 
 
-int cache_process(sp_session *session, sp_request *req) {
+int cache_process(sp_session *session, struct request *req) {
 	/* Do some garbage collection */
 	track_garbage_collect(session);
 

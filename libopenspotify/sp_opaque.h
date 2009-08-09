@@ -29,7 +29,7 @@ typedef enum {
 	REQ_STATE_RUNNING,
 	REQ_STATE_RETURNED,
 	REQ_STATE_PROCESSED
-} sp_request_state;
+} request_state;
 
 /*
  * When adding new types, have a look at request.c:request_notify_main_thread()
@@ -46,17 +46,17 @@ typedef enum {
 	REQ_TYPE_PLAYLIST_LOAD_PLAYLIST,
 	REQ_TYPE_BROWSE_TRACK,
 	REQ_TYPE_CACHE_PERIODIC
-} sp_request_type;
+} request_type;
 
-typedef struct sp_request {
-	sp_request_type type;
-	sp_request_state state;
+struct request {
+	request_type type;
+	request_state state;
 	void *input;
 	void *output;
 	sp_error error;
 	int next_timeout;
-	struct sp_request *next;
-} sp_request;
+	struct request *next;
+};
 
 
 /* sp_album.c */
@@ -214,7 +214,7 @@ struct sp_session {
 
 
 	/* Requests scoreboard */
-	sp_request *requests;
+	struct request *requests;
 
 
 	/* High level connection state */

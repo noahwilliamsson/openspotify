@@ -11,6 +11,6 @@ unsigned long playlistcontainer_checksum(sp_playlistcontainer *container);
 
 struct playlist_ctx *playlist_create(void);
 void playlist_release(struct playlist_ctx *);
-int playlist_process(sp_session *session, sp_request *req);
+int playlist_process(sp_session *session, struct request *req);
 
 #endif
