@@ -2,6 +2,7 @@
 #include "hashtable.h"
 #include "sp_opaque.h"
 #include "track.h"
+#include "request.h"
 #include "util.h"
 
 

@@ -23,43 +23,6 @@
 #include "shn.h"
 
 
-
-/* For request.c */
-typedef enum { 
-	REQ_STATE_NEW = 0,
-	REQ_STATE_RUNNING,
-	REQ_STATE_RETURNED,
-	REQ_STATE_PROCESSED
-} request_state;
-
-/*
- * When adding new types, have a look at request.c:request_notify_main_thread()
- * and session.c:sp_session_process_events() and add them to the
- * switch() statements if necessary
- *
- */
-typedef enum {
-	REQ_TYPE_LOGIN = 0,
-	REQ_TYPE_LOGOUT,
-	REQ_TYPE_PLAY_TOKEN_LOST,
-	REQ_TYPE_NOTIFY,
-	REQ_TYPE_PLAYLIST_LOAD_CONTAINER,
-	REQ_TYPE_PLAYLIST_LOAD_PLAYLIST,
-	REQ_TYPE_BROWSE_TRACK,
-	REQ_TYPE_CACHE_PERIODIC
-} request_type;
-
-struct request {
-	request_type type;
-	request_state state;
-	void *input;
-	void *output;
-	sp_error error;
-	int next_timeout;
-	struct request *next;
-};
-
-
 /* sp_album.c */
 struct sp_album {
 	unsigned char id[16];
