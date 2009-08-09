@@ -5,7 +5,6 @@
  */
 
 #include <stdlib.h>
-#include <spotify/api.h>
 #include "sp_opaque.h"
 #ifdef _WIN32
 #include <windows.h>
@@ -13,6 +12,8 @@
 #include <pthread.h>
 #include <time.h>
 #endif
+
+#include <spotify/api.h>
 
 #include "debug.h"
 #include "request.h"
@@ -152,6 +153,7 @@ int request_set_result(sp_session *session, struct request *req, sp_error error,
 /* For selecting which requests we should notify the main thread about */
 static void request_notify_main_thread(sp_session *session, struct request *request) {
 	sp_albumbrowse *alb;
+	sp_artistbrowse *arb;
 
 	switch(request->type) {
 	case REQ_TYPE_LOGIN:
@@ -175,6 +177,14 @@ static void request_notify_main_thread(sp_session *session, struct request *requ
 
 		if(alb->callback)
 			alb->callback(alb, alb->userdata);
+
+		break;
+
+	case REQ_TYPE_BROWSE_ARTIST:
+		arb = *(sp_artistbrowse **)request->input;
+
+		if(arb->callback)
+			arb->callback(arb, arb->userdata);
 
 		break;
 

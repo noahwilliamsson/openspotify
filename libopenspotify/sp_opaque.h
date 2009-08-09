@@ -65,6 +65,32 @@ struct sp_albumbrowse {
 	struct hashtable *hashtable;
 };
 
+/* sp_artistbrowse.h */
+struct sp_artistbrowse {
+	sp_artist *artist;
+
+	int num_tracks;
+	sp_track **tracks;
+
+	int num_portraits;
+	unsigned char **portraits;
+
+	int num_similar_artists;
+	sp_artist **similar_artists;
+
+	char *biography;
+
+	artistbrowse_complete_cb *callback;
+	void *userdata;
+
+	sp_error error;
+
+	int is_loaded;
+	int ref_count;
+
+	struct hashtable *hashtable;
+};
+
 
 /* sp_artist.c */
 struct sp_artist {
@@ -226,6 +252,7 @@ struct sp_session {
 
 	/* Album/artist/track memory memory management */
 	struct hashtable *hashtable_albumbrowses;
+	struct hashtable *hashtable_artistbrowses;
 	struct hashtable *hashtable_albums;
 	struct hashtable *hashtable_artists;
 	struct hashtable *hashtable_tracks;

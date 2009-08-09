@@ -75,6 +75,12 @@ int browse_process(sp_session *session, struct request *req) {
 		DSFYDEBUG("REQ_TYPE_BROWSE_ALBUM is not yet implemented\n");
 		return request_set_result(session, req, SP_ERROR_OTHER_PERMAMENT, NULL);
 	}
+	else if(req->type == REQ_TYPE_BROWSE_ARTIST) {
+		req->next_timeout = get_millisecs() + PLAYLIST_RETRY_TIMEOUT*1000;
+		
+		DSFYDEBUG("REQ_TYPE_BROWSE_ARTIST is not yet implemented\n");
+		return request_set_result(session, req, SP_ERROR_OTHER_PERMAMENT, NULL);
+	}
 
 
 	return ret;

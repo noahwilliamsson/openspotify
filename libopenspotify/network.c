@@ -168,6 +168,8 @@ static int process_request(sp_session *session, struct request *req) {
 		return playlist_process(session, req);
 		break;
 
+	case REQ_TYPE_BROWSE_ALBUM:
+	case REQ_TYPE_BROWSE_ARTIST:
 	case REQ_TYPE_BROWSE_TRACK:
 		return browse_process(session, req);
 		break;
