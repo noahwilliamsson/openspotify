@@ -4,6 +4,7 @@
 #include <spotify/api.h>
 
 #include "debug.h"
+#include "link.h"
 #include "sp_opaque.h"
 #include "track.h"
 
@@ -22,7 +23,9 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 	const char *ptr;
 	sp_link *lnk;
 	unsigned char track_id[16];
+	sp_session *session;
 	
+
 	if(link == NULL)
 		return NULL;
 	
@@ -34,6 +37,12 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 
 	ptr += 8;
 	
+
+	session = libopenspotify_link_get_session();
+	if(session == NULL)
+		return NULL;
+
+
 	/* Allocate memory for link. */
 	if((lnk = (sp_link *)malloc(sizeof(sp_link))) == NULL)
 		return NULL;
@@ -49,7 +58,7 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 		lnk->type       = SP_LINKTYPE_TRACK;
 		despotify_uri2id(ptr + 6, (char *)track_id);
 
-		lnk->data.track = track_add(NULL, track_id);
+		lnk->data.track = track_add(session, track_id);
 	}
 	/* Link refers to an album. */
 	else if(strncmp("album:", ptr, 6) == 0){

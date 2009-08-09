@@ -13,6 +13,7 @@
 #include "cache.h"
 #include "debug.h"
 #include "request.h"
+#include "link.h"
 #include "login.h"
 #include "network.h"
 #include "playlist.h"
@@ -89,6 +90,9 @@ SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_sess
 	if(pthread_create(&s->thread_network, NULL, network_thread, s))
 		return SP_ERROR_OTHER_TRANSIENT;
 #endif
+
+	/* Helper function for sp_link_create_from_string() */
+	libopenspotify_link_init(s);
 
 	/* Load album, artist and track cache */
 	cache_init(s);
@@ -271,6 +275,9 @@ SP_LIBEXPORT(sp_error) sp_session_release (sp_session *session) {
 		hashtable_free(session->hashtable_tracks);
 
 	free(session->callbacks);
+
+	/* Helper function for sp_link_create_from_string() */
+	libopenspotify_link_release();
 
 	free(session);
 
