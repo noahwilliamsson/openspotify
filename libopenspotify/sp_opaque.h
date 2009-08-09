@@ -74,6 +74,8 @@ struct sp_artist {
 
 	int is_loaded;
 	int ref_count;
+
+	struct hashtable *hashtable;
 };
 
 
@@ -225,6 +227,7 @@ struct sp_session {
 	/* Album/artist/track memory memory management */
 	struct hashtable *hashtable_albumbrowses;
 	struct hashtable *hashtable_albums;
+	struct hashtable *hashtable_artists;
 	struct hashtable *hashtable_tracks;
 
 
