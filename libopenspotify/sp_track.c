@@ -5,10 +5,12 @@
 
 #include "debug.h"
 #include "sp_opaque.h"
+#include "track.h"
+
 
 SP_LIBEXPORT(bool) sp_track_is_loaded(sp_track *track) {
 
-	return track->is_loaded;
+	return track_get_loaded(track);
 }
 
 
@@ -44,25 +46,25 @@ SP_LIBEXPORT(sp_album *) sp_track_album(sp_track *track) {
 
 SP_LIBEXPORT(const char *) sp_track_name(sp_track *track) {
 
-	return track->name;
+	return track_get_name(track);
 }
 
 
 SP_LIBEXPORT(int) sp_track_duration(sp_track *track) {
 
-	return track->duration;
+	return track_get_duration(track);
 }
 
 
 SP_LIBEXPORT(int) sp_track_popularity(sp_track *track) {
 
-	return track->popularity;
+	return track_get_popularity(track);
 }
 
 
 SP_LIBEXPORT(int) sp_track_disc(sp_track *track) {
 
-	return track->disc;
+	return track_get_disc(track);
 }
 
 
@@ -73,13 +75,10 @@ SP_LIBEXPORT(int) sp_track_index(sp_track *track) {
 
 
 SP_LIBEXPORT(void) sp_track_add_ref(sp_track *track) {
-	track->ref_count++;
+	track_add_ref(track);
 }
 
 
 SP_LIBEXPORT(void) sp_track_release(sp_track *track) {
-	if(track->ref_count)
-		track->ref_count--;
-
-	/* FIXME: free track when ref count reaches zero? */
+	track_del_ref(track);
 }

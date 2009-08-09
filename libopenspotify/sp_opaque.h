@@ -17,6 +17,7 @@
 
 #include <spotify/api.h>
 
+#include "hashtable.h"
 #include "login.h"
 #include "shn.h"
 
@@ -44,6 +45,7 @@ typedef enum {
 	REQ_TYPE_PLAYLIST_LOAD_CONTAINER,
 	REQ_TYPE_PLAYLIST_LOAD_PLAYLIST,
 	REQ_TYPE_BROWSE_TRACK,
+	REQ_TYPE_CACHE_PERIODIC
 } sp_request_type;
 
 typedef struct sp_request {
@@ -145,6 +147,8 @@ struct sp_track {
 	unsigned char album_id[16];
 	unsigned char cover_id[20];
 
+	char *title;
+	char *album;
 	char *name;
 
 	int num_artists;
@@ -219,6 +223,9 @@ struct sp_session {
 
 	/* For keeping track of playlists and related states */
 	struct playlist_ctx *playlist_ctx;
+
+	/* Tracks memory management */
+	struct hashtable *hashtable_tracks;
 
 
 #ifdef _WIN32
