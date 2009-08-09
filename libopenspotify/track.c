@@ -27,7 +27,6 @@ sp_track *track_add(sp_session *session, unsigned char *id) {
 		return NULL;
 	}
 
-
 	if((entry = hashtable_find(session->hashtable_tracks, id)) != NULL) {
 		track = entry->value;
 
@@ -66,6 +65,8 @@ sp_track *track_add(sp_session *session, unsigned char *id) {
 void track_free(sp_session *session, sp_track *track) {
 	int i;
 
+	hashtable_remove(session->hashtable_tracks, track->id);
+
 	if(track->name)
 		free(track->name);
 
@@ -81,10 +82,7 @@ void track_free(sp_session *session, sp_track *track) {
 	if(track->num_artists)
 		free(track->artists);
 
-
 	free(track);
-
-	/* FIXME: Free */
 }
 
 
