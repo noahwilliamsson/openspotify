@@ -154,6 +154,9 @@ void playlist_release(struct playlist_ctx *playlist_ctx) {
 int playlist_process(sp_session *session, struct request *req) {
 	int ret;
 
+	if(req->state == REQ_STATE_NEW)
+		req->state = REQ_STATE_RUNNING;
+
 	if(req->type == REQ_TYPE_PLAYLIST_LOAD_CONTAINER) {
 		req->next_timeout = get_millisecs() + PLAYLIST_RETRY_TIMEOUT*1000;
 
