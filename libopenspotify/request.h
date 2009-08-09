@@ -3,8 +3,8 @@
  *
  */
 
-#ifndef LIBOPENSPOTIFY_EVENT_H
-#define LIBOPENSPOTIFY_EVENT_H
+#ifndef LIBOPENSPOTIFY_REQUEST_H
+#define LIBOPENSPOTIFY_REQUEST_H
 
 #include <spotify/api.h>
 
