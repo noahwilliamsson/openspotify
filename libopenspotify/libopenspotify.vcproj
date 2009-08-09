@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;C:\Documents and Settings\user\Skrivbord\repo\openspotify\zlib\include&quot;;..\include;..\zlib\include;&quot;..\openssl-0.9.8k\include&quot;"
+				AdditionalIncludeDirectories="..\win32\include;..\include"
 				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;WIN32_LEAN_AND_MEAN;DEBUG"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -61,8 +61,9 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="dnsapi.lib ws2_32.lib ..\openssl-0.9.8k\lib\libeay32.lib ..\openssl-0.9.8k\lib\ssleay32.lib ..\zlib\lib\zlib.lib"
+				AdditionalDependencies="dnsapi.lib ws2_32.lib libeay32MDd.lib ssleay32MDd.lib zlibd.lib"
 				OutputFile="$(OutDir)\$(ProjectName).lib"
+				AdditionalLibraryDirectories="..\win32\lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -107,7 +108,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="&quot;C:\Documents and Settings\user\Skrivbord\repo\openspotify\zlib\include&quot;;..\include;..\zlib\include;&quot;..\openssl-0.9.8k\include&quot;"
+				AdditionalIncludeDirectories="..\win32\include;..\include"
 				PreprocessorDefinitions="_CRT_SECURE_NO_WARNINGS;WIN32_LEAN_AND_MEAN"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
@@ -126,8 +127,9 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="dnsapi.lib ws2_32.lib ..\openssl-0.9.8k\lib\libeay32.lib ..\openssl-0.9.8k\lib\ssleay32.lib ..\zlib\lib\zlib.lib"
+				AdditionalDependencies="dnsapi.lib ws2_32.lib libeay32MD.lib ssleay32MD.lib zlib.lib"
 				OutputFile="$(OutDir)\$(ProjectName).lib"
+				AdditionalLibraryDirectories="..\win32\lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
