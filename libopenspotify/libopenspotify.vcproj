@@ -195,6 +195,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\link.c"
+				>
+			</File>
+			<File
 				RelativePath=".\login.c"
 				>
 			</File>
@@ -302,6 +306,10 @@
 			</File>
 			<File
 				RelativePath=".\hmac.h"
+				>
+			</File>
+			<File
+				RelativePath=".\link.h"
 				>
 			</File>
 			<File
