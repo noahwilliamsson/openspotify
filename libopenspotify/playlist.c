@@ -213,7 +213,7 @@ static int playlist_container_callback(CHANNEL *ch, unsigned char *payload, unsi
 		buf_free(playlist_ctx->buf);
 		playlist_ctx->buf = NULL;
 
-		request_set_result(callback_ctx->session, callback_ctx->req, SP_ERROR_OTHER_TRANSIENT, NULL);
+		/* Don't set error on request. It will be retried. */
 		free(callback_ctx);
 
 		DSFYDEBUG("Got a channel ERROR\n");
@@ -368,7 +368,7 @@ static int playlist_callback(CHANNEL *ch, unsigned char *payload, unsigned short
 		buf_free(playlist->buf);
 		playlist->buf = NULL;
 
-		request_set_result(callback_ctx->session, callback_ctx->req, SP_ERROR_OTHER_TRANSIENT, NULL);
+		/* Don't set error on request. It will be retried. */
 		free(callback_ctx);
 
 		DSFYDEBUG("Got a channel ERROR\n");
