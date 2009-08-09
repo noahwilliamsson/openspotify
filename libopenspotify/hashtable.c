@@ -1,5 +1,6 @@
 /*
  * For caching of metadata
+ * Assumes key is at least sizeof(unsigned int) bytes
  *
  */
 
@@ -11,6 +12,9 @@
 
 struct hashtable *hashtable_create(int keysize) {
 	struct hashtable *hashtable;
+
+	if(keysize < sizeof(unsigned int))
+		return NULL;
 
 	hashtable = malloc(sizeof(struct hashtable));
 
@@ -45,6 +49,38 @@ void hashtable_insert(struct hashtable *hashtable, void *key, void *value) {
 	entry->value = value;
 
 	entry->next = NULL;
+
+	hashtable->count++;
+}
+
+
+void hashtable_remove(struct hashtable *hashtable, void *key) {
+	struct hashentry *entry, *prev;
+	int index;
+
+	index = *(unsigned int *)key & (hashtable->size - 1u);
+	if((entry = hashtable->entries[index]) == NULL)
+		return;
+
+	for(prev = NULL; entry; entry = entry->next) {
+		if(!memcmp(entry->key, key, hashtable->keysize))
+			break;
+
+		prev = entry;
+	}
+
+	if(entry == NULL)
+		return;
+	
+	if(prev == NULL)
+		hashtable->entries[index] = entry->next;
+	else
+		prev->next = entry->next;
+		
+	free(entry->key);
+	free(entry);
+
+	hashtable->count--;
 }
 
 
@@ -64,7 +100,7 @@ void *hashtable_find(struct hashtable *hashtable, void *key) {
 }
 
 
-struct hashiterator *hashtable_iterate_init(struct hashtable *hashtable) {
+struct hashiterator *hashtable_iterator_init(struct hashtable *hashtable) {
 	struct hashiterator *iter;
 
 	iter = malloc(sizeof(struct hashiterator));
@@ -76,7 +112,7 @@ struct hashiterator *hashtable_iterate_init(struct hashtable *hashtable) {
 }
 
 
-struct hashentry *hashtable_iterate_next(struct hashiterator *iter) {
+struct hashentry *hashtable_iterator_next(struct hashiterator *iter) {
 	if(iter->entry != NULL && (iter->entry = iter->entry->next) != NULL)
 		return iter->entry;
 
@@ -88,7 +124,7 @@ struct hashentry *hashtable_iterate_next(struct hashiterator *iter) {
 }
 
 
-void hashtable_iterate_free(struct hashiterator *iter) {
+void hashtable_iterator_free(struct hashiterator *iter) {
 	free(iter);
 }
 
