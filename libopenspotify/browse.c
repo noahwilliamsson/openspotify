@@ -38,6 +38,7 @@
 #include "playlist.h"
 #include "request.h"
 #include "sp_opaque.h"
+#include "track.h"
 #include "util.h"
 
 
@@ -193,62 +194,64 @@ static int browse_callback(CHANNEL *ch, unsigned char *payload, unsigned short l
 
 
 static int browse_parse_compressed_xml(sp_session *session, sp_playlist *playlist) {
-	const char *id;
-	unsigned char track_id[16];
+	const char *idstr;
+	unsigned char id[20];
 	struct buf *uncompressed;
 	ezxml_t root, track_node, node;
 	sp_track *track;
-	int i;
+
 
 	uncompressed = despotify_inflate(playlist->buf->ptr, playlist->buf->len);
 	if(uncompressed == NULL)
 		return -1;
 
 	root = ezxml_parse_str((char *)uncompressed->ptr, uncompressed->len);
+	if(root == NULL)
+		return -1;
 
 	for(track_node = ezxml_get(root, "tracks", 0, "track", -1); track_node; track_node = track_node->next) {
 		node = ezxml_get(track_node, "id", -1);
 		if(node == NULL)
 			continue;
 
-		hex_ascii_to_bytes(node->txt, track_id, sizeof(track_id));
-		for(i = 0; i < playlist->num_tracks; i++) {
-			track = playlist->tracks[i];
-
-			if(memcmp(playlist->tracks[i]->id, track_id, sizeof(track_id)))
-				continue;
-
-			node = ezxml_get(track_node, "title", -1);
-			if(node)
-				track->title = strdup(node->txt);
-
-			node = ezxml_get(track_node, "album", -1);
-			if(node)
-				track->album = strdup(node->txt);
+		hex_ascii_to_bytes(node->txt, id, sizeof(id));
+		track = track_add(session, id);
 
 
-			node = ezxml_get(track_node, "album-id", -1);
-			if(node)
-				hex_ascii_to_bytes(node->txt, track->album_id, sizeof(track->album_id));
+		if((node = ezxml_get(track_node, "title", -1)) != NULL)
+			track_set_title(track, node->txt);
 
-			node = ezxml_get(track_node, "cover", -1);
-			if(node)
-				hex_ascii_to_bytes(node->txt, track->cover_id, sizeof(track->cover_id));
+		if((node = ezxml_get(track_node, "album", -1)) != NULL)
+			track_set_album(track, node->txt);
 
-			node = ezxml_get(track_node, "files", 0, "file", -1);
-			if(node && (id = ezxml_attr(node, "id")) != NULL) {
-				track->playable = 1;
-				hex_ascii_to_bytes(id, track->file_id, sizeof(track->file_id));
-			}
 
-			node = ezxml_get(track_node, "length", -1);
-			if(node)
-				track->duration = atoi(node->txt);
-
-			/* FIXME: Handle all the other elements and attribuets */
+		if((node = ezxml_get(track_node, "album-id", -1)) != NULL) {
+			hex_ascii_to_bytes(node->txt, id, 16);
+			track_set_album_id(track, id);
 		}
-	}
 
+		if((node = ezxml_get(track_node, "cover", -1)) != NULL) {
+			hex_ascii_to_bytes(node->txt, id, 20);
+			track_set_cover_id(track, id);
+		}
+
+		node = ezxml_get(track_node, "files", 0, "file", -1);
+		if(node && (idstr = ezxml_attr(node, "id")) != NULL) {
+			hex_ascii_to_bytes(idstr, id, 20);
+			track_set_file_id(track, id);
+
+			/* FIXME: Also check country restrictions */
+			track_set_playable(track, 1);
+		}
+
+		if((node = ezxml_get(track_node, "length", -1)) != NULL)
+			track_set_duration(track, atoi(node->txt));
+
+		if((node = ezxml_get(track_node, "disc", -1)) != NULL)
+			track_set_disc(track, atoi(node->txt));
+
+		track_set_loaded(track, 1);
+	}
 
 	ezxml_free(root);
 

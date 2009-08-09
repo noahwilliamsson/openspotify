@@ -58,6 +58,7 @@
 #include "playlist.h"
 #include "request.h"
 #include "sp_opaque.h"
+#include "track.h"
 #include "util.h"
 
 #include <zlib.h>
@@ -69,7 +70,7 @@ static int playlist_parse_container_xml(sp_session *session);
 static void playlist_post_playlist_requests(sp_session *session);
 static int playlist_send_playlist_request(sp_session *session, sp_request *req);
 static int playlist_callback(CHANNEL *ch, unsigned char *payload, unsigned short len);
-static int playlist_parse_playlist_xml(sp_playlist *playlist);
+static int playlist_parse_playlist_xml(sp_session *session, sp_playlist *playlist);
 
 static void playlist_post_track_request(sp_session *session, sp_playlist *);
 
@@ -129,11 +130,8 @@ void playlist_release(struct playlist_ctx *playlist_ctx) {
 			for(i = 0; i < playlist->num_tracks; i++) {
 				track = playlist->tracks[i];
 
-				if(track->title)
-					free(track->title);
-
-				if(track->album)
-					free(track->album);
+				if(track->name)
+					free(track->name);
 
 				free(playlist->tracks[i]);
 			}
@@ -382,7 +380,8 @@ static int playlist_callback(CHANNEL *ch, unsigned char *payload, unsigned short
 
 	case CHANNEL_END:
 		/* Parse returned XML and request tracks */
-		if(playlist_parse_playlist_xml(playlist) == 0) {
+		if(playlist_parse_playlist_xml(callback_ctx->session, playlist) == 0) {
+			playlist->state = PLAYLIST_STATE_LISTED;
 
 			/* Create new request for loading tracks */
 			playlist_post_track_request(callback_ctx->session, playlist);
@@ -411,11 +410,10 @@ static int playlist_callback(CHANNEL *ch, unsigned char *payload, unsigned short
 }
 
 
-static int playlist_parse_playlist_xml(sp_playlist *playlist) {
+static int playlist_parse_playlist_xml(sp_session *session, sp_playlist *playlist) {
 	static char *end_element = "</playlist>";
-	char *id_list, *id;
-	char idstr[35];
-	int position;
+	char *id_list, *idstr;
+	unsigned char track_id[16];
 	ezxml_t root, node;
 	sp_track *track;
 
@@ -427,28 +425,17 @@ static int playlist_parse_playlist_xml(sp_playlist *playlist) {
 	node = ezxml_get(root, "next-change", 0, "change", 0, "ops", 0, "add", 0, "items", -1);
 	id_list = node->txt;
 	
-	for(id = strtok(id_list, ",\n"); id; id = strtok(NULL, ",\n")) {
-		hex_bytes_to_ascii((unsigned char *)id, idstr, 17);
-	
-		position = 0;
-		playlist->tracks = (sp_track **)realloc(playlist->tracks, (playlist->num_tracks + 1) * sizeof(sp_track *));
-		playlist->tracks[playlist->num_tracks] = malloc(sizeof(sp_track));
-		track = playlist->tracks[playlist->num_tracks];
-		playlist->num_tracks++;
-		
-		hex_ascii_to_bytes(id, track->id, sizeof(track->id));
-		track->title = NULL;
-		track->album = NULL;
-		track->playable = 0;
-		track->duration = 0;
-		track->index = position;
-		track->error = SP_ERROR_OK;
-		track->loaded = 0;
+	for(idstr = strtok(id_list, ",\n"); idstr; idstr = strtok(NULL, ",\n")) {
+		hex_ascii_to_bytes(idstr, track_id, sizeof(track_id));
+		track = track_add(session, track_id);
 
-		playlist->state = PLAYLIST_STATE_LISTED;
+		playlist->tracks = (sp_track **)realloc(playlist->tracks, (playlist->num_tracks + 1) * sizeof(sp_track *));
+		playlist->tracks[playlist->num_tracks] = track;
+		playlist->num_tracks++;
+
+		track_add_ref(track);
 	}
 	
-
 	ezxml_free(root);
 
 	return 0;

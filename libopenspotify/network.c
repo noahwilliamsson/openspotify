@@ -18,6 +18,7 @@
 #include <spotify/api.h>
 
 #include "browse.h"
+#include "cache.h"
 #include "debug.h"
 #include "login.h"
 #include "network.h"
@@ -150,6 +151,10 @@ static int process_request(sp_session *s, sp_request *req) {
 
 	case REQ_TYPE_BROWSE_TRACK:
 		return browse_process(s, req);
+		break;
+
+	case REQ_TYPE_CACHE_PERIODIC:
+		return cache_process(s, req);
 		break;
 
 	default:

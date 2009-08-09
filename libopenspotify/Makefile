@@ -2,8 +2,8 @@ CC = gcc
 CFLAGS = -Wall -ggdb -I../include -fPIC -DDEBUG
 LDFLAGS = -lcrypto -lresolv -lz
 
-CORE_OBJS = browse.o buf.o channel.o commands.o dns.o ezxml.o handlers.o hmac.o login.o network.o packet.o playlist.o request.o sha1.o shn.o util.o
-LIB_OBJS = sp_error.o sp_link.o sp_playlist.o sp_session.o sp_user.o
+CORE_OBJS = browse.o buf.o cache.o channel.o commands.o dns.o ezxml.o handlers.o hashtable.o hmac.o login.o network.o packet.o playlist.o request.o sha1.o shn.o track.o util.o
+LIB_OBJS = sp_album.o sp_artist.o sp_error.o sp_link.o sp_playlist.o sp_session.o sp_track.o sp_user.o
 
 # Linux
 LIB_NAME = libopenspotify.so

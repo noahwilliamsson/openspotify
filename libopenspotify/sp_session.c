@@ -10,6 +10,7 @@
 
 #include <spotify/api.h>
 
+#include "cache.h"
 #include "debug.h"
 #include "request.h"
 #include "login.h"
@@ -58,6 +59,9 @@ SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_sess
 	/* Playlist context, needed by playlist.c */
 	s->playlist_ctx = playlist_create();
 
+	/* Tracks memory management */
+	s->hashtable_tracks = hashtable_create(16);
+
 	/* Allocate memory for user info. */
 	if((s->user = (sp_user *)malloc(sizeof(sp_user))) == NULL)
 		return SP_ERROR_API_INITIALIZATION_FAILED;
@@ -85,6 +89,12 @@ SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_sess
 	if(pthread_create(&s->thread_network, NULL, network_thread, s))
 		return SP_ERROR_OTHER_TRANSIENT;
 #endif
+
+	/* Load album, artist and track cache */
+	cache_init(s);
+
+	/* Run garbage collector and save metadata to disk periodically */
+	request_post(s, REQ_TYPE_CACHE_PERIODIC, NULL);
 
 	DSFYDEBUG("Session initialized at %p\n", s);
 	
@@ -256,6 +266,9 @@ SP_LIBEXPORT(sp_error) sp_session_release (sp_session *session) {
 
 	if(session->playlist_ctx)
 		playlist_release(session->playlist_ctx);
+
+	if(session->hashtable_tracks)
+		hashtable_free(session->hashtable_tracks);
 
 	free(session->callbacks);
 
