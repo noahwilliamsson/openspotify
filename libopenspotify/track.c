@@ -55,10 +55,13 @@ sp_track *track_add(sp_session *session, unsigned char *id) {
 	track->disc = 0;
 
 	track->duration = 0;
+	track->population = 0;
 
 	track->is_loaded = 0;
 	track->playable = 0;
 	track->error = SP_ERROR_OK;
+
+	track->ref_count = 0;
 
 	return track;
 }
