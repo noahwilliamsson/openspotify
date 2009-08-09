@@ -51,4 +51,5 @@ CHANNEL *channel_register (char *, channel_callback, void *);
 void channel_unregister (CHANNEL *);
 CHANNEL *channel_by_id (unsigned short);
 int channel_process (unsigned char *, unsigned short, int);
+void channel_fail_and_unregister_all(void);
 #endif

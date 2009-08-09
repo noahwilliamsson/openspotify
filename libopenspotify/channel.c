@@ -207,3 +207,22 @@ int channel_process (unsigned char *buf, unsigned short len, int error)
 
 	return ret;
 }
+
+
+void channel_fail_and_unregister_all(void) {
+	CHANNEL *ch;
+
+	while(head) {
+		DSFYDEBUG
+			("channel %d: Forcing failure via callback (current state: %s) for channel '%s'\n",
+			 ch->channel_id,
+			 ch->state == CHANNEL_HEADER ? "header":
+			 ch->state == CHANNEL_DATA ? "data":
+			 ch->state == CHANNEL_ERROR ? "error": "end", ch->name);
+		head->state = CHANNEL_ERROR;
+
+		head->callback(head, NULL, 0);
+
+		channel_unregister(head);
+	}
+}
