@@ -33,7 +33,7 @@ sp_track *track_add(sp_session *session, unsigned char *id) {
 		return track;
 	}
 
-	track = (sp_track *)malloc(sizeof(track));
+	track = (sp_track *)malloc(sizeof(sp_track));
 	if(track == NULL)
 		return NULL;
 
@@ -45,6 +45,8 @@ sp_track *track_add(sp_session *session, unsigned char *id) {
 	memset(track->cover_id, 0, sizeof(track->cover_id));
 
 	track->name = NULL;
+	track->title = NULL;
+	track->album = NULL;
 
 	track->num_artists = 0;
 	track->artists = NULL;
