@@ -37,6 +37,8 @@ sp_track *track_add(sp_session *session, unsigned char *id) {
 	if(track == NULL)
 		return NULL;
 
+	DSFYDEBUG("Allocated track at %p\n", track);
+
 	hashtable_insert(session->hashtable_tracks, id, track);
 
 	memcpy(track->id, id, sizeof(track->id));
@@ -55,7 +57,7 @@ sp_track *track_add(sp_session *session, unsigned char *id) {
 	track->disc = 0;
 
 	track->duration = 0;
-	track->population = 0;
+	track->popularity = 0;
 
 	track->is_loaded = 0;
 	track->playable = 0;
@@ -212,6 +214,7 @@ void track_garbage_collect(sp_session *session) {
 		if(track->ref_count)
 			continue;
 
+		DSFYDEBUG("Freeing track %p because of zero ref_count\n", track);
 		track_free(session, track);
 	}
 
@@ -234,6 +237,9 @@ int track_save_metadata_to_disk(sp_session *session, char *filename) {
 	while((entry = hashtable_iterator_next(iter))) {
 		track = (sp_track *)entry->value;
 
+		if(track_get_loaded(track) == 0)
+			continue;
+
 		fwrite(track->id, sizeof(track->id), 1, fd);
 		fwrite(track->file_id, sizeof(track->file_id), 1, fd);
 		fwrite(track->album_id, sizeof(track->album_id), 1, fd);
@@ -250,8 +256,6 @@ int track_save_metadata_to_disk(sp_session *session, char *filename) {
 		num = htons(track->index);
 		fwrite(&num, sizeof(int), 1, fd);
 		num = htons(track->disc);
-		fwrite(&num, sizeof(int), 1, fd);
-		num = htons(track->is_loaded);
 		fwrite(&num, sizeof(int), 1, fd);
 		num = htons(track->playable);
 		fwrite(&num, sizeof(int), 1, fd);
@@ -276,44 +280,67 @@ int track_load_metadata_from_disk(sp_session *session, char *filename) {
 	
 	buf[256] = 0;
 	while(!feof(fd)) {
-		fread(id16, sizeof(id16), 1, fd);
-		track = track_add(session, id16);
+		if(fread(id16, sizeof(id16), 1, fd) == 1)
+			track = track_add(session, id16);
+		else
+			break;
 
-		fread(id20, sizeof(id20), 1, fd);
-		track_set_file_id(track, id20);
-		fread(id16, sizeof(id16), 1, fd);
-		track_set_album_id(track, id16);
-		fread(id20, sizeof(id20), 1, fd);
-		track_set_cover_id(track, id20);
+		if(fread(id20, sizeof(id20), 1, fd) == 1)
+			track_set_file_id(track, id20);
+		else
+			break;
+
+
+		if(fread(id16, sizeof(id16), 1, fd) == 1)
+			track_set_album_id(track, id16);
+		else
+			break;
+
+		if(fread(id20, sizeof(id20), 1, fd) == 1)
+			track_set_cover_id(track, id20);
+		else
+			break;
 		
-		fread(&len, 1, 1, fd);
-		if(len) {
-			fread(buf, len, 1, fd);
-			buf[len] = 0;
-			track_set_title(track, buf);
+		if(fread(&len, 1, 1, fd) == 1) {
+			if(len && fread(buf, len, 1, fd) == 1) {
+				buf[len] = 0;
+				track_set_title(track, buf);
+			}
 		}
+		else
+			break;
 
-		fread(&len, 1, 1, fd);
-		if(len) {
-			fread(buf, len, 1, fd);
-			buf[len] = 0;
-			track_set_album(track, buf);
+		if(fread(&len, 1, 1, fd) == 1) {
+			if(len && fread(buf, len, 1, fd) == 1) {
+				buf[len] = 0;
+				track_set_album(track, buf);
+			}
 		}
+		else
+			break;
 
-		fread(&num, 1, 1, fd);
-		track_set_index(track, ntohs(num));
+		if(fread(&num, 1, 1, fd) == 1)
+			track_set_index(track, ntohs(num));
+		else
+			break;
 
-		fread(&num, sizeof(int), 1, fd);
-		track_set_disc(track, ntohs(num));
+		if(fread(&num, sizeof(int), 1, fd) == 1)
+			track_set_disc(track, ntohs(num));
+		else
+			break;
 
-		fread(&num, sizeof(int), 1, fd);
-		track_set_duration(track, ntohs(num));
+		if(fread(&num, sizeof(int), 1, fd) == 1)
+			track_set_duration(track, ntohs(num));
+		else
+			break;
 
-		fread(&num, sizeof(int), 1, fd);
+
+		if(fread(&num, sizeof(int), 1, fd) == 1)
+			track_set_playable(track, ntohs(num));
+		else
+			break;
+
 		track_set_loaded(track, ntohs(num));
-
-		fread(&num, sizeof(int), 1, fd);
-		track_set_playable(track, ntohs(num));
 	}
 
 	fclose(fd);
