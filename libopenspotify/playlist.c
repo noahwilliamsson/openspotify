@@ -110,7 +110,6 @@ struct playlist_ctx *playlist_create(void) {
 /* Release resources held by the playlist context, called by sp_session_release() */
 void playlist_release(struct playlist_ctx *playlist_ctx) {
 	sp_playlist *playlist, *next_playlist;
-	sp_track *track;
 	int i;
 
 	if(playlist_ctx->container) {
@@ -127,14 +126,8 @@ void playlist_release(struct playlist_ctx *playlist_ctx) {
 				/* FIXME: Free sp_user */
 			}
 
-			for(i = 0; i < playlist->num_tracks; i++) {
-				track = playlist->tracks[i];
-
-				if(track->name)
-					free(track->name);
-
-				free(playlist->tracks[i]);
-			}
+			for(i = 0; i < playlist->num_tracks; i++)
+				track_del_ref(playlist->tracks[i]);
 
 			if(playlist->num_tracks)
 				free(playlist->tracks);
