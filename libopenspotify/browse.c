@@ -214,9 +214,8 @@ static int browse_parse_compressed_xml(sp_session *session, sp_playlist *playlis
 		if(node == NULL)
 			continue;
 
-		hex_ascii_to_bytes(node->txt, id, sizeof(id));
+		hex_ascii_to_bytes(node->txt, id, 16);
 		track = track_add(session, id);
-
 
 		if((node = ezxml_get(track_node, "title", -1)) != NULL)
 			track_set_title(track, node->txt);
