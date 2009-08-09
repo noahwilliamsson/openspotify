@@ -60,7 +60,9 @@ SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_sess
 	/* Playlist context, needed by playlist.c */
 	s->playlist_ctx = playlist_create();
 
-	/* Tracks memory management */
+	/* Albums/artists/tracks memory management */
+	s->hashtable_albums = hashtable_create(16);
+	s->hashtable_albumbrowses = hashtable_create(16);
 	s->hashtable_tracks = hashtable_create(16);
 
 	/* Allocate memory for user info. */
@@ -270,6 +272,12 @@ SP_LIBEXPORT(sp_error) sp_session_release (sp_session *session) {
 
 	if(session->playlist_ctx)
 		playlist_release(session->playlist_ctx);
+
+	if(session->hashtable_albums)
+		hashtable_free(session->hashtable_albums);
+
+	if(session->hashtable_albumbrowses)
+		hashtable_free(session->hashtable_albumbrowses);
 
 	if(session->hashtable_tracks)
 		hashtable_free(session->hashtable_tracks);

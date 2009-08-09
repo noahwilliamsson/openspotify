@@ -47,5 +47,37 @@ SP_LIBEXPORT(void) sp_album_release(sp_album *album) {
 	if(album->ref_count)
 		album->ref_count--;
 
+	if(album->ref_count)
+		return;
+
 	/* FIXME: Deallocate here when ref count reaches 0 */
+	hashtable_remove(album->hashtable, album->id);
+
+	if(album->name)
+		free(album->name);
+}
+
+
+/*
+ * Functions for internal use
+ *
+ */
+sp_album *sp_album_add(sp_session *session, unsigned char id[16]) {
+	sp_album *album;
+
+	album = malloc(sizeof(sp_album));
+
+	memcpy(album->id, id, sizeof(album->id));
+	memset(album->image_id, 0, sizeof(album->image_id));
+
+	album->name = NULL;
+	album->year = -1;
+
+	album->is_loaded = 0;
+	album->ref_count = 0;
+
+	album->hashtable = session->hashtable_albums;
+	hashtable_insert(album->hashtable, album->id, album);
+
+	return album;
 }

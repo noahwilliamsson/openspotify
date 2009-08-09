@@ -13,6 +13,7 @@
 #include <arpa/inet.h>
 #endif
 
+#include "album.h"
 #include "debug.h"
 #include "hashtable.h"
 #include "sp_opaque.h"
@@ -34,17 +35,18 @@ sp_track *track_add(sp_session *session, unsigned char *id) {
 	if(track == NULL)
 		return NULL;
 
-	hashtable_insert(session->hashtable_tracks, id, track);
+	track->hashtable = session->hashtable_tracks;
+	hashtable_insert(track->hashtable, id, track);
 
 	memcpy(track->id, id, sizeof(track->id));
 	memset(track->file_id, 0, sizeof(track->file_id));
-	memset(track->album_id, 0, sizeof(track->album_id));
 	memset(track->cover_id, 0, sizeof(track->cover_id));
 
 	track->name = NULL;
 	track->title = NULL;
-	track->album = NULL;
+	track->album_name = NULL;
 
+	track->album = NULL;
 	track->num_artists = 0;
 	track->artists = NULL;
 
@@ -64,10 +66,10 @@ sp_track *track_add(sp_session *session, unsigned char *id) {
 }
 
 
-void track_free(sp_session *session, sp_track *track) {
+void track_free(sp_track *track) {
 	int i;
 
-	hashtable_remove(session->hashtable_tracks, track->id);
+	hashtable_remove(track->hashtable, track->id);
 
 	if(track->name)
 		free(track->name);
@@ -75,14 +77,20 @@ void track_free(sp_session *session, sp_track *track) {
 	if(track->title)
 		free(track->title);
 
-	if(track->album)
-		free(track->album);
+	if(track->album_name)
+		free(track->album_name);
+
 
 	for(i = 0; i < track->num_artists; i++) {
 		free(track->artists[i]);
 	}
 	if(track->num_artists)
 		free(track->artists);
+
+
+	if(track->album)
+		sp_album_release(track->album);
+
 
 	free(track);
 }
@@ -92,26 +100,26 @@ void track_set_title(sp_track *track, char *title) {
 	track->title = realloc(track->title, strlen(title) + 1);
 	strcpy(track->title, title);
 
-	track->name = realloc(track->name, strlen(track->title) + 3 + (track->album? strlen(track->album): 0) + 1);
+	track->name = realloc(track->name, strlen(track->title) + 3 + (track->album_name? strlen(track->album_name): 0) + 1);
 	strcpy(track->name, track->title);
-	if(track->album == NULL)
+	if(track->album_name == NULL)
 		return;
 	
 	strcat(track->name, " - ");
-	strcat(track->name, track->album);
+	strcat(track->name, track->album_name);
 }
 
 
-void track_set_album(sp_track *track, char *album) {
-	track->album = realloc(track->album, strlen(album) + 1);
-	strcpy(track->album, album);
+void track_set_album_name(sp_track *track, char *album) {
+	track->album = realloc(track->album_name, strlen(album) + 1);
+	strcpy(track->album_name, album);
 
-	track->name = realloc(track->name, (track->title? strlen(track->title): 0) + 3 + (track->album? strlen(track->album): 0) + 1);
+	track->name = realloc(track->name, (track->title? strlen(track->title): 0) + 3 + (track->album_name? strlen(track->album_name): 0) + 1);
 
 	if(track->title) {
 		strcpy(track->name, track->title);
 		strcat(track->name, " - ");
-		strcat(track->name, track->album);
+		strcat(track->name, track->album_name);
 	}
 }
 
@@ -121,8 +129,8 @@ char *track_get_name(sp_track *track) {
 }
 
 
-void track_set_album_id(sp_track *track, unsigned char id[16]) {
-	memcpy(track->album_id, id, sizeof(track->album_id));
+void track_set_album(sp_track *track, sp_album *album) {
+	track->album = album;
 }
 
 
@@ -210,7 +218,7 @@ void track_garbage_collect(sp_session *session) {
 			continue;
 
 		DSFYDEBUG("Freeing track %p because of zero ref_count\n", track);
-		track_free(session, track);
+		track_free(track);
 	}
 
 	hashtable_iterator_free(iter);
@@ -237,16 +245,16 @@ int track_save_metadata_to_disk(sp_session *session, char *filename) {
 
 		fwrite(track->id, sizeof(track->id), 1, fd);
 		fwrite(track->file_id, sizeof(track->file_id), 1, fd);
-		fwrite(track->album_id, sizeof(track->album_id), 1, fd);
+		fwrite(track->album->id, sizeof(track->album->id), 1, fd);
 		fwrite(track->cover_id, sizeof(track->cover_id), 1, fd);
 		
 		len = (track->title? strlen(track->title): 0);
 		fwrite(&len, 1, 1, fd);
 		fwrite(track->title, len, 1, fd);
 
-		len = (track->album? strlen(track->album): 0);
+		len = (track->album_name? strlen(track->album_name): 0);
 		fwrite(&len, 1, 1, fd);
-		fwrite(track->album, len, 1, fd);
+		fwrite(track->album_name, len, 1, fd);
 
 		num = htons(track->index);
 		fwrite(&num, sizeof(int), 1, fd);
@@ -269,6 +277,7 @@ int track_load_metadata_from_disk(sp_session *session, char *filename) {
 	unsigned int num;
 	char buf[256 + 1];
 	sp_track *track;
+	sp_album *album;
 
 	if((fd = fopen(filename, "r")) == NULL)
 		return -1;
@@ -285,9 +294,11 @@ int track_load_metadata_from_disk(sp_session *session, char *filename) {
 		else
 			break;
 
-
-		if(fread(id16, sizeof(id16), 1, fd) == 1)
-			track_set_album_id(track, id16);
+		if(fread(id16, sizeof(id16), 1, fd) == 1) {
+			album = sp_album_add(session, id16);
+			track_set_album(track, album);
+			sp_album_add_ref(album);
+		}
 		else
 			break;
 
@@ -308,7 +319,7 @@ int track_load_metadata_from_disk(sp_session *session, char *filename) {
 		if(fread(&len, 1, 1, fd) == 1) {
 			if(len && fread(buf, len, 1, fd) == 1) {
 				buf[len] = 0;
-				track_set_album(track, buf);
+				track_set_album_name(track, buf);
 			}
 		}
 		else

@@ -151,6 +151,8 @@ int request_set_result(sp_session *session, struct request *req, sp_error error,
 
 /* For selecting which requests we should notify the main thread about */
 static void request_notify_main_thread(sp_session *session, struct request *request) {
+	sp_albumbrowse *alb;
+
 	switch(request->type) {
 	case REQ_TYPE_LOGIN:
 	case REQ_TYPE_LOGOUT:
@@ -166,6 +168,17 @@ static void request_notify_main_thread(sp_session *session, struct request *requ
 
 	case REQ_TYPE_PLAYLIST_LOAD_PLAYLIST:
 		/* FIXME: Callback processing here? */
+		break;
+
+	case REQ_TYPE_BROWSE_ALBUM:
+		alb = *(sp_albumbrowse **)request->input;
+
+		if(alb->callback)
+			alb->callback(alb, alb->userdata);
+
+		break;
+
+	case REQ_TYPE_BROWSE_TRACK:
 		break;
 
 	default:

@@ -1,14 +1,14 @@
 #ifndef LIBOPENSPOTIFY_TRACK_H
 #define LIBOPENSPOTIFY_TRACK_H
 
-#include "sp_opaque.h"
+#include <spotify/api.h>
 
 sp_track *track_add(sp_session *session, unsigned char *id);
-void track_free(sp_session *session, sp_track *track);
+void track_free(sp_track *track);
 void track_set_title(sp_track *track, char *title);
-void track_set_album(sp_track *track, char *album);
+void track_set_album_name(sp_track *track, char *album_name);
 char *track_get_name(sp_track *track);
-void track_set_album_id(sp_track *track, unsigned char id[16]);
+void track_set_album(sp_track *track, sp_album *album);
 void track_set_cover_id(sp_track *track, unsigned char id[20]);
 void track_set_file_id(sp_track *track, unsigned char id[20]);
 void track_set_loaded(sp_track *track, int loaded);

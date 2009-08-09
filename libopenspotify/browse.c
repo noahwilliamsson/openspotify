@@ -4,7 +4,7 @@
  * Program flow:
  *
  * + network_thread()
- * +--+ browse_process(REQ_TYPE_PLAYLIST_LOAD_CONTAINER)
+ * +--+ browse_process(REQ_TYPE_BROWSE_TRACK)
  * |  +--+ browse_send_browsetrack_request()
  * |  |  +--+ cmd_getplaylist()
  * |  |     +--+ channel_register() with callback browse_callback()
@@ -30,6 +30,7 @@
 #include <assert.h>
 #include <string.h>
 
+#include "album.h"
 #include "buf.h"
 #include "channel.h"
 #include "commands.h"
@@ -67,6 +68,12 @@ int browse_process(sp_session *session, struct request *req) {
 
 		/* Send request (CMD_BROWSE) to load track data. */
 		ret = browse_send_browsetrack_request(session, req, 0);
+	}
+	else if(req->type == REQ_TYPE_BROWSE_ALBUM) {
+		req->next_timeout = get_millisecs() + PLAYLIST_RETRY_TIMEOUT*1000;
+		
+		DSFYDEBUG("REQ_TYPE_BROWSE_ALBUM is not yet implemented\n");
+		return request_set_result(session, req, SP_ERROR_OTHER_PERMAMENT, NULL);
 	}
 
 
@@ -198,6 +205,7 @@ static int browse_parse_compressed_xml(sp_session *session, sp_playlist *playlis
 	unsigned char id[20];
 	struct buf *uncompressed;
 	ezxml_t root, track_node, node;
+	sp_album *album;
 	sp_track *track;
 
 
@@ -221,12 +229,14 @@ static int browse_parse_compressed_xml(sp_session *session, sp_playlist *playlis
 			track_set_title(track, node->txt);
 
 		if((node = ezxml_get(track_node, "album", -1)) != NULL)
-			track_set_album(track, node->txt);
+			track_set_album_name(track, node->txt);
 
 
 		if((node = ezxml_get(track_node, "album-id", -1)) != NULL) {
 			hex_ascii_to_bytes(node->txt, id, 16);
-			track_set_album_id(track, id);
+			album = sp_album_add(session, id);
+			track_set_album(track, album);
+			sp_album_add_ref(album);
 		}
 
 		if((node = ezxml_get(track_node, "cover", -1)) != NULL) {

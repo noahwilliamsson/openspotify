@@ -35,6 +35,34 @@ struct sp_album {
 
 	int is_loaded;
 	int ref_count;
+
+	struct hashtable *hashtable;
+};
+
+
+/* sp_albumbrowse.c */
+struct sp_albumbrowse {
+	sp_album *album;
+
+	sp_artist *artist;
+
+	int num_tracks;
+	sp_track **tracks;
+
+	int num_copyrights;
+	char **copyrights;
+
+	char *review;
+
+	albumbrowse_complete_cb *callback;
+	void *userdata;
+
+	sp_error error;
+
+	int is_loaded;
+	int ref_count;
+
+	struct hashtable *hashtable;
 };
 
 
@@ -108,12 +136,13 @@ struct sp_playlistcontainer {
 struct sp_track {
 	unsigned char id[16];
 	unsigned char file_id[20];
-	unsigned char album_id[16];
 	unsigned char cover_id[20];
 
 	char *title;
-	char *album;
+	char *album_name;
 	char *name;
+
+	sp_album *album;
 
 	int num_artists;
 	sp_artist **artists;
@@ -129,6 +158,8 @@ struct sp_track {
 	sp_error error;
 
 	int ref_count;
+
+	struct hashtable *hashtable;
 };
 
 
@@ -191,7 +222,9 @@ struct sp_session {
 	/* For keeping track of playlists and related states */
 	struct playlist_ctx *playlist_ctx;
 
-	/* Tracks memory management */
+	/* Album/artist/track memory memory management */
+	struct hashtable *hashtable_albumbrowses;
+	struct hashtable *hashtable_albums;
 	struct hashtable *hashtable_tracks;
 
 
