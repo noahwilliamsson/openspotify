@@ -31,7 +31,6 @@
 		4F5328E2103092D2004139C9 /* hashtable.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F53288A103092D2004139C9 /* hashtable.h */; };
 		4F5328E4103092D2004139C9 /* hmac.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F53288C103092D2004139C9 /* hmac.c */; };
 		4F5328E5103092D2004139C9 /* hmac.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F53288D103092D2004139C9 /* hmac.h */; };
-		4F5328E7103092D2004139C9 /* libopenspotify.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F53288F103092D2004139C9 /* libopenspotify.dylib */; };
 		4F5328E9103092D2004139C9 /* link.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F532891103092D2004139C9 /* link.c */; };
 		4F5328EA103092D2004139C9 /* link.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F532892103092D2004139C9 /* link.h */; };
 		4F5328EC103092D2004139C9 /* login.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F532894103092D2004139C9 /* login.c */; };
@@ -64,6 +63,9 @@
 		4F53291A103092D2004139C9 /* util.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F5328C3103092D2004139C9 /* util.c */; };
 		4F53291B103092D2004139C9 /* util.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F5328C4103092D2004139C9 /* util.h */; };
 		4F53295810309451004139C9 /* simple.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F53295310309451004139C9 /* simple.c */; };
+		4FFD4A921030A2AB00935706 /* appkey.c in Sources */ = {isa = PBXBuildFile; fileRef = 4FFD4A871030A2AB00935706 /* appkey.c */; };
+		4FFD4A941030A2AB00935706 /* browse.c in Sources */ = {isa = PBXBuildFile; fileRef = 4FFD4A8A1030A2AB00935706 /* browse.c */; };
+		4FFD4A971030A2AB00935706 /* session.c in Sources */ = {isa = PBXBuildFile; fileRef = 4FFD4A901030A2AB00935706 /* session.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -72,6 +74,13 @@
 			containerPortal = 4FE175A11030903A00FA72BC /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 4FE175AD1030904700FA72BC;
+			remoteInfo = openspotify;
+		};
+		4FFD4A821030A18C00935706 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4FE175A11030903A00FA72BC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4FE175AD1030904700FA72BC /* openspotify */;
 			remoteInfo = openspotify;
 		};
 /* End PBXContainerItemProxy section */
@@ -101,7 +110,6 @@
 		4F53288A103092D2004139C9 /* hashtable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hashtable.h; sourceTree = "<group>"; };
 		4F53288C103092D2004139C9 /* hmac.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = hmac.c; sourceTree = "<group>"; };
 		4F53288D103092D2004139C9 /* hmac.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hmac.h; sourceTree = "<group>"; };
-		4F53288F103092D2004139C9 /* libopenspotify.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libopenspotify.dylib; sourceTree = "<group>"; };
 		4F532891103092D2004139C9 /* link.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = link.c; sourceTree = "<group>"; };
 		4F532892103092D2004139C9 /* link.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = link.h; sourceTree = "<group>"; };
 		4F532894103092D2004139C9 /* login.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = login.c; sourceTree = "<group>"; };
@@ -139,6 +147,11 @@
 		4F53294C10309451004139C9 /* despotify-appkey.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "despotify-appkey.h"; sourceTree = "<group>"; };
 		4F53295310309451004139C9 /* simple.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = simple.c; sourceTree = "<group>"; };
 		4F53295F103094BD004139C9 /* openspotify-simple */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "openspotify-simple"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4FFD4A7E1030A18700935706 /* browse */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = browse; sourceTree = BUILT_PRODUCTS_DIR; };
+		4FFD4A871030A2AB00935706 /* appkey.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = appkey.c; sourceTree = "<group>"; };
+		4FFD4A8A1030A2AB00935706 /* browse.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = browse.c; sourceTree = "<group>"; };
+		4FFD4A8D1030A2AB00935706 /* debug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = debug.h; sourceTree = "<group>"; };
+		4FFD4A901030A2AB00935706 /* session.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = session.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -146,11 +159,17 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4F5328E7103092D2004139C9 /* libopenspotify.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		4FE175B41030905C00FA72BC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4FFD4A7C1030A18700935706 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -202,7 +221,6 @@
 				4F53288A103092D2004139C9 /* hashtable.h */,
 				4F53288C103092D2004139C9 /* hmac.c */,
 				4F53288D103092D2004139C9 /* hmac.h */,
-				4F53288F103092D2004139C9 /* libopenspotify.dylib */,
 				4F532891103092D2004139C9 /* link.c */,
 				4F532892103092D2004139C9 /* link.h */,
 				4F532894103092D2004139C9 /* login.c */,
@@ -252,6 +270,7 @@
 		4FE1759F1030903A00FA72BC = {
 			isa = PBXGroup;
 			children = (
+				4FFD4A861030A2AB00935706 /* browse */,
 				4F53294A10309451004139C9 /* openspotify-simple */,
 				4F53286C103092D2004139C9 /* libopenspotify */,
 				4F532868103092B0004139C9 /* include */,
@@ -264,8 +283,21 @@
 			children = (
 				4F5328E8103092D2004139C9 /* libopenspotify.dylib */,
 				4F53295F103094BD004139C9 /* openspotify-simple */,
+				4FFD4A7E1030A18700935706 /* browse */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		4FFD4A861030A2AB00935706 /* browse */ = {
+			isa = PBXGroup;
+			children = (
+				4FFD4A871030A2AB00935706 /* appkey.c */,
+				4FFD4A8A1030A2AB00935706 /* browse.c */,
+				4FFD4A8D1030A2AB00935706 /* debug.h */,
+				4FFD4A901030A2AB00935706 /* session.c */,
+			);
+			name = browse;
+			path = examples/browse;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -340,6 +372,23 @@
 			productReference = 4F53295F103094BD004139C9 /* openspotify-simple */;
 			productType = "com.apple.product-type.tool";
 		};
+		4FFD4A7D1030A18700935706 /* browse */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4FFD4A841030A1AB00935706 /* Build configuration list for PBXNativeTarget "browse" */;
+			buildPhases = (
+				4FFD4A7B1030A18700935706 /* Sources */,
+				4FFD4A7C1030A18700935706 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4FFD4A831030A18C00935706 /* PBXTargetDependency */,
+			);
+			name = browse;
+			productName = browse;
+			productReference = 4FFD4A7E1030A18700935706 /* browse */;
+			productType = "com.apple.product-type.tool";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -358,6 +407,7 @@
 			targets = (
 				4FE175AD1030904700FA72BC /* openspotify */,
 				4FE175B51030905C00FA72BC /* openspotify-simple */,
+				4FFD4A7D1030A18700935706 /* browse */,
 			);
 		};
 /* End PBXProject section */
@@ -408,6 +458,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		4FFD4A7B1030A18700935706 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4FFD4A921030A2AB00935706 /* appkey.c in Sources */,
+				4FFD4A941030A2AB00935706 /* browse.c in Sources */,
+				4FFD4A971030A2AB00935706 /* session.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -415,6 +475,11 @@
 			isa = PBXTargetDependency;
 			target = 4FE175AD1030904700FA72BC /* openspotify */;
 			targetProxy = 4F53296C10309692004139C9 /* PBXContainerItemProxy */;
+		};
+		4FFD4A831030A18C00935706 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4FE175AD1030904700FA72BC /* openspotify */;
+			targetProxy = 4FFD4A821030A18C00935706 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -545,6 +610,52 @@
 			};
 			name = Release;
 		};
+		4FFD4A801030A18800935706 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				OTHER_CFLAGS = (
+					"-Iinclude",
+					"-ggdb",
+				);
+				OTHER_LDFLAGS = (
+					"-Llibopenspotify",
+					"-lopenspotify",
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = browse;
+			};
+			name = Debug;
+		};
+		4FFD4A811030A18800935706 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				OTHER_CFLAGS = (
+					"-Iinclude",
+					"-ggdb",
+				);
+				OTHER_LDFLAGS = (
+					"-Llibopenspotify",
+					"-lopenspotify",
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = browse;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -571,6 +682,15 @@
 			buildConfigurations = (
 				4FE175B81030905C00FA72BC /* Debug */,
 				4FE175B91030905C00FA72BC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4FFD4A841030A1AB00935706 /* Build configuration list for PBXNativeTarget "browse" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4FFD4A801030A18800935706 /* Debug */,
+				4FFD4A811030A18800935706 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
