@@ -217,7 +217,7 @@ static void sigIgn(int signo)
 #endif
 
 
-int __cdecl main(int argc, char **argv)
+int main(int argc, char **argv)
 {
 	sp_session_config config;
 	sp_error error;
