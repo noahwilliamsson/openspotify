@@ -152,5 +152,6 @@ SP_LIBEXPORT(void) sp_albumbrowse_release(sp_albumbrowse *alb) {
 		sp_album_release(alb->album);
 
 
-	/* FIXME: free artist */
+	if(alb->artist)
+		sp_artist_release(alb->artist);
 }
