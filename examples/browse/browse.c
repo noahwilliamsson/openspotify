@@ -132,7 +132,7 @@ static void try_terminate(void)
  * @param browse    The browse result object that is now done
  * @param userdata  The opaque pointer given to sp_albumbrowse_create()
  */
-static void album_complete(sp_albumbrowse *browse, void *userdata)
+static void SP_CALLCONV album_complete(sp_albumbrowse *browse, void *userdata)
 {
 	if (browse && SP_ERROR_OK == sp_albumbrowse_error(browse))
 		print_albumbrowse(browse);
@@ -151,7 +151,7 @@ static void album_complete(sp_albumbrowse *browse, void *userdata)
  * @param browse    The browse result object that is now done
  * @param userdata  The opaque pointer given to sp_artistbrowse_create()
  */
-static void artist_complete(sp_artistbrowse *browse, void *userdata)
+static void SP_CALLCONV artist_complete(sp_artistbrowse *browse, void *userdata)
 {
 	if (browse && SP_ERROR_OK == sp_artistbrowse_error(browse))
 		print_artistbrowse(browse);
@@ -170,7 +170,7 @@ static void artist_complete(sp_artistbrowse *browse, void *userdata)
  * Not used in this example (but available to be able to reuse the session.c file
  * for other examples.)
  */
-void metadata_updated(sp_session *session)
+void SP_CALLCONV metadata_updated(sp_session *session)
 {
 }
 

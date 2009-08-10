@@ -41,7 +41,7 @@ typedef unsigned char uint8_t;
 
 /* --- Functions --- */
 /// External function called when some metadata has been updated.
-extern void metadata_updated(sp_session *session);
+extern void SP_CALLCONV metadata_updated(sp_session *session);
 /// External function called when successfully logged in. We do this to allow
 /// the session driver itself to be reused for other examples.
 extern void session_ready(sp_session *session);
@@ -62,7 +62,8 @@ int g_exit_code = -1;
 /// A handle to the main thread, needed for synchronization between callbacks
 /// and the main loop.
 #ifdef _WIN32
-HANDLE g_main_thread;
+static HANDLE g_main_thread = (HANDLE)0;  /* -1 is a valid HANDLE, 0 is not */
+static HANDLE g_notify_event;
 #else
 static pthread_t g_main_thread = -1;
 #endif
@@ -75,7 +76,7 @@ static pthread_t g_main_thread = -1;
  *
  * @sa sp_session_callbacks#connection_error
  */
-static void connection_error(sp_session *session, sp_error error)
+static void SP_CALLCONV connection_error(sp_session *session, sp_error error)
 {
 	fprintf(stderr, "connection to Spotify failed: %s\n",
 	                sp_error_message(error));
@@ -87,7 +88,7 @@ static void connection_error(sp_session *session, sp_error error)
  *
  * @sa sp_session_callbacks#logged_in
  */
-static void logged_in(sp_session *session, sp_error error)
+static void  SP_CALLCONV logged_in(sp_session *session, sp_error error)
 {
 	sp_user *me;
 	const char *my_name;
@@ -115,7 +116,7 @@ static void logged_in(sp_session *session, sp_error error)
  *
  * @sa sp_session_callbacks#logged_out
  */
-static void logged_out(sp_session *session)
+static void SP_CALLCONV logged_out(sp_session *session)
 {
 	if (g_exit_code < 0)
 		g_exit_code = 0;
@@ -130,9 +131,13 @@ static void logged_out(sp_session *session)
  *
  * @sa sp_session_callbacks#notify_main_thread
  */
-static void notify_main_thread(sp_session *session)
+static void SP_CALLCONV notify_main_thread(sp_session *session)
 {
+#ifdef _WIN32
+	PulseEvent(g_notify_event);
+#else
 	pthread_kill(g_main_thread, SIGIO);
+#endif
 }
 
 /**
@@ -140,7 +145,7 @@ static void notify_main_thread(sp_session *session)
  *
  * @sa sp_session_callbacks#log_message
  */
-static void log_message(sp_session *session, const char *data)
+static void SP_CALLCONV log_message(sp_session *session, const char *data)
 {
 	fprintf(stderr, "log_message: %s\n", data);
 }
@@ -176,18 +181,28 @@ static sp_session_callbacks g_callbacks = {
  */
 static void loop(sp_session *session)
 {
+#ifndef _WIN32
 	sigset_t sigset;
 
 	sigemptyset(&sigset);
 	sigaddset(&sigset, SIGIO);
+#endif
 
 	while (g_exit_code < 0) {
 		int timeout = -1;
 
+#ifndef _WIN32
 		pthread_sigmask(SIG_BLOCK, &sigset, NULL);
+#endif
+
 		sp_session_process_events(session, &timeout);
+
+#ifdef _WIN32
+		WaitForSingleObject(g_notify_event, timeout);
+#else
 		pthread_sigmask(SIG_UNBLOCK, &sigset, NULL);
 		usleep(timeout * 1000);
+#endif
 	}
 }
 
@@ -195,12 +210,14 @@ static void loop(sp_session *session)
 /**
  * A dummy function to ignore SIGIO.
  */
+#ifndef _WIN32
 static void sigIgn(int signo)
 {
 }
+#endif
 
 
-int main(int argc, char **argv)
+int __cdecl main(int argc, char **argv)
 {
 	sp_session_config config;
 	sp_error error;
@@ -209,14 +226,21 @@ int main(int argc, char **argv)
 	// Sending passwords on the command line is bad in general.
 	// We do it here for brevity.
 	if (argc < 3 || argv[1][0] == '-') {
-		fprintf(stderr, "usage: %s <username> <password>\n",
-		                basename(argv[0]));
+#ifdef _WIN32
+		fprintf(stderr, "usage: %s <username> <password>\n", argv[0]);
+#else
+		fprintf(stderr, "usage: %s <username> <password>\n", basename(argv[0]));
+#endif
 		return 1;
 	}
 
 	// Setup for waking up the main thread in notify_main_thread()
+#ifdef _WIN32
+	g_notify_event = CreateEvent(NULL, FALSE, FALSE, NULL);
+#else
 	g_main_thread = pthread_self();
 	signal(SIGIO, &sigIgn);
+#endif
 
 	// Always do this. It allows libspotify to check for
 	// header/library inconsistencies.
