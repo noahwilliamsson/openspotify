@@ -160,38 +160,18 @@ static void request_notify_main_thread(sp_session *session, struct request *requ
 	case REQ_TYPE_LOGOUT:
 	case REQ_TYPE_PLAY_TOKEN_LOST:
 	case REQ_TYPE_NOTIFY:
+	case REQ_TYPE_BROWSE_ALBUM:
+	case REQ_TYPE_BROWSE_ARTIST:
+	case REQ_TYPE_BROWSE_TRACK:
+	case REQ_TYPE_IMAGE:
 		session->callbacks->notify_main_thread(session);
-		DSFYDEBUG("Notified main thread via session->callbacks->notify_main_thread()\n");
+		DSFYDEBUG("Notified main thread for <type %s>\n", REQUEST_TYPE_STR(request->type));
 		break;
 
 	case REQ_TYPE_PLAYLIST_LOAD_CONTAINER:
-		/* FIXME: Callback processing here? */
 		break;
 
 	case REQ_TYPE_PLAYLIST_LOAD_PLAYLIST:
-		/* FIXME: Callback processing here? */
-		break;
-
-	case REQ_TYPE_BROWSE_ALBUM:
-		alb = *(sp_albumbrowse **)request->input;
-
-		if(alb->callback)
-			alb->callback(alb, alb->userdata);
-
-		break;
-
-	case REQ_TYPE_BROWSE_ARTIST:
-		arb = *(sp_artistbrowse **)request->input;
-
-		if(arb->callback)
-			arb->callback(arb, arb->userdata);
-
-		break;
-
-	case REQ_TYPE_BROWSE_TRACK:
-		break;
-
-	case REQ_TYPE_IMAGE:
 		break;
 
 	default:

@@ -166,6 +166,9 @@ SP_LIBEXPORT(void *) sp_session_userdata(sp_session *session) {
 
 SP_LIBEXPORT(void) sp_session_process_events(sp_session *session, int *next_timeout) {
 	struct request *request;
+	sp_albumbrowse *alb;
+	sp_artistbrowse *arb;
+	sp_image *image;
 
 	while((request = request_fetch_next_result(session, next_timeout)) != NULL) {
 		DSFYDEBUG("Processing finished request of type %d, error %d\n",
@@ -193,6 +196,26 @@ SP_LIBEXPORT(void) sp_session_process_events(sp_session *session, int *next_time
 
 			/* We'll leak memory here for each login made :( */
 			session->callbacks->message_to_user(session, request->output);
+			break;
+
+		case REQ_TYPE_BROWSE_ALBUM:
+			alb = *(sp_albumbrowse **)request->input;
+			if(alb->callback)
+				alb->callback(alb, alb->userdata);
+
+			break;
+
+		case REQ_TYPE_BROWSE_ARTIST:
+	                arb = *(sp_artistbrowse **)request->input;
+	                if(arb->callback)
+	                        arb->callback(arb, arb->userdata);
+
+			break;
+
+		case REQ_TYPE_IMAGE:
+			image = *(sp_image **)image;
+			if(image->callback)
+				image->callback(image, image->userdata);
 			break;
 
 		default:
