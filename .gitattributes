@@ -1,1 +1,5 @@
+# Visual Studio
 *.vcproj -crlf
+
+# Xcode
+*.pbxproj -crlf -diff -merge

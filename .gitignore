@@ -13,3 +13,9 @@ libopenspotify.so
 libopenspotify.dylib
 simple
 despotify.log
+
+# Xcode and Mac OS X
+build/*
+*.pbxuser
+*.mode1v3
+.DS_Store
