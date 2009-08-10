@@ -89,7 +89,7 @@ struct callback_ctx {
 struct playlist_ctx *playlist_create(void) {
 	struct playlist_ctx *playlist_ctx;
 
-	playlist_ctx = malloc(sizeof(playlist_ctx));
+	playlist_ctx = malloc(sizeof(struct playlist_ctx));
 	if(playlist_ctx == NULL)
 		return NULL;
 
