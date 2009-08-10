@@ -65,7 +65,7 @@ int g_exit_code = -1;
 static HANDLE g_main_thread = (HANDLE)0;  /* -1 is a valid HANDLE, 0 is not */
 static HANDLE g_notify_event;
 #else
-static pthread_t g_main_thread = -1;
+static pthread_t g_main_thread = (pthread_t)0;
 #endif
 
 
@@ -223,15 +223,26 @@ int main(int argc, char **argv)
 	sp_error error;
 	sp_session *session;
 
-	// Sending passwords on the command line is bad in general.
-	// We do it here for brevity.
-	if (argc < 3 || argv[1][0] == '-') {
-#ifdef _WIN32
-		fprintf(stderr, "usage: %s <username> <password>\n", argv[0]);
-#else
-		fprintf(stderr, "usage: %s <username> <password>\n", basename(argv[0]));
-#endif
-		return 1;
+	char username[256];
+	char password[256];
+	char *ptr;
+	
+	if(argc == 1) {
+		printf("Username: ");
+		ptr = fgets(username, sizeof(username) - 1, stdin);
+		while(*ptr) { if(*ptr == '\r' || *ptr == '\n') *ptr = 0; ptr++; }
+		
+		printf("Password: ");
+		ptr = fgets(password, sizeof(password) - 1, stdin);
+		while(*ptr) { if(*ptr == '\r' || *ptr == '\n') *ptr = 0; ptr++; }
+	}
+	else if(argc == 3) {
+		strcpy(username, argv[1]);
+		strcpy(password, argv[2]);
+	}
+	else {
+		printf("Usage: browse <username> <password>\n");
+		return -1;
 	}
 
 	// Setup for waking up the main thread in notify_main_thread()
@@ -275,7 +286,7 @@ int main(int argc, char **argv)
 	}
 
 	// Login using the credentials given on the command line.
-	error = sp_session_login(session, argv[1], argv[2]);
+	error = sp_session_login(session, username, password);
 
 	if (SP_ERROR_OK != error) {
 		fprintf(stderr, "failed to login: %s\n",
