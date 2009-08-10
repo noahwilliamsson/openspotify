@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 42;
+	objectVersion = 44;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -71,7 +71,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 4FE175A11030903A00FA72BC /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 4FE175AD1030904700FA72BC /* openspotify */;
+			remoteGlobalIDString = 4FE175AD1030904700FA72BC;
 			remoteInfo = openspotify;
 		};
 /* End PBXContainerItemProxy section */
@@ -345,8 +345,11 @@
 /* Begin PBXProject section */
 		4FE175A11030903A00FA72BC /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+			};
 			buildConfigurationList = 4FE175A41030903A00FA72BC /* Build configuration list for PBXProject "openspotify" */;
-			compatibilityVersion = "Xcode 2.4";
+			compatibilityVersion = "Xcode 3.0";
 			hasScannedForEncodings = 0;
 			mainGroup = 4FE1759F1030903A00FA72BC;
 			productRefGroup = 4FE175AF1030904700FA72BC /* Products */;
@@ -420,6 +423,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
+				ONLY_ACTIVE_ARCH = NO;
 			};
 			name = Debug;
 		};
@@ -427,6 +431,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
+				ONLY_ACTIVE_ARCH = NO;
 			};
 			name = Release;
 		};
