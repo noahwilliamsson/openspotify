@@ -69,6 +69,7 @@ SP_LIBEXPORT(void) sp_album_release(sp_album *album) {
  */
 sp_album *sp_album_add(sp_session *session, unsigned char id[16]) {
 	sp_album *album;
+	void **container;
 
 	album = (sp_album *)hashtable_find(session->hashtable_albums, id);
 	if(album)
@@ -88,6 +89,10 @@ sp_album *sp_album_add(sp_session *session, unsigned char id[16]) {
 
 	album->hashtable = session->hashtable_albums;
 	hashtable_insert(album->hashtable, album->id, album);
+
+	container = (void **)malloc(sizeof(void *));
+	*container = album;
+	request_post(session, REQ_TYPE_BROWSE_ALBUM, container);
 
 	return album;
 }
