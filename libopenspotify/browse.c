@@ -206,6 +206,7 @@ static int browse_callback(CHANNEL *ch, unsigned char *payload, unsigned short l
 }
 
 
+/* FIXME: This should be moved into sp_track.c */
 static int browse_parse_compressed_xml(sp_session *session, sp_playlist *playlist) {
 	const char *idstr;
 	unsigned char id[20];
@@ -213,6 +214,7 @@ static int browse_parse_compressed_xml(sp_session *session, sp_playlist *playlis
 	ezxml_t root, track_node, node;
 	sp_album *album;
 	sp_track *track;
+	sp_image *image;
 
 
 	uncompressed = despotify_inflate(playlist->buf->ptr, playlist->buf->len);
@@ -229,43 +231,45 @@ static int browse_parse_compressed_xml(sp_session *session, sp_playlist *playlis
 			continue;
 
 		hex_ascii_to_bytes(node->txt, id, 16);
-		track = track_add(session, id);
+		track = osfy_track_add(session, id);
 
 		if((node = ezxml_get(track_node, "title", -1)) != NULL)
-			track_set_title(track, node->txt);
+			osfy_track_title_set(track, node->txt);
 
 		if((node = ezxml_get(track_node, "album", -1)) != NULL)
-			track_set_album_name(track, node->txt);
+			osfy_track_album_name_set(track, node->txt);
 
 
 		if((node = ezxml_get(track_node, "album-id", -1)) != NULL) {
 			hex_ascii_to_bytes(node->txt, id, 16);
 			album = sp_album_add(session, id);
-			track_set_album(track, album);
+			osfy_track_album_set(track, album);
 			sp_album_add_ref(album);
 		}
 
 		if((node = ezxml_get(track_node, "cover", -1)) != NULL) {
 			hex_ascii_to_bytes(node->txt, id, 20);
-			track_set_cover_id(track, id);
+			image = sp_image_create(session, id);
+			osfy_track_image_set(track, image);
+			sp_image_add_ref(image);
 		}
 
 		node = ezxml_get(track_node, "files", 0, "file", -1);
 		if(node && (idstr = ezxml_attr(node, "id")) != NULL) {
 			hex_ascii_to_bytes(idstr, id, 20);
-			track_set_file_id(track, id);
+			osfy_track_file_id_set(track, id);
 
 			/* FIXME: Also check country restrictions */
-			track_set_playable(track, 1);
+			osfy_track_playable_set(track, 1);
 		}
 
 		if((node = ezxml_get(track_node, "length", -1)) != NULL)
-			track_set_duration(track, atoi(node->txt));
+			osfy_track_duration_set(track, atoi(node->txt));
 
 		if((node = ezxml_get(track_node, "disc", -1)) != NULL)
-			track_set_disc(track, atoi(node->txt));
+			osfy_track_disc_set(track, atoi(node->txt));
 
-		track_set_loaded(track, 1);
+		osfy_track_loaded_set(track, 1);
 	}
 
 	ezxml_free(root);

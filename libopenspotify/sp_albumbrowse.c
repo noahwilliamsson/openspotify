@@ -129,7 +129,7 @@ SP_LIBEXPORT(void) sp_albumbrowse_release(sp_albumbrowse *alb) {
 
 
 	for(i = 0; i < alb->num_tracks; i++)
-		track_free(alb->tracks[i]);
+		sp_track_release(alb->tracks[i]);
 
 	if(alb->num_tracks)
 		free(alb->tracks);

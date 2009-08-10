@@ -127,7 +127,7 @@ void playlist_release(struct playlist_ctx *playlist_ctx) {
 			}
 
 			for(i = 0; i < playlist->num_tracks; i++)
-				track_del_ref(playlist->tracks[i]);
+				sp_track_release(playlist->tracks[i]);
 
 			if(playlist->num_tracks)
 				free(playlist->tracks);
@@ -423,13 +423,13 @@ static int playlist_parse_playlist_xml(sp_session *session, sp_playlist *playlis
 	
 	for(idstr = strtok(id_list, ",\n"); idstr; idstr = strtok(NULL, ",\n")) {
 		hex_ascii_to_bytes(idstr, track_id, sizeof(track_id));
-		track = track_add(session, track_id);
+		track = osfy_track_add(session, track_id);
 
 		playlist->tracks = (sp_track **)realloc(playlist->tracks, (playlist->num_tracks + 1) * sizeof(sp_track *));
 		playlist->tracks[playlist->num_tracks] = track;
 		playlist->num_tracks++;
 
-		track_add_ref(track);
+		sp_track_add_ref(track);
 	}
 	
 	ezxml_free(root);
