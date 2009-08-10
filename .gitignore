@@ -8,6 +8,7 @@ Release
 *.ncb
 *.suo
 *.user
+*.cache
 libopenspotify.so
 libopenspotify.dylib
 simple
