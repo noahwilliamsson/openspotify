@@ -218,7 +218,7 @@ SP_LIBEXPORT(void) sp_session_process_events(sp_session *session, int *next_time
 			break;
 
 		case REQ_TYPE_IMAGE:
-			image = *(sp_image **)image;
+			image = *(sp_image **)request->input;
 			if(image->callback)
 				image->callback(image, image->userdata);
 			break;
