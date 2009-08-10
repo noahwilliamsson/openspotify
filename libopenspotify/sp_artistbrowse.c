@@ -16,7 +16,7 @@ SP_LIBEXPORT(sp_artistbrowse *) sp_artistbrowse_create(sp_session *session, sp_a
 	if(arb)
 		return arb;
 
-	arb = malloc(sizeof(arb));
+	arb = malloc(sizeof(sp_artistbrowse));
 	if(arb == NULL)
 		return NULL;
 
