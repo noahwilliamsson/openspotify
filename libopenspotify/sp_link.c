@@ -212,7 +212,7 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_playlist (sp_playlist *playlist) {
 }
 
 SP_LIBEXPORT(int) sp_link_as_string (sp_link *link, char *buffer, int buffer_size) {
-	unsigned char uri[23];
+	char uri[23];
 
 	if(link == NULL || buffer == NULL || buffer_size < 0)
 		return -1;
