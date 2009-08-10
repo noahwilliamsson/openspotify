@@ -4,6 +4,7 @@
 #include <spotify/api.h>
 
 #include "debug.h"
+#include "request.h"
 #include "sp_opaque.h"
 
 SP_LIBEXPORT(const char *) sp_artist_name(sp_artist *artist) {
@@ -46,6 +47,7 @@ SP_LIBEXPORT(void) sp_artist_release(sp_artist *artist) {
  */
 sp_artist *osfy_artist_add(sp_session *session, unsigned char id[16]) {
 	sp_artist *artist;
+	void **container;
 
 	artist = (sp_artist *)hashtable_find(session->hashtable_artists, id);
 	if(artist)
@@ -64,6 +66,10 @@ sp_artist *osfy_artist_add(sp_session *session, unsigned char id[16]) {
 
 	artist->hashtable = session->hashtable_artists;
 	hashtable_insert(artist->hashtable, artist->id, artist);
+
+	container = (void **)malloc(sizeof(void *));
+	*container = artist;
+	request_post(session, REQ_TYPE_BROWSE_ARTIST, container);
 
 	return artist;
 }
