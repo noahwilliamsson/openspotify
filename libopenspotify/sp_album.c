@@ -21,7 +21,7 @@ SP_LIBEXPORT(sp_artist *) sp_album_artist(sp_album *album) {
 
 SP_LIBEXPORT(const byte *) sp_album_cover(sp_album *album) {
 
-	return album->image_id;
+	return album->image->id;
 }
 
 
@@ -55,6 +55,11 @@ SP_LIBEXPORT(void) sp_album_release(sp_album *album) {
 
 	if(album->name)
 		free(album->name);
+
+	if(album->image)
+		sp_image_release(album->image);
+
+	free(album);
 }
 
 
@@ -68,7 +73,8 @@ sp_album *sp_album_add(sp_session *session, unsigned char id[16]) {
 	album = malloc(sizeof(sp_album));
 
 	memcpy(album->id, id, sizeof(album->id));
-	memset(album->image_id, 0, sizeof(album->image_id));
+
+	album->image = NULL;
 
 	album->name = NULL;
 	album->year = -1;
