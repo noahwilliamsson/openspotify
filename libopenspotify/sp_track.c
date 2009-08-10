@@ -314,7 +314,9 @@ int osfy_track_metadata_save_to_disk(sp_session *session, char *filename) {
 
 		fwrite(track->id, sizeof(track->id), 1, fd);
 		fwrite(track->file_id, sizeof(track->file_id), 1, fd);
+		#if 0
 		fwrite(track->album->id, sizeof(track->album->id), 1, fd);
+		#endif
 		fwrite(track->image->id, sizeof(track->image->id), 1, fd);
 		
 		len = (track->title? strlen(track->title): 0);
@@ -346,7 +348,6 @@ int osfy_track_metadata_load_from_disk(sp_session *session, char *filename) {
 	unsigned int num;
 	char buf[256 + 1];
 	sp_track *track;
-	sp_album *album;
 	sp_image *image;
 
 	if((fd = fopen(filename, "r")) == NULL)
@@ -364,6 +365,7 @@ int osfy_track_metadata_load_from_disk(sp_session *session, char *filename) {
 		else
 			break;
 
+		#if 0
 		if(fread(id16, sizeof(id16), 1, fd) == 1) {
 			album = sp_album_add(session, id16);
 			track->album = album;
@@ -371,6 +373,7 @@ int osfy_track_metadata_load_from_disk(sp_session *session, char *filename) {
 		}
 		else
 			break;
+		#endif
 
 		if(fread(id20, sizeof(id20), 1, fd) == 1) {
 			image = sp_image_create(session, id20);
