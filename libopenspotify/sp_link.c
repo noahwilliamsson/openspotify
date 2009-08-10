@@ -273,24 +273,41 @@ SP_LIBEXPORT(sp_artist *) sp_link_as_artist (sp_link *link) {
 
 SP_LIBEXPORT(void) sp_link_add_ref (sp_link *link) {
 	++(link->refs);
+
+	switch(link->type) {
+	case SP_LINKTYPE_ALBUM:
+		sp_album_add_ref(link->data.album);
+		break;
+	case SP_LINKTYPE_ARTIST:
+		sp_artist_add_ref(link->data.artist);
+		break;
+	case SP_LINKTYPE_TRACK:
+		sp_track_add_ref(link->data.track);
+		break;
+	default:
+		break;
+	}
 }
 
 SP_LIBEXPORT(void) sp_link_release (sp_link *link) {
-	if(link != NULL && --(link->refs) <= 0) {
-		switch(link->type) {
-		case SP_LINKTYPE_ALBUM:
-			sp_album_release(link->data.album);
-			break;
-		case SP_LINKTYPE_ARTIST:
-			sp_artist_release(link->data.artist);
-			break;
-		case SP_LINKTYPE_TRACK:
-			sp_track_release(link->data.track);
-			break;
-		default:
-			break;
-		}
+	if(link == NULL)
+		return;
 
+	switch(link->type) {
+	case SP_LINKTYPE_ALBUM:
+		sp_album_release(link->data.album);
+		break;
+	case SP_LINKTYPE_ARTIST:
+		sp_artist_release(link->data.artist);
+		break;
+	case SP_LINKTYPE_TRACK:
+		sp_track_release(link->data.track);
+		break;
+	default:
+		break;
+	}
+
+	if(--(link->refs) <= 0) {
 		free(link);
 	}
 }
