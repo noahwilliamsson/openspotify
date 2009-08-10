@@ -65,6 +65,7 @@ SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_sess
 	s->hashtable_albumbrowses = hashtable_create(16);
 	s->hashtable_artistbrowses = hashtable_create(16);
 	s->hashtable_artists = hashtable_create(16);
+	s->hashtable_images = hashtable_create(20);
 	s->hashtable_tracks = hashtable_create(16);
 
 	/* Allocate memory for user info. */
@@ -286,6 +287,9 @@ SP_LIBEXPORT(sp_error) sp_session_release (sp_session *session) {
 
 	if(session->hashtable_artistbrowses)
 		hashtable_free(session->hashtable_artistbrowses);
+
+	if(session->hashtable_images)
+		hashtable_free(session->hashtable_images);
 
 	if(session->hashtable_tracks)
 		hashtable_free(session->hashtable_tracks);
