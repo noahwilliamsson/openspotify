@@ -47,6 +47,10 @@ SP_LIBEXPORT(void) sp_artist_release(sp_artist *artist) {
 sp_artist *osfy_artist_add(sp_session *session, unsigned char id[16]) {
 	sp_artist *artist;
 
+	artist = (sp_artist *)hashtable_find(session->hashtable_artists, id);
+	if(artist)
+		return artist;
+
 	artist = malloc(sizeof(sp_artist));
 	if(artist == NULL)
 		return NULL;
