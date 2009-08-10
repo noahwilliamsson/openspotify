@@ -191,6 +191,9 @@ static void request_notify_main_thread(sp_session *session, struct request *requ
 	case REQ_TYPE_BROWSE_TRACK:
 		break;
 
+	case REQ_TYPE_IMAGE:
+		break;
+
 	default:
 		break;
 	}
