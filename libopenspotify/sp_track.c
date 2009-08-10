@@ -193,9 +193,9 @@ void osfy_track_title_set(sp_track *track, char *title) {
 }
 
 
-void osfy_track_album_name_set(sp_track *track, char *album) {
-	track->album = realloc(track->album_name, strlen(album) + 1);
-	strcpy(track->album_name, album);
+void osfy_track_album_name_set(sp_track *track, char *album_name) {
+	track->album = realloc(track->album_name, strlen(album_name) + 1);
+	strcpy(track->album_name, album_name);
 
 	track->name = realloc(track->name, (track->title? strlen(track->title): 0) + 3 + (track->album_name? strlen(track->album_name): 0) + 1);
 
