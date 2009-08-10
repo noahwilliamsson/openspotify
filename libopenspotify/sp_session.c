@@ -198,18 +198,23 @@ SP_LIBEXPORT(void) sp_session_process_events(sp_session *session, int *next_time
 			session->callbacks->message_to_user(session, request->output);
 			break;
 
-		case REQ_TYPE_BROWSE_ALBUM:
+		case REQ_TYPE_ALBUMBROWSE:
 			alb = *(sp_albumbrowse **)request->input;
 			if(alb->callback)
 				alb->callback(alb, alb->userdata);
 
 			break;
 
-		case REQ_TYPE_BROWSE_ARTIST:
+		case REQ_TYPE_ARTISTBROWSE:
 	                arb = *(sp_artistbrowse **)request->input;
 	                if(arb->callback)
 	                        arb->callback(arb, arb->userdata);
 
+			break;
+
+		case REQ_TYPE_BROWSE_ALBUM:
+		case REQ_TYPE_BROWSE_ARTIST:
+		case REQ_TYPE_BROWSE_TRACK:
 			break;
 
 		case REQ_TYPE_IMAGE:

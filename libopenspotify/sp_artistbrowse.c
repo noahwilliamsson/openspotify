@@ -43,7 +43,7 @@ SP_LIBEXPORT(sp_artistbrowse *) sp_artistbrowse_create(sp_session *session, sp_a
 
         container = (void **)malloc(sizeof(void *));
         *container = arb;
-        request_post(session, REQ_TYPE_BROWSE_ARTIST, container);
+        request_post(session, REQ_TYPE_ARTISTBROWSE, container);
 
 	return arb;
 }

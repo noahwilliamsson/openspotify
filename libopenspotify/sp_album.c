@@ -4,6 +4,7 @@
 #include <spotify/api.h>
 
 #include "debug.h"
+#include "request.h"
 #include "sp_opaque.h"
 
 

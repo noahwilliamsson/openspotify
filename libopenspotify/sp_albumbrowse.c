@@ -44,7 +44,7 @@ SP_LIBEXPORT(sp_albumbrowse *) sp_albumbrowse_create(sp_session *session, sp_alb
 
 	container = (void **)malloc(sizeof(void *));
 	*container = alb;
-	request_post(session, REQ_TYPE_BROWSE_ALBUM, container);
+	request_post(session, REQ_TYPE_ALBUMBROWSE, container);
 
 	return alb;
 }

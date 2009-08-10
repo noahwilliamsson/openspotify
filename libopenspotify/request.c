@@ -152,8 +152,6 @@ int request_set_result(sp_session *session, struct request *req, sp_error error,
 
 /* For selecting which requests we should notify the main thread about */
 static void request_notify_main_thread(sp_session *session, struct request *request) {
-	sp_albumbrowse *alb;
-	sp_artistbrowse *arb;
 
 	switch(request->type) {
 	case REQ_TYPE_LOGIN:
@@ -164,6 +162,8 @@ static void request_notify_main_thread(sp_session *session, struct request *requ
 	case REQ_TYPE_BROWSE_ARTIST:
 	case REQ_TYPE_BROWSE_TRACK:
 	case REQ_TYPE_IMAGE:
+	case REQ_TYPE_ALBUMBROWSE:
+	case REQ_TYPE_ARTISTBROWSE:
 		session->callbacks->notify_main_thread(session);
 		DSFYDEBUG("Notified main thread for <type %s>\n", REQUEST_TYPE_STR(request->type));
 		break;
