@@ -6,14 +6,26 @@ http://www.microsoft.com/express/
 You might need "Microsoft Visual C++ 2008 Redistributables" from
 http://www.slproweb.com/products/Win32OpenSSL.html
 
-OpenSSL 0.9.8k is bundled in openssl/
+Open openspotify.sln and choose Build->Build Solution from the menu.
+Depending on which configuration is selected, output will either be
+in the directories Release/ or Debug/
 
-Open openspotify.sln and choose Build->Build Solution from the menu
+Libopenspotify is currently built as a static library (/MD).
+
+
+WIN32 BUNDLES
+=============
+A static build (/MD) of OpenSSL 0.9.k is bundled in win32/{lib,include}
+http://www.slproweb.com/products/Win32OpenSSL.html
+
+A static build (/MD) of Zlib 1.2.3 is bundled in win32/{lib,include}
+http://www.winimage.com/zLibDll/
+It was built using the static release and debug configurations.
 
 
 UNIX
 ====
-Requires openssl development headers and libraries
+Requires openssl and zlib development headers and libraries
 
 $ sudo apt-get install libssl-dev zlib1g-dev
 $ cd libopenspotify && make clean all
@@ -27,19 +39,24 @@ NOTES for WIN32
 ===============
 These are the changes that are made in Visual C++ for libopenspotify:
 
-Select the libopenspotify project, right click on it and choose Properties
-Make sure "All configurations" is selected in the top-left menu
+1. Select the libopenspotify project, right click on it and choose Properties
+   Make sure "All configurations" is selected in the top-left menu
 
-Under Configurations Properties, Project Defaults -> Configuration Type, set
-  Static Library (.lib)
+2. Under Configurations Properties, Project Defaults -> Configuration Type, set
+     Static Library (.lib)
 
-Under C/C++ -> General -> Additional Include Directories, add
-  ..\include, ..\openssl-0.9.8k\include
+3. Under C/C++ -> General -> Additional Include Directories, add
+     ..\include, ..\win32\lib
 
-Under C/C++ -> Preprocessor -> Preprocessor Definitions, add
-  WIN32_LEAN_AND_MEAN
-  _CRT_SECURE_NO_WARNINGS
+4. Under C/C++ -> Preprocessor -> Preprocessor Definitions, add
+    WIN32_LEAN_AND_MEAN
+    _CRT_SECURE_NO_WARNINGS
 
-Under Librarian -> General -> Additional Dependencies, add
-  dnsapi.lib ws2_32.lib ..\openssl-0.9.8k\lib\libeay32.lib ..\openssl-0.9.8k\lib\libssl32.lib
+5. Switch to the debug configuration
+   Under Librarian -> General -> Additional Dependencies, add
+     dnsapi.lib ws2_32.lib zlibd.lib libeay32MDd.lib libssl32MDd.lib
+
+6. Switch to the release configuration
+   Under Librarian -> General -> Additional Dependencies, add
+     dnsapi.lib ws2_32.lib zlib.lib libeay32MD.lib libssl32MD.lib
 
