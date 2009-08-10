@@ -24,6 +24,8 @@
  */
 
 #include <stdio.h>
+#include <string.h>
+
 #ifdef _WIN32
 typedef unsigned char uint8_t;
 #include <windows.h>
