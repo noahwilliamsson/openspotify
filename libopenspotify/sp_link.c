@@ -59,6 +59,7 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 
 		lnk->type       = SP_LINKTYPE_TRACK;
 		lnk->data.track = osfy_track_add(session, id);
+		sp_track_add_ref(lnk->data.track);
 	}
 	/* Link refers to an album. */
 	else if(strncmp("album:", ptr, 6) == 0){
@@ -68,6 +69,7 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 
 		lnk->type       = SP_LINKTYPE_ALBUM;
 		lnk->data.album = sp_album_add(session, id);
+		sp_album_add_ref(lnk->data.album);
 	}
 	/* Link refers to an artist. */
 	else if(strncmp("artist:", ptr, 7) == 0){
@@ -77,13 +79,14 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 
 		lnk->type        = SP_LINKTYPE_ARTIST;
 		lnk->data.artist = osfy_artist_add(session, id);
+		sp_artist_add_ref(lnk->data.artist);
 	}
 	/* Link is a search query. */
 	else if(strncmp("search:", ptr, 7) == 0){
 		ptr += 7;
 
 		lnk->type        = SP_LINKTYPE_SEARCH;
-		lnk->data.search = NULL; //FIXME: search_add / query is @ ptr
+		lnk->data.search = NULL; //FIXME: search_add / query is @ ptr and refcount
 	}
 	/* Link probably refers to a playlist. */
 	else if(strncmp("user:", ptr, 5) == 0){
@@ -106,7 +109,7 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 			id_uri_to_bytes(ptr, id);
 
 			lnk->type          = SP_LINKTYPE_PLAYLIST;
-			lnk->data.playlist = NULL; //FIXME: playlist_add
+			lnk->data.playlist = NULL; //FIXME: playlist_add and refcount
 		}
 		else{
 			sp_link_release(lnk);
