@@ -22,12 +22,20 @@
  *
  * Example application showing the simple case of logging in.
  */
+
+#include <stdio.h>
+#include <string.h>
+
+#ifdef _WIN32
+typedef unsigned char uint8_t;
+#include <windows.h>
+#else
+#include <stdint.h>
 #include <libgen.h>
 #include <pthread.h>
 #include <signal.h>
-#include <stdio.h>
-#include <stdint.h>
 #include <unistd.h>
+#endif
 
 // The one and only entrypoint to the libspotify API
 #include <spotify/api.h>
@@ -35,7 +43,7 @@
 
 /* --- Functions --- */
 /// External function called when some metadata has been updated.
-extern void metadata_updated(sp_session *session);
+extern void SP_CALLCONV metadata_updated(sp_session *session);
 /// External function called when successfully logged in. We do this to allow
 /// the session driver itself to be reused for other examples.
 extern void session_ready(sp_session *session);
@@ -55,7 +63,12 @@ extern const size_t g_appkey_size;
 int g_exit_code = -1;
 /// A handle to the main thread, needed for synchronization between callbacks
 /// and the main loop.
-static pthread_t g_main_thread = -1;
+#ifdef _WIN32
+static HANDLE g_main_thread = (HANDLE)0;  /* -1 is a valid HANDLE, 0 is not */
+static HANDLE g_notify_event;
+#else
+static pthread_t g_main_thread = (pthread_t)0;
+#endif
 
 
 /* ------------------------  BEGIN SESSION CALLBACKS  ---------------------- */
@@ -65,10 +78,10 @@ static pthread_t g_main_thread = -1;
  *
  * @sa sp_session_callbacks#connection_error
  */
-static void connection_error(sp_session *session, sp_error error)
+static void SP_CALLCONV connection_error(sp_session *session, sp_error error)
 {
 	fprintf(stderr, "connection to Spotify failed: %s\n",
-	                sp_error_message(error));
+		sp_error_message(error));
 	g_exit_code = 5;
 }
 
@@ -77,23 +90,26 @@ static void connection_error(sp_session *session, sp_error error)
  *
  * @sa sp_session_callbacks#logged_in
  */
-static void logged_in(sp_session *session, sp_error error)
+static void  SP_CALLCONV logged_in(sp_session *session, sp_error error)
 {
+	sp_user *me;
+	const char *my_name;
+	
 	if (SP_ERROR_OK != error) {
 		fprintf(stderr, "failed to log in to Spotify: %s\n",
-		                sp_error_message(error));
+			sp_error_message(error));
 		g_exit_code = 4;
 		return;
 	}
-
+	
 	// Let us print the nice message...
-	sp_user *me = sp_session_user(session);
-	const char *my_name = (sp_user_is_loaded(me) ?
-		sp_user_display_name(me) :
-		sp_user_canonical_name(me));
-
+	me = sp_session_user(session);
+	my_name = (sp_user_is_loaded(me) ?
+		   sp_user_display_name(me) :
+		   sp_user_canonical_name(me));
+	
 	printf("Logged in to Spotify as user %s\n", my_name);
-
+	
 	session_ready(session);
 }
 
@@ -102,7 +118,7 @@ static void logged_in(sp_session *session, sp_error error)
  *
  * @sa sp_session_callbacks#logged_out
  */
-static void logged_out(sp_session *session)
+static void SP_CALLCONV logged_out(sp_session *session)
 {
 	if (g_exit_code < 0)
 		g_exit_code = 0;
@@ -117,9 +133,13 @@ static void logged_out(sp_session *session)
  *
  * @sa sp_session_callbacks#notify_main_thread
  */
-static void notify_main_thread(sp_session *session)
+static void SP_CALLCONV notify_main_thread(sp_session *session)
 {
+#ifdef _WIN32
+	PulseEvent(g_notify_event);
+#else
 	pthread_kill(g_main_thread, SIGIO);
+#endif
 }
 
 /**
@@ -127,7 +147,7 @@ static void notify_main_thread(sp_session *session)
  *
  * @sa sp_session_callbacks#log_message
  */
-static void log_message(sp_session *session, const char *data)
+static void SP_CALLCONV log_message(sp_session *session, const char *data)
 {
 	fprintf(stderr, "log_message: %s\n", data);
 }
@@ -141,15 +161,15 @@ static void log_message(sp_session *session, const char *data)
  * @sa sp_session_callbacks
  */
 static sp_session_callbacks g_callbacks = {
-	&logged_in,
-	&logged_out,
-	&metadata_updated,
-	&connection_error,
-	NULL,
-	&notify_main_thread,
-	NULL,
-	NULL,
-	&log_message
+&logged_in,
+&logged_out,
+&metadata_updated,
+&connection_error,
+NULL,
+&notify_main_thread,
+NULL,
+NULL,
+&log_message
 };
 /* -------------------------  END SESSION CALLBACKS  ----------------------- */
 
@@ -163,18 +183,28 @@ static sp_session_callbacks g_callbacks = {
  */
 static void loop(sp_session *session)
 {
+#ifndef _WIN32
 	sigset_t sigset;
-
+	
 	sigemptyset(&sigset);
 	sigaddset(&sigset, SIGIO);
-
+#endif
+	
 	while (g_exit_code < 0) {
 		int timeout = -1;
-
+		
+#ifndef _WIN32
 		pthread_sigmask(SIG_BLOCK, &sigset, NULL);
+#endif
+		
 		sp_session_process_events(session, &timeout);
+		
+#ifdef _WIN32
+		WaitForSingleObject(g_notify_event, timeout);
+#else
 		pthread_sigmask(SIG_UNBLOCK, &sigset, NULL);
 		usleep(timeout * 1000);
+#endif
 	}
 }
 
@@ -182,9 +212,11 @@ static void loop(sp_session *session)
 /**
  * A dummy function to ignore SIGIO.
  */
+#ifndef _WIN32
 static void sigIgn(int signo)
 {
 }
+#endif
 
 
 int main(int argc, char **argv)
@@ -192,62 +224,80 @@ int main(int argc, char **argv)
 	sp_session_config config;
 	sp_error error;
 	sp_session *session;
-
-	// Sending passwords on the command line is bad in general.
-	// We do it here for brevity.
-	if (argc < 3 || argv[1][0] == '-') {
-		fprintf(stderr, "usage: %s <username> <password>\n",
-		                basename(argv[0]));
-		return 1;
+	
+	char username[256];
+	char password[256];
+	char *ptr;
+	
+	if(argc == 1) {
+		printf("Username: ");
+		ptr = fgets(username, sizeof(username) - 1, stdin);
+		while(*ptr) { if(*ptr == '\r' || *ptr == '\n') *ptr = 0; ptr++; }
+		
+		printf("Password: ");
+		ptr = fgets(password, sizeof(password) - 1, stdin);
+		while(*ptr) { if(*ptr == '\r' || *ptr == '\n') *ptr = 0; ptr++; }
 	}
-
+	else if(argc == 3) {
+		strcpy(username, argv[1]);
+		strcpy(password, argv[2]);
+	}
+	else {
+		printf("Usage: track <username> <password>\n");
+		return -1;
+	}
+	
 	// Setup for waking up the main thread in notify_main_thread()
+#ifdef _WIN32
+	g_notify_event = CreateEvent(NULL, FALSE, FALSE, NULL);
+#else
 	g_main_thread = pthread_self();
 	signal(SIGIO, &sigIgn);
-
+#endif
+	
 	// Always do this. It allows libspotify to check for
 	// header/library inconsistencies.
 	config.api_version = SPOTIFY_API_VERSION;
-
+	
 	// The path of the directory to store the cache. This must be specified.
 	// Please read the documentation on preferred values.
 	config.cache_location = "tmp";
-
+	
 	// The path of the directory to store the settings. This must be specified.
 	// Please read the documentation on preferred values.
 	config.settings_location = "tmp";
-
+	
 	// The key of the application. They are generated by Spotify,
 	// and are specific to each application using libspotify.
 	config.application_key = g_appkey;
 	config.application_key_size = g_appkey_size;
-
+	
 	// This identifies the application using some
 	// free-text string [1, 255] characters.
 	config.user_agent = "spotify-session-example";
-
+	
 	// Register the callbacks.
 	config.callbacks = &g_callbacks;
-
+	
 	error = sp_session_init(&config, &session);
-
+	
 	if (SP_ERROR_OK != error) {
 		fprintf(stderr, "failed to create session: %s\n",
-		                sp_error_message(error));
+			sp_error_message(error));
 		return 2;
 	}
-
+	
 	// Login using the credentials given on the command line.
-	error = sp_session_login(session, argv[1], argv[2]);
-
+	error = sp_session_login(session, username, password);
+	
 	if (SP_ERROR_OK != error) {
 		fprintf(stderr, "failed to login: %s\n",
-		                sp_error_message(error));
+			sp_error_message(error));
 		return 3;
 	}
-
+	
 	loop(session);
 	session_terminated();
-
+	
 	return 0;
 }
