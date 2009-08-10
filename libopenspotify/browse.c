@@ -64,31 +64,31 @@ int browse_process(sp_session *session, struct request *req) {
 	int ret;
 
 	if(req->type == REQ_TYPE_BROWSE_TRACK) {
-		req->next_timeout = get_millisecs() + PLAYLIST_RETRY_TIMEOUT*1000;
+		req->next_timeout = get_millisecs() + BROWSE_RETRY_TIMEOUT*1000;
 
 		/* Send request (CMD_BROWSE) to load track data. */
 		ret = browse_send_browsetrack_request(session, req, 0);
 	}
 	else if(req->type == REQ_TYPE_BROWSE_ALBUM) {
-		req->next_timeout = get_millisecs() + PLAYLIST_RETRY_TIMEOUT*1000;
+		req->next_timeout = get_millisecs() + BROWSE_RETRY_TIMEOUT*1000;
 		
 		DSFYDEBUG("REQ_TYPE_BROWSE_ALBUM is not yet implemented\n");
 		return request_set_result(session, req, SP_ERROR_OTHER_PERMAMENT, NULL);
 	}
 	else if(req->type == REQ_TYPE_BROWSE_ARTIST) {
-		req->next_timeout = get_millisecs() + PLAYLIST_RETRY_TIMEOUT*1000;
+		req->next_timeout = get_millisecs() + BROWSE_RETRY_TIMEOUT*1000;
 		
 		DSFYDEBUG("REQ_TYPE_BROWSE_ARTIST is not yet implemented\n");
 		return request_set_result(session, req, SP_ERROR_OTHER_PERMAMENT, NULL);
 	}
 	else if(req->type == REQ_TYPE_ALBUMBROWSE) {
-		req->next_timeout = get_millisecs() + PLAYLIST_RETRY_TIMEOUT*1000;
+		req->next_timeout = get_millisecs() + BROWSE_RETRY_TIMEOUT*1000;
 		
 		DSFYDEBUG("REQ_TYPE_ALBUMBROWSE is not yet implemented\n");
 		return request_set_result(session, req, SP_ERROR_OTHER_PERMAMENT, NULL);
 	}
 	else if(req->type == REQ_TYPE_ARTISTBROWSE) {
-		req->next_timeout = get_millisecs() + PLAYLIST_RETRY_TIMEOUT*1000;
+		req->next_timeout = get_millisecs() + BROWSE_RETRY_TIMEOUT*1000;
 		
 		DSFYDEBUG("REQ_TYPE_ARTISTBROWSE is not yet implemented\n");
 		return request_set_result(session, req, SP_ERROR_OTHER_PERMAMENT, NULL);
