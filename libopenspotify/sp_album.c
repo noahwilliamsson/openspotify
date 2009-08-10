@@ -70,6 +70,10 @@ SP_LIBEXPORT(void) sp_album_release(sp_album *album) {
 sp_album *sp_album_add(sp_session *session, unsigned char id[16]) {
 	sp_album *album;
 
+	album = (sp_album *)hashtable_find(session->hashtable_albums, id);
+	if(album)
+		return album;
+
 	album = malloc(sizeof(sp_album));
 
 	memcpy(album->id, id, sizeof(album->id));
