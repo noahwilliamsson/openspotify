@@ -22,12 +22,18 @@
  *
  * Example application showing the simple case of logging in.
  */
+
+#include <stdio.h>
+#ifdef _WIN32
+typedef unsigned char uint8_t;
+#include <windows.h>
+#else
+#include <stdint.h>
 #include <libgen.h>
 #include <pthread.h>
 #include <signal.h>
-#include <stdio.h>
-#include <stdint.h>
 #include <unistd.h>
+#endif
 
 // The one and only entrypoint to the libspotify API
 #include <spotify/api.h>
@@ -55,7 +61,11 @@ extern const size_t g_appkey_size;
 int g_exit_code = -1;
 /// A handle to the main thread, needed for synchronization between callbacks
 /// and the main loop.
+#ifdef _WIN32
+HANDLE g_main_thread;
+#else
 static pthread_t g_main_thread = -1;
+#endif
 
 
 /* ------------------------  BEGIN SESSION CALLBACKS  ---------------------- */
@@ -79,6 +89,9 @@ static void connection_error(sp_session *session, sp_error error)
  */
 static void logged_in(sp_session *session, sp_error error)
 {
+	sp_user *me;
+	const char *my_name;
+
 	if (SP_ERROR_OK != error) {
 		fprintf(stderr, "failed to log in to Spotify: %s\n",
 		                sp_error_message(error));
@@ -87,8 +100,8 @@ static void logged_in(sp_session *session, sp_error error)
 	}
 
 	// Let us print the nice message...
-	sp_user *me = sp_session_user(session);
-	const char *my_name = (sp_user_is_loaded(me) ?
+	me = sp_session_user(session);
+	my_name = (sp_user_is_loaded(me) ?
 		sp_user_display_name(me) :
 		sp_user_canonical_name(me));
 
