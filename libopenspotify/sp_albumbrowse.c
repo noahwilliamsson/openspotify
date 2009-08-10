@@ -12,7 +12,9 @@ SP_LIBEXPORT(sp_albumbrowse *) sp_albumbrowse_create(sp_session *session, sp_alb
 	void **container;
 	sp_albumbrowse *alb;
 
-	DSFYDEBUG("Not yet implemented\n");
+	alb = (sp_albumbrowse *)hashtable_find(session->hashtable_albumbrowses, album->id);
+	if(alb)
+		return alb;
 
 	alb = malloc(sizeof(sp_albumbrowse));
 	if(alb == NULL)
