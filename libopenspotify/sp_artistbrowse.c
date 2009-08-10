@@ -12,6 +12,10 @@ SP_LIBEXPORT(sp_artistbrowse *) sp_artistbrowse_create(sp_session *session, sp_a
 	sp_artistbrowse *arb;
 	void **container;
 
+	arb = (sp_artistbrowse *)hashtable_find(session->hashtable_artistbrowse, artist->id);
+	if(arb)
+		return arb;
+
 	arb = malloc(sizeof(arb));
 	if(arb == NULL)
 		return NULL;
