@@ -25,6 +25,8 @@
 #include <stdio.h>
 #include <spotify/api.h>
 
+#include "debug.h"
+
 
 /* --- Data --- */
 extern int g_exit_code;
@@ -65,6 +67,7 @@ static void print_albumbrowse(sp_albumbrowse *browse)
 {
 	int i;
 
+	DSFYDEBUG("browse=%p\n", browse);
 	printf("Album browse of \"%s\" (%d)\n", sp_album_name(sp_albumbrowse_album(browse)), sp_album_year(sp_albumbrowse_album(browse)));
 
 	for (i = 0; i < sp_albumbrowse_num_copyrights(browse); ++i)
@@ -89,6 +92,7 @@ static void print_artistbrowse(sp_artistbrowse *browse)
 {
 	int i;
 
+	DSFYDEBUG("browse=%p\n", browse);
 	printf("Artist browse of \"%s\"\n", sp_artist_name(sp_artistbrowse_artist(browse)));
 
 	for (i = 0; i < sp_artistbrowse_num_similar_artists(browse); ++i)
@@ -114,9 +118,13 @@ static void try_terminate(void)
 {
 	sp_error error;
 
-	if (g_albumbrowse || g_artistbrowse)
+	if (g_albumbrowse || g_artistbrowse) {
+		DSFYDEBUG("Can't exit, have g_albumbrowse=%p and g_artistbrowse=%p\n",
+			g_albumbrowse, g_artistbrowse);
 		return;
+	}
 
+	DSFYDEBUG("Calling sp_session_logout()\n");
 	error = sp_session_logout(g_session);
 
 	if (SP_ERROR_OK != error) {
@@ -134,6 +142,7 @@ static void try_terminate(void)
  */
 static void SP_CALLCONV album_complete(sp_albumbrowse *browse, void *userdata)
 {
+	DSFYDEBUG("browse=%p, userdata=%p\n", browse, userdata);
 	if (browse && SP_ERROR_OK == sp_albumbrowse_error(browse))
 		print_albumbrowse(browse);
 	else
@@ -153,14 +162,17 @@ static void SP_CALLCONV album_complete(sp_albumbrowse *browse, void *userdata)
  */
 static void SP_CALLCONV artist_complete(sp_artistbrowse *browse, void *userdata)
 {
+	DSFYDEBUG("browse=%p, userdata=%p\n", browse, userdata);
 	if (browse && SP_ERROR_OK == sp_artistbrowse_error(browse))
 		print_artistbrowse(browse);
 	else
 		fprintf(stderr, "Failed to browse artist: %s\n",
 		        sp_error_message(sp_artistbrowse_error(browse)));
 
+	DSFYDEBUG("sp_artistbrowse_release()\n");
 	sp_artistbrowse_release(g_artistbrowse);
 	g_artistbrowse = NULL;
+	DSFYDEBUG("try_terminate()\n");
 	try_terminate();
 }
 
@@ -186,6 +198,7 @@ void session_ready(sp_session *session)
 	sp_artist *artist;
 	sp_album *album;
 
+	DSFYDEBUG("Have artist link at %p\n", link);
 	if (!link) {
 		fprintf(stderr, "failed to get link from a Spotify URI\n");
 		g_exit_code = 6;
@@ -193,6 +206,7 @@ void session_ready(sp_session *session)
 	}
 
 	artist = sp_link_as_artist(link);
+	DSFYDEBUG("Have artist %p\n", artist);
 
 	if (!artist) {
 		fprintf(stderr, "not an artist link\n");
@@ -201,7 +215,9 @@ void session_ready(sp_session *session)
 		return;
 	}
 
+	DSFYDEBUG("Calling sp_artistbrowse_create()\n");
 	g_artistbrowse = sp_artistbrowse_create(session, artist, &artist_complete, NULL);
+	DSFYDEBUG("Releasing link\n");
 	sp_link_release(link);
 
 	if (!g_artistbrowse) {
@@ -211,6 +227,7 @@ void session_ready(sp_session *session)
 	}
 
 	link = sp_link_create_from_string("spotify:album:3L0CYQZR9jjFLbyX8ZZ6UP");
+	DSFYDEBUG("Have album link at %p\n", link);
 
 	if (!link) {
 		fprintf(stderr, "failed to get link from a Spotify URI\n");
@@ -219,6 +236,7 @@ void session_ready(sp_session *session)
 	}
 
 	album = sp_link_as_album(link);
+	DSFYDEBUG("Have album %p\n", album);
 
 	if (!album) {
 		fprintf(stderr, "not an album link\n");
@@ -227,7 +245,10 @@ void session_ready(sp_session *session)
 		return;
 	}
 
+	DSFYDEBUG("Calling sp_albumbrowse_create()\n");
 	g_albumbrowse = sp_albumbrowse_create(session, album, &album_complete, NULL);
+
+	DSFYDEBUG("Releasing link\n");
 	sp_link_release(link);
 
 	if (!g_albumbrowse) {

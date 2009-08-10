@@ -6,7 +6,7 @@
 dirname = $(notdir $(PWD))
 targets = $(dirname)
 
-CFLAGS = -I../../include -ggdb
+CFLAGS = -I../../include -ggdb -DDEBUG
 LDFLAGS = -L../../libopenspotify
 LDLIBS = -lopenspotify
 
