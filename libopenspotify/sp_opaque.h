@@ -26,7 +26,7 @@
 /* sp_album.c */
 struct sp_album {
 	unsigned char id[16];
-	unsigned char image_id[20];
+	sp_image *image;
 
 	char *name;
 	int year;
@@ -105,6 +105,29 @@ struct sp_artist {
 };
 
 
+/* sp_image.c */
+struct sp_image {
+	unsigned char id[20];
+
+	int width;
+	int height;
+
+	void *data;
+
+	sp_imageformat format;
+
+	image_loaded_cb *callback;
+	void *userdata;
+
+	sp_error error;
+
+	int ref_count;
+	int is_loaded;
+
+	struct hashtable *hashtable;
+};
+
+
 /* sp_link.c */
 struct sp_link {
 	sp_linktype type;
@@ -164,7 +187,7 @@ struct sp_playlistcontainer {
 struct sp_track {
 	unsigned char id[16];
 	unsigned char file_id[20];
-	unsigned char cover_id[20];
+	sp_image *image;
 
 	char *title;
 	char *album_name;
@@ -255,6 +278,7 @@ struct sp_session {
 	struct hashtable *hashtable_artistbrowses;
 	struct hashtable *hashtable_albums;
 	struct hashtable *hashtable_artists;
+	struct hashtable *hashtable_images;
 	struct hashtable *hashtable_tracks;
 
 
