@@ -147,6 +147,10 @@ int osfy_album_load_from_xml(sp_session *session, sp_album *album, ezxml_t album
 		hex_ascii_to_bytes(node->txt, id, 16);
 		album->artist = osfy_artist_add(session, id);
 		sp_artist_add_ref(album->artist);
+		
+		if(sp_artist_is_loaded(album->artist) == 0)
+			osfy_artist_load_from_xml(session, album->artist, album_node);
+
 
 
 		/* Album cover */
