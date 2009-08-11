@@ -60,6 +60,11 @@ SP_LIBEXPORT(sp_image *) sp_image_create(sp_session *session, const byte image_i
 	image = osfy_image_create(session, image_id);
 	sp_image_add_ref(image);
 
+	if(sp_image_is_loaded(image))
+		return image;
+
+	/* FIXME: Should probably make sure this image isn't currently being loaded aswell, too. Flag maybe? */
+
 	
 	image_ctx = malloc(sizeof(struct image_ctx));
 	image_ctx->session = session;
