@@ -24,7 +24,14 @@ SP_LIBEXPORT(sp_image *) sp_image_create(sp_session *session, const byte image_i
 
 	image = (sp_image *)hashtable_find(session->hashtable_images, image_id);
 	if(image) {
+		{
+			char buf[41];
+			hex_bytes_to_ascii(image->id, buf, 20);
+			DSFYDEBUG("Returning existing image '%s'\n", buf);
+		}
+		
 		/* FIXME: What about any possible callbacks? */
+		image->ref_count++;
 		return image;
 	}
 
@@ -174,7 +181,7 @@ int osfy_image_process_request(sp_session *session, struct request *req) {
 	assert(image_ctx->image->data == NULL);
 	image_ctx->image->data = buf_new();
 	
-	req->next_timeout = get_millisecs() + IMAGE_RETRY_TIMEOUT;
+	req->next_timeout = get_millisecs() + IMAGE_RETRY_TIMEOUT * 1000;
 	
 	return cmd_request_image(session, image_ctx->image->id, osfy_image_callback, image_ctx);
 }
