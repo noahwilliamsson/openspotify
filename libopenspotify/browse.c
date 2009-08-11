@@ -31,6 +31,7 @@
 #include <string.h>
 
 #include "album.h"
+#include "browse.h"
 #include "buf.h"
 #include "channel.h"
 #include "commands.h"
