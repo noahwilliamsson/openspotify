@@ -5,7 +5,7 @@
 
 #include "request.h"
 
-#define IMAGE_RETRY_TIMEOUT 30
+#define IMAGE_RETRY_TIMEOUT 120
 struct image_ctx {
 	sp_session *session;
 	struct request *req;

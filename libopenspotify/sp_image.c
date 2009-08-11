@@ -40,7 +40,7 @@ SP_LIBEXPORT(sp_image *) sp_image_create(sp_session *session, const byte image_i
 	image->userdata = NULL;
 
 	image->is_loaded = 0;
-	image->ref_count = 0;
+	image->ref_count = 1;
 
 	image->hashtable = session->hashtable_images;
 	hashtable_insert(image->hashtable, image->id, image);
@@ -53,6 +53,13 @@ SP_LIBEXPORT(sp_image *) sp_image_create(sp_session *session, const byte image_i
 
         container = (void **)malloc(sizeof(void *));
         *container = image_ctx;
+
+	{
+		char buf[41];
+		hex_bytes_to_ascii(image->id, buf, 20);
+		DSFYDEBUG("Requesting download of image '%s'\n", buf);
+	}
+
         request_post(session, REQ_TYPE_IMAGE, container);
 
 	return image;
@@ -134,13 +141,17 @@ SP_LIBEXPORT(void) sp_image_add_ref(sp_image *image) {
 SP_LIBEXPORT(void) sp_image_release(sp_image *image) {
 
 	assert(image->ref_count);
-	image->ref_count--;
-
-	if(image->ref_count)
+	if(--image->ref_count)
 		return;
 
-	/* FIXME: Free stuff */
+	hashtable_remove(image->hashtable, image->id);
 
+	{
+		char buf[41];
+		hex_bytes_to_ascii(image->id, buf, 20);
+		DSFYDEBUG("Freeing image '%s'\n", buf);
+	}
+	
 	if(image->data)
 		buf_free(image->data);
 
@@ -153,7 +164,13 @@ int osfy_image_process_request(sp_session *session, struct request *req) {
 
 	req->state = REQ_STATE_RUNNING;
 	image_ctx->req = req;
-	
+
+	{
+		char buf[41];
+		hex_bytes_to_ascii(image->id, buf, 20);
+		DSFYDEBUG("Sending request for image '%s'\n", buf);
+	}
+
 	assert(image_ctx->image->data == NULL);
 	image_ctx->image->data = buf_new();
 	
