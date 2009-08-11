@@ -234,7 +234,7 @@ struct buf* despotify_inflate(unsigned char* data, int len) {
 	b = buf_new();
 	buf_extend(b, 4096);
 
-	offset = 1;
+	offset = 0;
 	done = 0;
 	while(!done) {
 		z.avail_out = b->size - offset;
