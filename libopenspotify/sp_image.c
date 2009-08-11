@@ -1,29 +1,39 @@
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include <spotify/api.h>
 
 #include "debug.h"
+#include "image.h"
 #include "hashtable.h"
 #include "request.h"
 #include "sp_opaque.h"
+#include "util.h"
+
+
+static int osfy_image_callback(CHANNEL *ch, unsigned char *payload, unsigned short len);
 
 
 SP_LIBEXPORT(sp_image *) sp_image_create(sp_session *session, const byte image_id[20]) {
 	sp_image *image;
 	void **container;
+	struct image_ctx *image_ctx;
+	
 
 	image = (sp_image *)hashtable_find(session->hashtable_images, image_id);
-	if(image)
+	if(image) {
+		/* FIXME: What about any possible callbacks? */
 		return image;
+	}
 
 	image = malloc(sizeof(sp_image));
 
 	memcpy(image->id, image_id, sizeof(image->id));
 	image->format = -1;
-	image->data = NULL;
 	image->width = -1;
 	image->height = -1;
+	image->data = NULL;
 
 	image->callback = NULL;
 	image->userdata = NULL;
@@ -34,8 +44,14 @@ SP_LIBEXPORT(sp_image *) sp_image_create(sp_session *session, const byte image_i
 	image->hashtable = session->hashtable_images;
 	hashtable_insert(image->hashtable, image->id, image);
 
+	
+	image_ctx = malloc(sizeof(struct image_ctx));
+	image_ctx->session = session;
+	image_ctx->req = NULL;
+	image_ctx->image = image;
+
         container = (void **)malloc(sizeof(void *));
-        *container = image;
+        *container = image_ctx;
         request_post(session, REQ_TYPE_IMAGE, container);
 
 	return image;
@@ -46,6 +62,10 @@ SP_LIBEXPORT(void) sp_image_add_load_callback(sp_image *image, image_loaded_cb *
 	/* FIXME: Support multiple callbacks */
 	image->callback = callback;
 	image->callback = userdata;
+
+	/* FIXME: Check with libspotify */
+	if(image->is_loaded)
+		callback(image, userdata);
 }
 
 
@@ -112,8 +132,8 @@ SP_LIBEXPORT(void) sp_image_add_ref(sp_image *image) {
 
 SP_LIBEXPORT(void) sp_image_release(sp_image *image) {
 
-	if(image->ref_count)
-		image->ref_count--;
+	assert(image->ref_count);
+	image->ref_count--;
 
 	if(image->ref_count)
 		return;
@@ -121,7 +141,67 @@ SP_LIBEXPORT(void) sp_image_release(sp_image *image) {
 	/* FIXME: Free stuff */
 
 	if(image->data)
-		free(image->data);
+		buf_free(image->data);
 
 	free(image);
+}
+
+
+int osfy_image_process_request(sp_session *session, struct request *req) {
+	struct image_ctx *image_ctx = *(struct image_ctx **)req->input;
+
+	req->state = REQ_STATE_RUNNING;
+	image_ctx->req = req;
+	
+	assert(image_ctx->image->data == NULL);
+	image_ctx->image->data = buf_new();
+	
+	req->next_timeout = get_millisecs() + IMAGE_RETRY_TIMEOUT;
+	
+	return cmd_request_image(session, image_ctx->image->id, osfy_image_callback, image_ctx);
+}
+
+
+static int osfy_image_callback(CHANNEL *ch, unsigned char *payload, unsigned short len) {
+	int skip_len;
+	struct image_ctx *image_ctx = (struct image_ctx *)ch->private;
+	
+	switch(ch->state) {
+		case CHANNEL_DATA:
+			buf_append_data(image_ctx->image->data, payload, len);
+			break;
+			
+		case CHANNEL_ERROR:
+			DSFYDEBUG("Got a channel ERROR, retrying within %d seconds\n", IMAGE_RETRY_TIMEOUT);
+			buf_free(image_ctx->image->data);
+			image_ctx->image->data = NULL;
+			
+			/* The request processor will retry this round */
+			break;
+			
+		case CHANNEL_END:
+			image_ctx->image->is_loaded = 1;
+			image_ctx->image->error = SP_ERROR_OK;
+
+			DSFYDEBUG("Got all data, returning the image as result\n");
+			request_set_result(image_ctx->session, image_ctx->req, SP_ERROR_OK, image_ctx->image);
+		
+			{
+				FILE *fd;
+				
+				fd = fopen("image.jpg", "w");
+				if(fd) {
+					fwrite(image_ctx->image->data->ptr, image_ctx->image->data->len, 1, fd);
+					fclose(fd);
+				}
+			}
+			
+			free(image_ctx);
+			break;
+			
+		default:
+			break;
+	}
+	
+	return 0;
 }

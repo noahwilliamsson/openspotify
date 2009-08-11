@@ -167,6 +167,10 @@ static int process_request(sp_session *session, struct request *req) {
 	case REQ_TYPE_PLAYLIST_LOAD_PLAYLIST:
 		return playlist_process(session, req);
 		break;
+	
+	case REQ_TYPE_IMAGE:
+		return osfy_image_process_request(session, req);
+		break;
 
 	case REQ_TYPE_ALBUMBROWSE:
 	case REQ_TYPE_ARTISTBROWSE:
