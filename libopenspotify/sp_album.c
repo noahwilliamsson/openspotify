@@ -6,6 +6,7 @@
 
 #include "album.h"
 #include "artist.h"
+#include "browse.h"
 #include "debug.h"
 #include "ezxml.h"
 #include "image.h"
