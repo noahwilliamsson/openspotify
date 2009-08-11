@@ -195,12 +195,13 @@ struct sp_track {
 	int num_artists;
 	sp_artist **artists;
 
+	char *restricted_countries;
+
 	int index;
 	int disc;
 	int duration;
 	int popularity;
 
-	/* FIXME: Need more members */
 	int is_loaded;
 	int playable;
 	sp_error error;

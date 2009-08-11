@@ -3,7 +3,12 @@
 
 #include <spotify/api.h>
 
+#include "ezxml.h"
+
+
 sp_track *osfy_track_add(sp_session *session, unsigned char id[16]);
+int osfy_track_load_from_xml(sp_session *session, sp_track *track, ezxml_t track_node);
+
 void osfy_track_free(sp_track *track);
 void osfy_track_name_set(sp_track *track, char *title);
 void osfy_track_album_set(sp_track *track, sp_album *album);

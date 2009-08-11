@@ -10,10 +10,13 @@
 #include <spotify/api.h>
 
 #include "album.h"
+#include "artist.h"
 #include "debug.h"
+#include "ezxml.h"
 #include "hashtable.h"
 #include "sp_opaque.h"
 #include "track.h"
+#include "util.h"
 
 
 SP_LIBEXPORT(bool) sp_track_is_loaded(sp_track *track) {
@@ -126,9 +129,10 @@ sp_track *osfy_track_add(sp_session *session, unsigned char id[16]) {
 	track->num_artists = 0;
 	track->artists = NULL;
 
+	track->restricted_countries = NULL;
+
 	track->index = 0;
 	track->disc = 0;
-
 	track->duration = 0;
 	track->popularity = 0;
 
@@ -154,6 +158,7 @@ void osfy_track_free(sp_track *track) {
 	for(i = 0; i < track->num_artists; i++) {
 		free(track->artists[i]);
 	}
+
 	if(track->num_artists)
 		free(track->artists);
 
@@ -161,8 +166,118 @@ void osfy_track_free(sp_track *track) {
 	if(track->album)
 		sp_album_release(track->album);
 
+	if(track->restricted_countries)
+		free(track->restricted_countries);
 
 	free(track);
+}
+
+
+int osfy_track_load_from_xml(sp_session *session, sp_track *track, ezxml_t track_node) {
+	unsigned char id[20];
+	const char *str;
+	float popularity;
+	int i;
+	ezxml_t node;
+	
+
+	/* Track UUID */
+	if((node = ezxml_get(track_node, "id", -1)) == NULL) {
+		DSFYDEBUG("Failed to find element 'id'\n");
+		return -1;
+	}
+	
+	hex_ascii_to_bytes(node->txt, id, sizeof(track->id));
+	assert(memcmp(track->id, id, sizeof(track->id)) == 0);
+	
+	
+	/* Track name */
+	if((node = ezxml_get(track_node, "title", -1)) == NULL) {
+		DSFYDEBUG("Failed to find element 'title'\n");
+		return -1;
+	}
+
+	assert(strlen(node->txt) < 256);
+	track->name = realloc(track->name, strlen(node->txt) + 1);
+	strcpy(track->name, node->txt);
+	
+
+	/* Track duration */
+	if((node = ezxml_get(track_node, "length", -1)) == NULL) {
+		DSFYDEBUG("Failed to find element 'length'\n");
+		return -1;
+	}
+	
+	track->duration = atoi(node->txt);
+
+	
+	/* Track popularity */
+	if((node = ezxml_get(track_node, "popularity", -1)) == NULL) {
+		DSFYDEBUG("Failed to find element 'popularity'\n");
+		return -1;
+	}
+	
+	sscanf(node->txt, "%f", &popularity);
+	track->popularity = (int) (100.0 * popularity);
+
+
+	/* Track album */
+	if((node = ezxml_get(track_node, "album-id", -1)) == NULL) {
+		DSFYDEBUG("Failed to find element 'album-id'\n");
+		return -1;
+	}
+	
+	hex_ascii_to_bytes(node->txt, id, 16);
+	if(track->album != NULL)
+		sp_album_release(track->album);
+
+	track->album = sp_album_add(session, id);
+	sp_album_add_ref(track->album);
+	if(sp_album_is_loaded(track->album) == 0)
+		osfy_album_load_from_xml(session,track->album, track_node);
+
+	
+	/* Country restrictions */
+	node = ezxml_get(track_node, "restrictions", 0, "restriction", -1);
+	if(node && (str = ezxml_attr(node, "forbidden")) != NULL) {
+		track->restricted_countries = realloc(track->restricted_countries, strlen(str) + 1);
+		strcpy(track->restricted_countries, str);
+	}
+	
+	
+	/* ID of file */
+	node = ezxml_get(track_node, "files", 0, "file", -1);
+	if(node && (str = ezxml_attr(node, "id")) != NULL) {
+		hex_ascii_to_bytes(str, id, sizeof(track->file_id));
+		memcpy(track->file_id, id, sizeof(track->file_id));
+		
+		/* FIXME: Also check country restrictions */
+		osfy_track_playable_set(track, 1);
+	}
+
+	
+	/* Add artists */
+	for(node = ezxml_get(track_node, "artist", -1); node; node = node->next) {
+		hex_ascii_to_bytes(node->txt, id, 16);
+		for(i = 0; i < track->num_artists; i++)
+			if(memcmp(track->artists[i]->id, id, sizeof(track->artists[i]->id)) == 0)
+				break;
+	
+		/* Skip dupes */
+		if(i != track->num_artists)
+			continue;
+		
+		track->artists = realloc(track->artists, sizeof(sp_artist *) * (1 + track->num_artists));
+		track->artists[track->num_artists] = osfy_artist_add(session, id);
+		sp_artist_add_ref(track->artists[track->num_artists]);
+		
+		track->num_artists++;
+	}
+
+	
+	track->is_loaded = 1;
+
+	return 0;
 }
 
 
