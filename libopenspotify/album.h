@@ -7,5 +7,6 @@
 
 sp_album *sp_album_add(sp_session *session, unsigned char id[16]);
 int osfy_album_load_from_xml(sp_session *session, sp_album *album, ezxml_t album_node);
+int osfy_album_browse(sp_session *session, sp_album *album);
 
 #endif

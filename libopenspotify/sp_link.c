@@ -70,6 +70,13 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 		lnk->type       = SP_LINKTYPE_ALBUM;
 		lnk->data.album = sp_album_add(session, id);
 		sp_album_add_ref(lnk->data.album);
+
+		/* Browse album if needed */
+		if(sp_album_is_loaded(lnk->data.artist) == 0) {
+			DSFYDEBUG("Browsing not yet loaded album\n");
+			osfy_album_browse(session, lnk->data.album);
+		}
+	}
 	}
 	/* Link refers to an artist. */
 	else if(strncmp("artist:", ptr, 7) == 0){
@@ -80,6 +87,12 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 		lnk->type        = SP_LINKTYPE_ARTIST;
 		lnk->data.artist = osfy_artist_add(session, id);
 		sp_artist_add_ref(lnk->data.artist);
+
+		/* Browse artist if needed */
+		if(sp_artist_is_loaded(lnk->data.artist) == 0) {
+			DSFYDEBUG("Browsing not yet loaded artist\n");
+			osfy_artist_browse(session, lnk->data.artist);
+		}
 	}
 	/* Link is a search query. */
 	else if(strncmp("search:", ptr, 7) == 0){
