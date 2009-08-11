@@ -5,8 +5,10 @@
 #include <spotify/api.h>
 
 #include "debug.h"
+#include "hashtable.h"
 #include "request.h"
 #include "sp_opaque.h"
+
 
 SP_LIBEXPORT(const char *) sp_artist_name(sp_artist *artist) {
 
