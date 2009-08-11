@@ -112,7 +112,7 @@ struct sp_image {
 	int width;
 	int height;
 
-	void *data;
+	struct buf *data;
 
 	sp_imageformat format;
 
