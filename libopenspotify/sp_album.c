@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 
 #include <spotify/api.h>
 
@@ -45,10 +46,10 @@ SP_LIBEXPORT(void) sp_album_add_ref(sp_album *album) {
 
 
 SP_LIBEXPORT(void) sp_album_release(sp_album *album) {
-	if(album->ref_count)
-		album->ref_count--;
 
-	if(album->ref_count)
+	assert(album->ref_count > 0);
+
+	if(--album->ref_count)
 		return;
 
 	/* FIXME: Deallocate here when ref count reaches 0 */
