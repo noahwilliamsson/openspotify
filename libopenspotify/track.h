@@ -8,7 +8,6 @@ void osfy_track_free(sp_track *track);
 void osfy_track_title_set(sp_track *track, char *title);
 void osfy_track_album_name_set(sp_track *track, char *album_name);
 void osfy_track_album_set(sp_track *track, sp_album *album);
-void osfy_track_image_set(sp_track *track, sp_image *image);
 void osfy_track_file_id_set(sp_track *track, unsigned char id[20]);
 void osfy_track_playable_set(sp_track *track, int playable);
 void osfy_track_duration_set(sp_track *track, int duration);
