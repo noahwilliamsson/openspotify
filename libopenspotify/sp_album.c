@@ -52,11 +52,13 @@ SP_LIBEXPORT(void) sp_album_release(sp_album *album) {
 	if(--album->ref_count)
 		return;
 
-	/* FIXME: Deallocate here when ref count reaches 0 */
 	hashtable_remove(album->hashtable, album->id);
 
 	if(album->name)
 		free(album->name);
+
+	if(album->artist)
+		sp_artist_release(album->artist);
 
 	if(album->image)
 		sp_image_release(album->image);
@@ -81,6 +83,7 @@ sp_album *sp_album_add(sp_session *session, unsigned char id[16]) {
 
 	memcpy(album->id, id, sizeof(album->id));
 
+	album->artist = NULL;
 	album->image = NULL;
 
 	album->name = NULL;
