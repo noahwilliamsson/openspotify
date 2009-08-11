@@ -157,7 +157,7 @@ int osfy_artist_browse(sp_session *session, sp_artist *artist) {
 	/* The artist callback context */
 	brctx = (struct browse_callback_ctx *)malloc(sizeof(struct browse_callback_ctx));
 	
-	brctx->session = NULL; /* Filled in by the request processor */
+	brctx->session = session;
 	brctx->req = NULL; /* Filled in by the request processor */
 	brctx->buf = NULL; /* Filled in by the request processor */
 	
