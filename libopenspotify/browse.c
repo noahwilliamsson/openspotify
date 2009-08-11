@@ -227,7 +227,6 @@ static int browse_parse_compressed_xml(sp_session *session, sp_playlist *playlis
 	ezxml_t root, track_node, node;
 	sp_album *album;
 	sp_track *track;
-	sp_image *image;
 
 
 	uncompressed = despotify_inflate(playlist->buf->ptr, playlist->buf->len);
@@ -258,13 +257,6 @@ static int browse_parse_compressed_xml(sp_session *session, sp_playlist *playlis
 			album = sp_album_add(session, id);
 			osfy_track_album_set(track, album);
 			sp_album_add_ref(album);
-		}
-
-		if((node = ezxml_get(track_node, "cover", -1)) != NULL) {
-			hex_ascii_to_bytes(node->txt, id, 20);
-			image = sp_image_create(session, id);
-			osfy_track_image_set(track, image);
-			sp_image_add_ref(image);
 		}
 
 		node = ezxml_get(track_node, "files", 0, "file", -1);

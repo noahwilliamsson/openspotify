@@ -187,7 +187,6 @@ struct sp_playlistcontainer {
 struct sp_track {
 	unsigned char id[16];
 	unsigned char file_id[20];
-	sp_image *image;
 
 	char *title;
 	char *album_name;
