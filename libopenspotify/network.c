@@ -154,7 +154,18 @@ static int process_request(sp_session *session, struct request *req) {
 			return request_set_result(session, req, SP_ERROR_OTHER_TRANSIENT, NULL);
 		}
 	}
+	else if(req->state == REQ_STATE_NEW && session->num_channels >= 16) {
+		DSFYDEBUG("%d channels active, postponing request <type %s, state %s, input %p>\n",
+			  session->num_channels, REQUEST_TYPE_STR(req->type),
+			  REQUEST_STATE_STR(req->state), req->input);
 
+		if(req->next_timeout < get_millisecs() + 2000)
+			req->next_timeout = get_millisecs() + 2000;
+		
+		return 0;
+	}
+
+	
 	switch(req->type) {
 	case REQ_TYPE_LOGIN:
 		return process_login_request(session, req);
