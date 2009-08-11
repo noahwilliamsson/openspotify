@@ -81,6 +81,12 @@ SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_sess
 	/* To allow main thread to communicate with network thread */
 	s->requests = NULL;
 
+	/* Channels */
+	s->channels = NULL;
+	s->next_channel_id = 0;
+	s->num_channels = 0;
+
+
 	/* Spawn networking thread. */
 #ifdef _WIN32
 	s->request_mutex = CreateMutex(NULL, FALSE, NULL);

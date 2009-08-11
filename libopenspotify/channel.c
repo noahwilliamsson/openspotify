@@ -56,6 +56,8 @@ CHANNEL *channel_register (sp_session *session, char *name, channel_callback cal
 	ch->next = session->channels;
 	session->channels = ch;
 
+	session->num_channels++;
+
 	return ch;
 }
 
@@ -84,6 +86,8 @@ void channel_unregister (sp_session *session, CHANNEL * ch)
 		session->next_channel_id = ch->channel_id;
 
 	free (ch);
+
+	session->num_channels--;
 }
 
 CHANNEL *channel_by_id (sp_session *session, unsigned short channel_id)

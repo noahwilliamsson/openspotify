@@ -260,6 +260,7 @@ struct sp_session {
 
 	/* Channels */
 	CHANNEL *channels;
+	int num_channels;
 	int next_channel_id;
 
 	/* Requests scoreboard */
