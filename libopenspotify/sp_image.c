@@ -16,7 +16,7 @@
 static int osfy_image_callback(CHANNEL *ch, unsigned char *payload, unsigned short len);
 
 
-sp_image *ofsy_image_create(sp_session *session, const byte image_id[20]) {
+sp_image *osfy_image_create(sp_session *session, const byte image_id[20]) {
 	sp_image *image;
 
 	image = (sp_image *)hashtable_find(session->hashtable_images, image_id);
