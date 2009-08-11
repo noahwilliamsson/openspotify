@@ -5,6 +5,7 @@
 #include <spotify/api.h>
 
 #include "debug.h"
+#include "ezxml.h"
 #include "request.h"
 #include "sp_opaque.h"
 
@@ -100,7 +101,7 @@ sp_album *sp_album_add(sp_session *session, unsigned char id[16]) {
 }
 
 
-int osfy_album_load_from_xml(sp_ession *session, sp_album *album, ezxml_t album_node) {
+int osfy_album_load_from_xml(sp_session *session, sp_album *album, ezxml_t album_node) {
 	unsigned char id[20];
 	
 	/* Assume XML from tracking browsing */
