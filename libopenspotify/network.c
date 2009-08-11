@@ -21,6 +21,7 @@
 #include "cache.h"
 #include "channel.h"
 #include "debug.h"
+#include "image.h"
 #include "login.h"
 #include "network.h"
 #include "packet.h"
