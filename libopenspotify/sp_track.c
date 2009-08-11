@@ -218,7 +218,7 @@ int osfy_track_load_from_xml(sp_session *session, sp_track *track, ezxml_t track
 	}
 	
 	sscanf(node->txt, "%f", &popularity);
-	track->popularity = (int) (100.0 * popularity);
+	track->popularity = (int)popularity;
 
 
 	/* Track album */
