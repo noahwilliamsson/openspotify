@@ -4,6 +4,7 @@
 
 #include <spotify/api.h>
 
+#include "commands.h"
 #include "debug.h"
 #include "image.h"
 #include "hashtable.h"
@@ -163,7 +164,6 @@ int osfy_image_process_request(sp_session *session, struct request *req) {
 
 
 static int osfy_image_callback(CHANNEL *ch, unsigned char *payload, unsigned short len) {
-	int skip_len;
 	struct image_ctx *image_ctx = (struct image_ctx *)ch->private;
 	
 	switch(ch->state) {
