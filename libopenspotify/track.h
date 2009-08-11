@@ -5,8 +5,7 @@
 
 sp_track *osfy_track_add(sp_session *session, unsigned char id[16]);
 void osfy_track_free(sp_track *track);
-void osfy_track_title_set(sp_track *track, char *title);
-void osfy_track_album_name_set(sp_track *track, char *album_name);
+void osfy_track_name_set(sp_track *track, char *title);
 void osfy_track_album_set(sp_track *track, sp_album *album);
 void osfy_track_file_id_set(sp_track *track, unsigned char id[20]);
 void osfy_track_playable_set(sp_track *track, int playable);

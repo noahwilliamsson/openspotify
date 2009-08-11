@@ -246,11 +246,7 @@ static int browse_parse_compressed_xml(sp_session *session, sp_playlist *playlis
 		track = osfy_track_add(session, id);
 
 		if((node = ezxml_get(track_node, "title", -1)) != NULL)
-			osfy_track_title_set(track, node->txt);
-
-		if((node = ezxml_get(track_node, "album", -1)) != NULL)
-			osfy_track_album_name_set(track, node->txt);
-
+			osfy_track_name_set(track, node->txt);
 
 		if((node = ezxml_get(track_node, "album-id", -1)) != NULL) {
 			hex_ascii_to_bytes(node->txt, id, 16);

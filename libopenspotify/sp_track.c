@@ -124,8 +124,6 @@ sp_track *osfy_track_add(sp_session *session, unsigned char id[16]) {
 	memset(track->file_id, 0, sizeof(track->file_id));
 
 	track->name = NULL;
-	track->title = NULL;
-	track->album_name = NULL;
 
 	track->album = NULL;
 	track->num_artists = 0;
@@ -155,12 +153,6 @@ void osfy_track_free(sp_track *track) {
 	if(track->name)
 		free(track->name);
 
-	if(track->title)
-		free(track->title);
-
-	if(track->album_name)
-		free(track->album_name);
-
 
 	for(i = 0; i < track->num_artists; i++) {
 		free(track->artists[i]);
@@ -177,31 +169,10 @@ void osfy_track_free(sp_track *track) {
 }
 
 
-void osfy_track_title_set(sp_track *track, char *title) {
-	track->title = realloc(track->title, strlen(title) + 1);
-	strcpy(track->title, title);
+void osfy_track_name_set(sp_track *track, char *name) {
 
-	track->name = realloc(track->name, strlen(track->title) + 3 + (track->album_name? strlen(track->album_name): 0) + 1);
-	strcpy(track->name, track->title);
-	if(track->album_name == NULL)
-		return;
-	
-	strcat(track->name, " - ");
-	strcat(track->name, track->album_name);
-}
-
-
-void osfy_track_album_name_set(sp_track *track, char *album_name) {
-	track->album_name = realloc(track->album_name, strlen(album_name) + 1);
-	strcpy(track->album_name, album_name);
-
-	track->name = realloc(track->name, (track->title? strlen(track->title): 0) + 3 + (track->album_name? strlen(track->album_name): 0) + 1);
-
-	if(track->title) {
-		strcpy(track->name, track->title);
-		strcat(track->name, " - ");
-		strcat(track->name, track->album_name);
-	}
+	track->name = realloc(track->name, strlen(name) + 1);
+	strcpy(track->name, name);
 }
 
 
@@ -310,13 +281,9 @@ int osfy_track_metadata_save_to_disk(sp_session *session, char *filename) {
 		fwrite(track->album->id, sizeof(track->album->id), 1, fd);
 		#endif
 		
-		len = (track->title? strlen(track->title): 0);
+		len = (track->name? strlen(track->name): 0);
 		fwrite(&len, 1, 1, fd);
-		fwrite(track->title, len, 1, fd);
-
-		len = (track->album_name? strlen(track->album_name): 0);
-		fwrite(&len, 1, 1, fd);
-		fwrite(track->album_name, len, 1, fd);
+		fwrite(track->name, len, 1, fd);
 
 		num = htons(track->index);
 		fwrite(&num, sizeof(int), 1, fd);
@@ -369,20 +336,12 @@ int osfy_track_metadata_load_from_disk(sp_session *session, char *filename) {
 		if(fread(&len, 1, 1, fd) == 1) {
 			if(len && fread(buf, len, 1, fd) == 1) {
 				buf[len] = 0;
-				osfy_track_title_set(track, buf);
+				osfy_track_name_set(track, buf);
 			}
 		}
 		else
 			break;
 
-		if(fread(&len, 1, 1, fd) == 1) {
-			if(len && fread(buf, len, 1, fd) == 1) {
-				buf[len] = 0;
-				osfy_track_album_name_set(track, buf);
-			}
-		}
-		else
-			break;
 
 		if(fread(&num, 1, 1, fd) == 1)
 			track->index = ntohs(num);

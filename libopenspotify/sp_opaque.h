@@ -188,8 +188,6 @@ struct sp_track {
 	unsigned char id[16];
 	unsigned char file_id[20];
 
-	char *title;
-	char *album_name;
 	char *name;
 
 	sp_album *album;
