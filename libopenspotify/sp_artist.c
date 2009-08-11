@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 
 #include <spotify/api.h>
 
@@ -26,10 +27,10 @@ SP_LIBEXPORT(void) sp_artist_add_ref(sp_artist *artist) {
 
 
 SP_LIBEXPORT(void) sp_artist_release(sp_artist *artist) {
-	if(artist->ref_count)
-		artist->ref_count--;
-	
-	if(artist->ref_count)
+
+	assert(artist->ref_count > 0);
+
+	if(--artist->ref_count)
 		return;
 
 	hashtable_remove(artist->hashtable, artist->id);
