@@ -78,53 +78,64 @@ sp_artist *osfy_artist_add(sp_session *session, unsigned char id[16]) {
 }
 
 
-int osfy_artist_load_from_xml(sp_session *session, sp_artist *artist, ezxml_t artist_node) {
-	unsigned char id[20];
+/* Parse XML from artist browsing */
+int osfy_artist_load_from_artist_xml(sp_session *session, sp_artist *artist, ezxml_t artist_node) {
+	unsigned char id[16];
 	ezxml_t node;
 	
-	if((node = ezxml_get(artist_node, "name", -1)) != NULL) {
-		/* XML from artist browsing */
-		
-		/* Artist UUID */
-		hex_ascii_to_bytes(node->txt, id, sizeof(artist->id));
-		assert(memcmp(artist->id, id, sizeof(artist->id)) == 0);
-		
-		/* Artist name */
-		if((node = ezxml_get(artist_node, "name", -1)) == NULL) {
-			DSFYDEBUG("Failed to find element 'name'\n");
-			return -1;
-		}
-
-		assert(strlen(node->txt) < 256);
-		artist->name = realloc(artist->name, strlen(node->txt) + 1);
-		strcpy(artist->name, node->txt);
-		
-		artist->is_loaded = 1;
-	}
-	else if((node = ezxml_get(artist_node, "artist", -1)) != NULL) {
-		/* XML from track browsing */
-
-		/* Artist UUID */
-		hex_ascii_to_bytes(node->txt, id, sizeof(artist->id));
-		assert(memcmp(artist->id, id, sizeof(artist->id)) == 0);
-		
-		/* Artist name */
-		if((node = ezxml_get(artist_node, "artist", -1)) == NULL) {
-			DSFYDEBUG("Failed to find element 'artist'\n");
-			return -1;
-		}
-		
-		assert(strlen(node->txt) < 256);
-		artist->name = realloc(artist->name, strlen(node->txt) + 1);
-		strcpy(artist->name, node->txt);
-		
-		artist->is_loaded = 1;
-	}
-	else {
-		DSFYDEBUG("Failed to find element 'name' (browse artist) or 'artist' (browse track)\n");
+	/* Artist UUID */
+	if((node = ezxml_get(artist_node, "id", -1)) == NULL) {
+		DSFYDEBUG("Failed to find element 'id'\n");
 		return -1;
 	}
+		
+	hex_ascii_to_bytes(node->txt, id, sizeof(artist->id));
+	assert(memcmp(artist->id, id, sizeof(artist->id)) == 0);
 	
+
+	/* Artist name */
+	if((node = ezxml_get(artist_node, "name", -1)) == NULL) {
+		DSFYDEBUG("Failed to find element 'name'\n");
+		return -1;
+	}
+
+	assert(strlen(node->txt) < 256);
+	artist->name = realloc(artist->name, strlen(node->txt) + 1);
+	strcpy(artist->name, node->txt);
+	
+	artist->is_loaded = 1;
+
+	return 0;
+}
+
+
+/* Parse XML from album or track browsing */
+int osfy_artist_load_from_album_or_track_xml(sp_session *session, sp_artist *artist, ezxml_t artist_node) {
+	unsigned char id[16];
+	ezxml_t node;
+
+	/* Artist UUID */
+	if((node = ezxml_get(artist_node, "artist-id", -1)) == NULL) {
+		DSFYDEBUG("Failed to find element 'artist-id'\n");
+		return -1;
+	}
+
+	hex_ascii_to_bytes(node->txt, id, sizeof(artist->id));
+	assert(memcmp(artist->id, id, sizeof(artist->id)) == 0);
+	
+
+	/* Artist name */
+	if((node = ezxml_get(artist_node, "artist", -1)) == NULL) {
+		DSFYDEBUG("Failed to find element 'artist'\n");
+		return -1;
+	}
+		
+	assert(strlen(node->txt) < 256);
+	artist->name = realloc(artist->name, strlen(node->txt) + 1);
+	strcpy(artist->name, node->txt);
+		
+	artist->is_loaded = 1;
+
 	return 0;
 }
 
@@ -207,7 +218,7 @@ static int osfy_artist_browse_callback(struct browse_callback_ctx *brctx) {
 	
 	artists = brctx->data.artists;
 	for(i = 0; i < brctx->num_in_request; i++) {
-		osfy_artist_load_from_xml(brctx->session, artists[brctx->num_browsed + i], root);
+		osfy_artist_load_from_artist_xml(brctx->session, artists[brctx->num_browsed + i], root);
 	}
 
 	

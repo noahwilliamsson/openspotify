@@ -153,7 +153,8 @@ int osfy_album_load_from_xml(sp_session *session, sp_album *album, ezxml_t album
 		sp_artist_add_ref(album->artist);
 		
 		if(sp_artist_is_loaded(album->artist) == 0)
-			osfy_artist_load_from_xml(session, album->artist, album_node);
+			osfy_artist_load_from_album_or_track_xml(session, album->artist, album_node);
+		assert(sp_artist_is_loaded(album->artist) != 0);
 		
 		
 		/* Album cover */
@@ -214,8 +215,9 @@ int osfy_album_load_from_xml(sp_session *session, sp_album *album, ezxml_t album
 		sp_artist_add_ref(album->artist);
 		
 		if(sp_artist_is_loaded(album->artist) == 0)
-			osfy_artist_load_from_xml(session, album->artist, album_node);
+			osfy_artist_load_from_album_or_track_xml(session, album->artist, album_node);
 
+		assert(sp_artist_is_loaded(album->artist) != 0);
 
 
 		/* Album cover */
