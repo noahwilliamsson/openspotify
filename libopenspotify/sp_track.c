@@ -1,11 +1,12 @@
 #include <stdio.h>
 #include <string.h>
-
+#include <assert.h>
 #ifdef _WIN32
 #include <ws2tcpip.h>
 #else
 #include <arpa/inet.h>
 #endif
+
 #include <spotify/api.h>
 
 #include "album.h"
@@ -85,10 +86,9 @@ SP_LIBEXPORT(void) sp_track_add_ref(sp_track *track) {
 
 
 SP_LIBEXPORT(void) sp_track_release(sp_track *track) {
-	if(track->ref_count)
-		track->ref_count--;
+	assert(track->ref_count > 0);
 
-	if(track->ref_count)
+	if(--track->ref_count)
 		return;
 
 	osfy_track_free(track);
@@ -104,10 +104,7 @@ SP_LIBEXPORT(void) sp_track_release(sp_track *track) {
 sp_track *osfy_track_add(sp_session *session, unsigned char id[16]) {
 	sp_track *track;
 
-	if(session == NULL) {
-		DSFYDEBUG("Called with NULL session, failing\n");
-		return NULL;
-	}
+	assert(session != NULL);
 
 	if((track = (sp_track *)hashtable_find(session->hashtable_tracks, id)) != NULL)
 		return track;
@@ -170,6 +167,8 @@ void osfy_track_free(sp_track *track) {
 
 
 void osfy_track_name_set(sp_track *track, char *name) {
+
+	assert(strlen(name) < 256);
 
 	track->name = realloc(track->name, strlen(name) + 1);
 	strcpy(track->name, name);
