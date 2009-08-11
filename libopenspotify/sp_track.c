@@ -221,22 +221,6 @@ int osfy_track_load_from_xml(sp_session *session, sp_track *track, ezxml_t track
 	track->popularity = (int)popularity;
 
 
-	/* Track album */
-	if((node = ezxml_get(track_node, "album-id", -1)) == NULL) {
-		DSFYDEBUG("Failed to find element 'album-id'\n");
-		return -1;
-	}
-	
-	hex_ascii_to_bytes(node->txt, id, 16);
-	if(track->album != NULL)
-		sp_album_release(track->album);
-
-	track->album = sp_album_add(session, id);
-	sp_album_add_ref(track->album);
-	if(sp_album_is_loaded(track->album) == 0)
-		osfy_album_load_from_xml(session,track->album, track_node);
-
-	
 	/* Country restrictions */
 	node = ezxml_get(track_node, "restrictions", 0, "restriction", -1);
 	if(node && (str = ezxml_attr(node, "forbidden")) != NULL) {
@@ -274,6 +258,19 @@ int osfy_track_load_from_xml(sp_session *session, sp_track *track, ezxml_t track
 		track->num_artists++;
 	}
 
+
+	/* Track album */
+	if((node = ezxml_get(track_node, "album-id", -1)) != NULL) {
+		hex_ascii_to_bytes(node->txt, id, 16);
+		if(track->album != NULL)
+			sp_album_release(track->album);
+		
+		track->album = sp_album_add(session, id);
+		sp_album_add_ref(track->album);
+		if(sp_album_is_loaded(track->album) == 0)
+			osfy_album_load_from_xml(session,track->album, track_node);
+	}
+	
 	
 	track->is_loaded = 1;
 
