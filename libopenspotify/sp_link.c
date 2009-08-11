@@ -72,11 +72,10 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 		sp_album_add_ref(lnk->data.album);
 
 		/* Browse album if needed */
-		if(sp_album_is_loaded(lnk->data.artist) == 0) {
+		if(sp_album_is_loaded(lnk->data.album) == 0) {
 			DSFYDEBUG("Browsing not yet loaded album\n");
 			osfy_album_browse(session, lnk->data.album);
 		}
-	}
 	}
 	/* Link refers to an artist. */
 	else if(strncmp("artist:", ptr, 7) == 0){
