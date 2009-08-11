@@ -167,7 +167,7 @@ int osfy_image_process_request(sp_session *session, struct request *req) {
 
 	{
 		char buf[41];
-		hex_bytes_to_ascii(image->id, buf, 20);
+		hex_bytes_to_ascii(image_ctx->image->id, buf, 20);
 		DSFYDEBUG("Sending request for image '%s'\n", buf);
 	}
 
