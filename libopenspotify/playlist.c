@@ -49,6 +49,9 @@
  */
 
 #include <string.h>
+#include <zlib.h>
+
+#include <spotify/api.h>
 
 #include "buf.h"
 #include "channel.h"
@@ -61,7 +64,6 @@
 #include "track.h"
 #include "util.h"
 
-#include <zlib.h>
 
 static int playlist_send_playlist_container_request(sp_session *session, struct request *req);
 static int playlist_container_callback(CHANNEL *ch, unsigned char *payload, unsigned short len);
