@@ -199,14 +199,14 @@ SP_LIBEXPORT(void) sp_session_process_events(sp_session *session, int *next_time
 			break;
 
 		case REQ_TYPE_ALBUMBROWSE:
-			alb = *(sp_albumbrowse **)request->input;
+			alb = (sp_albumbrowse *)request->output;
 			if(alb->callback)
 				alb->callback(alb, alb->userdata);
 
 			break;
 
 		case REQ_TYPE_ARTISTBROWSE:
-	                arb = *(sp_artistbrowse **)request->input;
+	                arb = (sp_artistbrowse *)request->output;
 	                if(arb->callback)
 	                        arb->callback(arb, arb->userdata);
 
@@ -215,10 +215,12 @@ SP_LIBEXPORT(void) sp_session_process_events(sp_session *session, int *next_time
 		case REQ_TYPE_BROWSE_ALBUM:
 		case REQ_TYPE_BROWSE_ARTIST:
 		case REQ_TYPE_BROWSE_TRACK:
+			DSFYDEBUG("Ignoring returned request <type %s> in main thread\n",
+				  REQUEST_TYPE_STR(request->type));
 			break;
 
 		case REQ_TYPE_IMAGE:
-			image = *(sp_image **)request->input;
+			image = (sp_image *)request->output;
 			if(image->callback)
 				image->callback(image, image->userdata);
 			break;
