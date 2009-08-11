@@ -4,10 +4,14 @@
 
 #include <spotify/api.h>
 
+#include "album.h"
+#include "artist.h"
 #include "debug.h"
 #include "ezxml.h"
+#include "image.h"
 #include "request.h"
 #include "sp_opaque.h"
+#include "util.h"
 
 
 SP_LIBEXPORT(bool) sp_album_is_loaded(sp_album *album) {
@@ -103,6 +107,7 @@ sp_album *sp_album_add(sp_session *session, unsigned char id[16]) {
 
 int osfy_album_load_from_xml(sp_session *session, sp_album *album, ezxml_t album_node) {
 	unsigned char id[20];
+	ezxml_t node;
 	
 	/* Assume XML from tracking browsing */
 	if((node = ezxml_get(album_node, "album-id", -1)) != NULL) {
@@ -111,7 +116,7 @@ int osfy_album_load_from_xml(sp_session *session, sp_album *album, ezxml_t album
 		assert(memcmp(album->id, id, sizeof(album->id)) == 0);
 
 		/* Album name */
-		if((node = ezxml_get(track_node, "album", -1)) == NULL) {
+		if((node = ezxml_get(album_node, "album", -1)) == NULL) {
 			DSFYDEBUG("Failed to find element 'album'\n");
 			return -1;
 		}
@@ -122,7 +127,7 @@ int osfy_album_load_from_xml(sp_session *session, sp_album *album, ezxml_t album
 
 		
 		/* Album year */
-		if((node = ezxml_get(track_node, "year", -1)) == NULL) {
+		if((node = ezxml_get(album_node, "year", -1)) == NULL) {
 			DSFYDEBUG("Failed to find element 'year'\n");
 			return -1;
 		}
@@ -131,7 +136,7 @@ int osfy_album_load_from_xml(sp_session *session, sp_album *album, ezxml_t album
 
 		
 		/* Album artist */
-		if((node = ezxml_get(track_node, "album-artist-id", -1)) == NULL) {
+		if((node = ezxml_get(album_node, "album-artist-id", -1)) == NULL) {
 			DSFYDEBUG("Failed to find element 'album-artist-id'\n");
 			return -1;
 		}
@@ -141,11 +146,11 @@ int osfy_album_load_from_xml(sp_session *session, sp_album *album, ezxml_t album
 		
 		hex_ascii_to_bytes(node->txt, id, 16);
 		album->artist = osfy_artist_add(session, id);
-		sp_artist_add_ref(album->artist)
+		sp_artist_add_ref(album->artist);
 
 
 		/* Album cover */
-		if((node = ezxml_get(track_node, "cover", -1)) == NULL) {
+		if((node = ezxml_get(album_node, "cover", -1)) == NULL) {
 			DSFYDEBUG("Failed to find element 'cover'\n");
 			return -1;
 		}
@@ -155,7 +160,7 @@ int osfy_album_load_from_xml(sp_session *session, sp_album *album, ezxml_t album
 		
 		hex_ascii_to_bytes(node->txt, id, 20);
 		album->image = osfy_image_create(session, id);
-		sp_image_add_ref(album->image)
+		sp_image_add_ref(album->image);
 		
 
 		/* Done loading */
