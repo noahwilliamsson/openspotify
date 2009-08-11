@@ -158,12 +158,15 @@ static void request_notify_main_thread(sp_session *session, struct request *requ
 	case REQ_TYPE_LOGOUT:
 	case REQ_TYPE_PLAY_TOKEN_LOST:
 	case REQ_TYPE_NOTIFY:
-	case REQ_TYPE_BROWSE_ALBUM:
-	case REQ_TYPE_BROWSE_ARTIST:
-	case REQ_TYPE_BROWSE_TRACK:
 	case REQ_TYPE_IMAGE:
 	case REQ_TYPE_ALBUMBROWSE:
 	case REQ_TYPE_ARTISTBROWSE:
+
+	/* FIXME: Do these three really need to be routed to the main thread? */
+	case REQ_TYPE_BROWSE_ALBUM:
+	case REQ_TYPE_BROWSE_ARTIST:
+	case REQ_TYPE_BROWSE_TRACK:
+			
 		session->callbacks->notify_main_thread(session);
 		DSFYDEBUG("Notified main thread for <type %s>\n", REQUEST_TYPE_STR(request->type));
 		break;
