@@ -16,11 +16,8 @@
 static int osfy_image_callback(CHANNEL *ch, unsigned char *payload, unsigned short len);
 
 
-SP_LIBEXPORT(sp_image *) sp_image_create(sp_session *session, const byte image_id[20]) {
+sp_image *ofsy_image_create(sp_session *session, const byte image_id[20]) {
 	sp_image *image;
-	void **container;
-	struct image_ctx *image_ctx;
-	
 
 	image = (sp_image *)hashtable_find(session->hashtable_images, image_id);
 	if(image) {
@@ -30,8 +27,6 @@ SP_LIBEXPORT(sp_image *) sp_image_create(sp_session *session, const byte image_i
 			DSFYDEBUG("Returning existing image '%s'\n", buf);
 		}
 		
-		/* FIXME: What about any possible callbacks? */
-		image->ref_count++;
 		return image;
 	}
 
@@ -47,10 +42,23 @@ SP_LIBEXPORT(sp_image *) sp_image_create(sp_session *session, const byte image_i
 	image->userdata = NULL;
 
 	image->is_loaded = 0;
-	image->ref_count = 1;
+	image->ref_count = 0;
 
 	image->hashtable = session->hashtable_images;
 	hashtable_insert(image->hashtable, image->id, image);
+
+	return image;
+}
+
+
+SP_LIBEXPORT(sp_image *) sp_image_create(sp_session *session, const byte image_id[20]) {
+	sp_image *image;
+	void **container;
+	struct image_ctx *image_ctx;
+	
+
+	image = osfy_image_create(session, image_id);
+	sp_image_add_ref(image);
 
 	
 	image_ctx = malloc(sizeof(struct image_ctx));
