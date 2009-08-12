@@ -1,6 +1,3 @@
-#ifndef LIBOPENSPOTIFY_PLAYLIST_H
-#define LIBOPENSPOTIFY_PLAYLIST_H
-
 #include <string.h>
 #include <stdlib.h>
 
@@ -169,5 +166,3 @@ SP_LIBEXPORT(sp_error) sp_playlistcontainer_move_playlist (sp_playlistcontainer 
 
 	return SP_ERROR_OK;
 }
-
-#endif
