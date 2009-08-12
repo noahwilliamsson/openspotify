@@ -20,10 +20,11 @@
 	}							\
 }
 #else
+#include <libgen.h>
 #define DSFYDEBUG(...) {                                        \
         FILE *fd;                                               \
         if((fd = fopen("despotify.log", "at")) != NULL) {       \
-                fprintf(fd, "%s:%d %s() ", __FILE__, __LINE__,	\
+                fprintf(fd, "%s:%d %s() ", basename(__FILE__), __LINE__,	\
                         __func__);				\
                 fprintf(fd, __VA_ARGS__);			\
                 fclose(fd);					\
