@@ -150,6 +150,7 @@ int login_process(struct login_ctx *l) {
 	fd_set wfds;
 	struct timeval tv;
 
+	l->error = SP_LOGIN_ERROR_OK;
 	switch(l->state) {
 
 	case 0:
@@ -327,8 +328,17 @@ int login_process(struct login_ctx *l) {
 
 	case 4:
 		ret = send_client_parameters(l);
-		if(ret < 0)
-			l->state = 0;
+		if(ret < 0) {
+			if(l->error == SP_ERROR_OTHER_TRANSIENT || l->error == SP_LOGIN_ERROR_SOCKET_ERROR) {
+				DSFYDEBUG("Retrying with next server\n");
+				l->state = 2;
+				return 0;
+			}
+			else {
+				l->state = 0;
+				return -1;
+			}
+		}
 		else
 			l->state++;
 
@@ -339,8 +349,15 @@ int login_process(struct login_ctx *l) {
 		/* Receive server parameters and eventually compute session key */
 		ret = receive_server_parameters(l);
 		DSFYDEBUG("Recieved initial packet, return value was %d, login error is %d\n", ret, l->error);
-		if(ret < 0)
-			l->state = 0;
+		if(ret < 0) {
+			if(l->error == SP_ERROR_OTHER_TRANSIENT || l->error == SP_LOGIN_ERROR_SOCKET_ERROR) {
+				DSFYDEBUG("Retrying with next server\n");
+				l->state = 2;
+				return 0;
+			}
+			else
+				l->state = 0;
+		}
 		else
 			l->state++;
 
@@ -388,7 +405,7 @@ int login_process(struct login_ctx *l) {
 			return 1;
 
 		l->state = 0;
-		l->error = -12;
+		return -1;
 		break;
 	}
 
