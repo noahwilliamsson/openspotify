@@ -238,6 +238,7 @@ static int process_login_request(sp_session *s, struct request *req) {
 
 		s->connectionstate = SP_CONNECTION_STATE_LOGGED_IN;
 
+		DSFYDEBUG("Logged in\n");
 		return request_set_result(s, req, SP_ERROR_OK, NULL);
 	}
 
@@ -275,6 +276,7 @@ static int process_login_request(sp_session *s, struct request *req) {
 	login_release(s->login);
 	s->login = NULL;
 
+	DSFYDEBUG("Login failed with error: %s\n", sp_error_message(error));
 	return request_set_result(s, req, error, NULL);
 }
 
