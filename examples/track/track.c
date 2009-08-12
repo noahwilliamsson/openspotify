@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <spotify/api.h>
 
+#include "debug.h"
 
 /* --- Data --- */
 extern int g_exit_code;
@@ -201,6 +202,8 @@ static void try_tracks(sp_session *session)
 {
 	// If we have already shown the track (track is NULL), or the track
 	// metadata is not yet ready, do nothing.
+	fprintf(stderr, "trytracks with g_track=%p and sp_track_is_loaded=%d\n",
+		g_track, (g_track? sp_track_is_loaded(g_track): -1));
 	if (!g_track || !sp_track_is_loaded(g_track))
 		return;
 
@@ -209,6 +212,7 @@ static void try_tracks(sp_session *session)
 	request_cover(session, g_track);
 
 	// We increased the reference count in session_ready(), better decrease it here.
+	fprintf(stderr, "Releasing track\n");
 	sp_track_release(g_track);
 	g_track = NULL;
 }
@@ -218,6 +222,7 @@ static void try_tracks(sp_session *session)
  */
 void metadata_updated(sp_session *session)
 {
+	fprintf(stderr, "Metadata updated, trying to display tracks..\n");
 	try_tracks(session);
 }
 
@@ -226,13 +231,18 @@ void metadata_updated(sp_session *session)
  */
 void session_ready(sp_session *session)
 {
-	sp_link *link = sp_link_create_from_string("spotify:track:6JEK0CvvjDjjMUBFoXShNZ");
+	sp_link *link;
+	
+	fprintf(stderr, "Entering session_ready\n");
+	link = sp_link_create_from_string("spotify:track:6JEK0CvvjDjjMUBFoXShNZ");
 
 	if (!link) {
 		fprintf(stderr, "failed to get link from a Spotify URI\n");
 		g_exit_code = 6;
 		return;
 	}
+
+	fprintf(stderr, "Got session_ready(), requesting a track link..\n");
 
 	g_track = sp_link_as_track(link);
 
@@ -248,6 +258,7 @@ void session_ready(sp_session *session)
 	sp_track_add_ref(g_track);
 	sp_link_release(link);
 
+	fprintf(stderr, "Calling try_tracks()\n");
 	try_tracks(session);
 }
 

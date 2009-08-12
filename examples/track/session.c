@@ -40,6 +40,7 @@ typedef unsigned char uint8_t;
 // The one and only entrypoint to the libspotify API
 #include <spotify/api.h>
 
+#include "debug.h"
 
 /* --- Functions --- */
 /// External function called when some metadata has been updated.
@@ -192,6 +193,8 @@ static void loop(sp_session *session)
 	
 	while (g_exit_code < 0) {
 		int timeout = -1;
+
+		fprintf(stderr, "loop()\n");
 		
 #ifndef _WIN32
 		pthread_sigmask(SIG_BLOCK, &sigset, NULL);
