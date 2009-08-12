@@ -89,8 +89,9 @@ SP_LIBEXPORT(sp_image *) sp_image_create(sp_session *session, const byte image_i
 SP_LIBEXPORT(void) sp_image_add_load_callback(sp_image *image, image_loaded_cb *callback, void *userdata) {
 	/* FIXME: Support multiple callbacks */
 	image->callback = callback;
-	image->callback = userdata;
+	image->userdata = userdata;
 
+	
 	/* FIXME: Check with libspotify */
 	if(image->is_loaded)
 		callback(image, userdata);
@@ -220,19 +221,8 @@ static int osfy_image_callback(CHANNEL *ch, unsigned char *payload, unsigned sho
 			image_ctx->image->is_loaded = 1;
 			image_ctx->image->error = SP_ERROR_OK;
 
-			DSFYDEBUG("Got all data, returning the image as result\n");
 			request_set_result(image_ctx->session, image_ctx->req, SP_ERROR_OK, image_ctx->image);
-		
-			{
-				FILE *fd;
-				
-				fd = fopen("image.jpg", "w");
-				if(fd) {
-					fwrite(image_ctx->image->data->ptr, image_ctx->image->data->len, 1, fd);
-					fclose(fd);
-				}
-			}
-			
+
 			free(image_ctx);
 			break;
 			
