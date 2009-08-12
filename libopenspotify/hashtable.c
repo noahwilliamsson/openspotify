@@ -93,7 +93,7 @@ void *hashtable_find(struct hashtable *hashtable, const void *key) {
 		return NULL;
 	
 	for(entry = hashtable->entries[index]; entry; entry = entry->next)
-		if(memcmp(entry->key, key, hashtable->keysize))
+		if(memcmp(entry->key, key, hashtable->keysize) == 0)
 			return entry->value;
 	
 	return NULL;
