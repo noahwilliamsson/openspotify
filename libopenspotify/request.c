@@ -162,7 +162,7 @@ static void request_notify_main_thread(sp_session *session, struct request *requ
 	case REQ_TYPE_ALBUMBROWSE:
 	case REQ_TYPE_ARTISTBROWSE:
 
-	/* FIXME: Do these three really need to be routed to the main thread? */
+	/* FIXME: Do these really need to be routed to the main thread? */
 	case REQ_TYPE_BROWSE_ALBUM:
 	case REQ_TYPE_BROWSE_ARTIST:
 	case REQ_TYPE_BROWSE_TRACK:
@@ -172,9 +172,23 @@ static void request_notify_main_thread(sp_session *session, struct request *requ
 		break;
 
 	case REQ_TYPE_PLAYLIST_LOAD_CONTAINER:
+		DSFYDEBUG("Playlist container loaded\n");
 		break;
 
 	case REQ_TYPE_PLAYLIST_LOAD_PLAYLIST:
+		{
+			char idstr[35];
+			hex_bytes_to_ascii(((sp_playlist *)request->output)->id, idstr, 17);
+			DSFYDEBUG("Playlist '%s' has list of tracks\n", idstr);
+		}
+		break;
+
+	case REQ_TYPE_BROWSE_PLAYLIST_TRACKS:
+		{
+			char idstr[35];
+			hex_bytes_to_ascii(((sp_playlist *)request->output)->id, idstr, 17);
+			DSFYDEBUG("Playlist '%s' is completely loaded\n", idstr);
+		}
 		break;
 
 	default:
