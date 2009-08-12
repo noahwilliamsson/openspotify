@@ -3,19 +3,14 @@ TODO list
 * Initialize PRNG !!!
 * Searching
 * Playlists
-  - Rewrite callback stuff as arrays instead of a single pointer
-  - Support loading of tracks (BrowseTrack requests)
-* Tracks
-* Albums
+  -- Add support for changing/removing
 * Request and decryption of audio
 * Audio decoding to PCM
+* Images
+  -- Add JPG decoder to support images fully
 
 
 KNOWN ISSUES
 ============
-1. If connecting to server fails libopenspotify the login session fails.
-   The official libspotify will retry with the next server.
-2. In DNS only port 4070 is listed. The official library will also try 
-   port 80 and 443 I think.
-3. Apparently there's a race between posting of requests and
+1. Apparently there's a race between posting of requests and
    sleeping while waiting for new.. seen on Mac OS X

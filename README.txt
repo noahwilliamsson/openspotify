@@ -15,16 +15,16 @@ STATUS
 Modules (from the below link) that are implemented so far are:
 http://developer.spotify.com/en/libspotify/docs/modules.html
 * Error Handling
-* Session handling (login, most callbacks, logout)
-* Links (Spotify URIs)
-* Tracks subsystem
-* Album subsystem
-* Artist subsystem
-* Album browsing (neither browsing nor callbacks are made)
-* Artist browsing (neither browsing nor callbacks are made)
-* Image handling (stubs)
-* Playlist subsystem (partly)
-* User handling (partly done)
+* Session handling 	- Works!
+* Links (Spotify URIs)	- Everything but spotify:search: links
+* Tracks subsystem	- Works!
+* Album subsystem	- Works!
+* Artist subsystem	- Works!
+* Album browsing	- Works!
+* Artist browsing	- Works!
+* Image handling	- No support for image decode (width, height, pixel locking, ..)
+* Playlist subsystem	- Loading works, no support for changing/removing them yet
+* User handling		- Stubs
 
 Currently there is no support for neither searching nor audio.
 
@@ -47,5 +47,4 @@ openspotify-simple/
  
 win32/
 - Bundled openssl and zlib headers and libraries for Windows 
-
 
