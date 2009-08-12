@@ -77,9 +77,6 @@ static int playlist_parse_playlist_xml(sp_session *session, sp_playlist *playlis
 
 static int osfy_playlist_browse(sp_session *session, sp_playlist *playlist);
 static int osfy_playlist_browse_callback(struct browse_callback_ctx *brctx);
-#if 0
-static void playlist_post_track_request(sp_session *session, sp_playlist *);
-#endif
 
 unsigned long playlist_checksum(sp_playlist *playlist);
 unsigned long playlistcontainer_checksum(sp_playlistcontainer *container);
@@ -387,9 +384,6 @@ static int playlist_callback(CHANNEL *ch, unsigned char *payload, unsigned short
 			playlist->state = PLAYLIST_STATE_LISTED;
 
 			/* Create new request for loading tracks */
-#if 0
-			playlist_post_track_request(callback_ctx->session, playlist);
-#endif
 			osfy_playlist_browse(callback_ctx->session, playlist);
 			
 			/* Note we're done loading this playlist */
@@ -446,18 +440,6 @@ static int playlist_parse_playlist_xml(sp_session *session, sp_playlist *playlis
 
 	return 0;
 }
-
-
-/* Create new track request for this playlist */
-void playlist_post_track_request(sp_session *session, sp_playlist *playlist) {
-	sp_playlist **ptr;
-
-	ptr = (sp_playlist **)malloc(sizeof(sp_playlist *));
-	*ptr = playlist;
-
-	request_post(session, REQ_TYPE_BROWSE_TRACK, ptr);
-}
-
 
 
 /*
