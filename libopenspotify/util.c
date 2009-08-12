@@ -113,6 +113,8 @@ ssize_t block_read (int fd, void *buf, size_t nbyte)
 	unsigned int idx;
 	ssize_t n;
 	fd_set rfds;
+	struct timeval tv;
+	int ret;
 
 	idx = 0;
 	while (idx < nbyte) {
@@ -124,7 +126,10 @@ ssize_t block_read (int fd, void *buf, size_t nbyte)
 #endif
 				FD_ZERO(&rfds);
 				FD_SET(fd, &rfds);
-				if(select(fd + 1, &rfds, NULL, NULL, NULL) < 0)
+				tv.tv_sec = 2;
+				tv.tv_usec = 0;
+				ret = select(fd + 1, &rfds, NULL, NULL, &tv);
+				if(!FD_ISSET(fd, &rfds))
 					return -1;
 
 				continue;
