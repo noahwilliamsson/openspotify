@@ -95,6 +95,7 @@ SP_LIBEXPORT(void) sp_track_release(sp_track *track) {
 	if(--track->ref_count)
 		return;
 
+	DSFYDEBUG("Freeing track %p because of zero ref_count\n", track);
 	osfy_track_free(track);
 }
 
@@ -149,6 +150,8 @@ sp_track *osfy_track_add(sp_session *session, unsigned char id[16]) {
 
 void osfy_track_free(sp_track *track) {
 	int i;
+
+	assert(track->ref_count == 0);
 
 	hashtable_remove(track->hashtable, track->id);
 
@@ -421,8 +424,6 @@ void osfy_track_garbage_collect(sp_session *session) {
 			continue;
 
 		DSFYDEBUG("Freeing track %p because of zero ref_count\n", track);
-
-		/* FIXME: Won't work as we would have gotten a negative ref_count */
 		osfy_track_free(track);
 	}
 

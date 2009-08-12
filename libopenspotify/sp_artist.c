@@ -39,12 +39,8 @@ SP_LIBEXPORT(void) sp_artist_release(sp_artist *artist) {
 	if(--artist->ref_count)
 		return;
 
-	hashtable_remove(artist->hashtable, artist->id);
-
-	if(artist->name)
-		free(artist->name);
-	
-	free(artist);
+	DSFYDEBUG("Freeing artist %p because of zero ref count\n", artist);
+	osfy_artist_free(artist);
 }
 
 
@@ -80,6 +76,20 @@ sp_artist *osfy_artist_add(sp_session *session, unsigned char id[16]) {
 
 	DSFYDEBUG("Returning new artist at %p (ref_count 0)\n", artist);
 	return artist;
+}
+
+
+/* Free an artist. Used by sp_artist_relase() and the garbage collector */
+void osfy_artist_free(sp_artist *artist) {
+	
+	assert(artist->ref_count == 0);
+
+	hashtable_remove(artist->hashtable, artist->id);
+
+	if(artist->name)
+		free(artist->name);
+	
+	free(artist);
 }
 
 

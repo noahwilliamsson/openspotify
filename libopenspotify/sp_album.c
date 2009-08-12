@@ -58,18 +58,8 @@ SP_LIBEXPORT(void) sp_album_release(sp_album *album) {
 	if(--album->ref_count)
 		return;
 
-	hashtable_remove(album->hashtable, album->id);
-
-	if(album->name)
-		free(album->name);
-
-	if(album->artist)
-		sp_artist_release(album->artist);
-
-	if(album->image)
-		sp_image_release(album->image);
-
-	free(album);
+        DSFYDEBUG("Freeing album %p because of zero ref count\n", album);
+        osfy_album_free(album);
 }
 
 
@@ -103,6 +93,26 @@ sp_album *sp_album_add(sp_session *session, unsigned char id[16]) {
 
 
 	return album;
+}
+
+
+/* Free an album. Used by sp_album_relase() and the garbage collector */
+void osfy_album_free(sp_album *album) {
+
+	assert(album->ref_count == 0);
+
+	hashtable_remove(album->hashtable, album->id);
+
+	if(album->name)
+		free(album->name);
+
+	if(album->artist)
+		sp_artist_release(album->artist);
+
+	if(album->image)
+		sp_image_release(album->image);
+
+	free(album);
 }
 
 
