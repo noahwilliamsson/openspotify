@@ -106,145 +106,192 @@ sp_album *sp_album_add(sp_session *session, unsigned char id[16]) {
 }
 
 
-int osfy_album_load_from_xml(sp_session *session, sp_album *album, ezxml_t album_node) {
+/* Load an album from XML returned by album browsing */
+int osfy_album_load_from_album_xml(sp_session *session, sp_album *album, ezxml_t album_node) {
 	unsigned char id[20];
 	ezxml_t node;
 
+	{
+		char buf[33];
+		hex_bytes_to_ascii(album->id, buf, 16);
+		DSFYDEBUG("Loading album '%s' from XML returned by album browsing\n", buf);
+	}
 	
-	if((node = ezxml_get(album_node, "name", -1)) != NULL) {
-		/* XML from album browsing */
-		
-		if((node = ezxml_get(album_node, "id", -1)) == NULL) {
-			DSFYDEBUG("Failed to find element 'id'\n");
-			return -1;
-		}
-		
-		/* Album name */
-		if((node = ezxml_get(album_node, "name", -1)) == NULL) {
-			DSFYDEBUG("Failed to find element 'name'\n");
-			return -1;
-		}
-		
-		assert(strlen(node->txt) < 256);
-		album->name = realloc(album->name, strlen(node->txt) + 1);
-		strcpy(album->name, node->txt);
-		
-		
-		/* Album year */
-		if((node = ezxml_get(album_node, "year", -1)) == NULL) {
-			DSFYDEBUG("Failed to find element 'year'\n");
-			return -1;
-		}
-		
-		album->year = atoi(node->txt);
-		
-		
-		/* Album artist */
-		if((node = ezxml_get(album_node, "artist-id", -1)) == NULL) {
-			DSFYDEBUG("Failed to find element 'artist-id'\n");
-			return -1;
-		}
-		
-		if(album->artist != NULL)
-			sp_artist_release(album->artist);
-		
-		hex_ascii_to_bytes(node->txt, id, 16);
-		album->artist = osfy_artist_add(session, id);
-		sp_artist_add_ref(album->artist);
-		
-		if(sp_artist_is_loaded(album->artist) == 0)
-			osfy_artist_load_from_album_or_track_xml(session, album->artist, album_node);
-		assert(sp_artist_is_loaded(album->artist) != 0);
-		
-		
-		/* Album cover */
-		if((node = ezxml_get(album_node, "cover", -1)) == NULL) {
-			DSFYDEBUG("Failed to find element 'cover'\n");
-			return -1;
-		}
-		
-		if(album->image != NULL)
-			sp_image_release(album->image);
-		
-		hex_ascii_to_bytes(node->txt, id, 20);
-		album->image = osfy_image_create(session, id);
-		sp_image_add_ref(album->image);
-		
-		
-		/* Done loading */
-		album->is_loaded = 1;
-	}
-	else if((node = ezxml_get(album_node, "album-id", -1)) != NULL) {
-		/* XML from track browsing */
-
-		/* Album UUID */
-		hex_ascii_to_bytes(node->txt, id, sizeof(album->id));
-		assert(memcmp(album->id, id, sizeof(album->id)) == 0);
-
-		/* Album name */
-		if((node = ezxml_get(album_node, "album", -1)) == NULL) {
-			DSFYDEBUG("Failed to find element 'album'\n");
-			return -1;
-		}
-		
-		assert(strlen(node->txt) < 256);
-		album->name = realloc(album->name, strlen(node->txt) + 1);
-		strcpy(album->name, node->txt);
-
-		
-		/* Album year */
-		if((node = ezxml_get(album_node, "year", -1)) == NULL) {
-			DSFYDEBUG("Failed to find element 'year'\n");
-			return -1;
-		}
-		
-		album->year = atoi(node->txt);
-
-		
-		/* Album artist */
-		if((node = ezxml_get(album_node, "album-artist-id", -1)) == NULL) {
-			DSFYDEBUG("Failed to find element 'album-artist-id'\n");
-			return -1;
-		}
-
-		if(album->artist != NULL)
-			sp_artist_release(album->artist);
-		
-		hex_ascii_to_bytes(node->txt, id, 16);
-		album->artist = osfy_artist_add(session, id);
-		sp_artist_add_ref(album->artist);
-		
-		if(sp_artist_is_loaded(album->artist) == 0)
-			osfy_artist_load_from_album_or_track_xml(session, album->artist, album_node);
-
-		assert(sp_artist_is_loaded(album->artist) != 0);
-
-
-		/* Album cover */
-		if((node = ezxml_get(album_node, "cover", -1)) == NULL) {
-			DSFYDEBUG("Failed to find element 'cover'\n");
-			return -1;
-		}
-		
-		if(album->image != NULL)
-			sp_image_release(album->image);
-		
-		hex_ascii_to_bytes(node->txt, id, 20);
-		album->image = osfy_image_create(session, id);
-		sp_image_add_ref(album->image);
-		
-
-		/* Done loading */
-		album->is_loaded = 1;
-	}
-	else {
-		DSFYDEBUG("Failed to find element 'album-id'\n");
+	/* Verify we're loading XML for the expected album ID */
+	if((node = ezxml_get(album_node, "id", -1)) == NULL) {
+		DSFYDEBUG("Failed to find element 'id'\n");
 		return -1;
 	}
+	
+	hex_ascii_to_bytes(node->txt, id, sizeof(album->id));
+	assert(memcmp(album->id, id, sizeof(album->id)) == 0);
+
+	
+	/* Album name */
+	if((node = ezxml_get(album_node, "name", -1)) == NULL) {
+		DSFYDEBUG("Failed to find element 'name'\n");
+		return -1;
+	}
+	
+	assert(strlen(node->txt) < 256);
+	album->name = realloc(album->name, strlen(node->txt) + 1);
+	strcpy(album->name, node->txt);
+	
+	
+	/* Album year */
+	if((node = ezxml_get(album_node, "year", -1)) == NULL) {
+		DSFYDEBUG("Failed to find element 'year'\n");
+		return -1;
+	}
+	
+	album->year = atoi(node->txt);
+	
+	
+	/* Album artist */
+	if((node = ezxml_get(album_node, "artist-id", -1)) == NULL) {
+		DSFYDEBUG("Failed to find element 'artist-id'\n");
+		return -1;
+	}
+	
+	if(album->artist != NULL)
+		sp_artist_release(album->artist);
+	
+	hex_ascii_to_bytes(node->txt, id, 16);
+	album->artist = osfy_artist_add(session, id);
+	sp_artist_add_ref(album->artist);
+	
+	if(sp_artist_is_loaded(album->artist) == 0) {
+		{
+			char buf[33];
+			hex_bytes_to_ascii(album->artist->id, buf, 16);
+			DSFYDEBUG("Artist '%s' not yet loaded, trying to load from album XML\n", buf);
+		}
+		
+		/*
+		 * Despite the name, we're loading the album artist.
+		 * Album browsing (or album nodes in XML from artist browsing)
+		 * just returns artist information in elements such as 
+		 * 'artist' (name) and 'artist-id' (id)
+		 */
+		osfy_artist_load_track_artist_from_xml(session, album->artist, album_node);
+	}
+	
+	assert(sp_artist_is_loaded(album->artist));
+	
+	
+	/* Album cover */
+	if((node = ezxml_get(album_node, "cover", -1)) == NULL) {
+		DSFYDEBUG("Failed to find element 'cover'\n");
+		return -1;
+	}
+	
+	if(album->image != NULL)
+		sp_image_release(album->image);
+	
+	hex_ascii_to_bytes(node->txt, id, 20);
+	album->image = osfy_image_create(session, id);
+	sp_image_add_ref(album->image);
+	
+	
+	/* Done loading */
+	album->is_loaded = 1;
 
 	return 0;
 }
 
+
+/* Load album from XML returned by track browsing */
+int osfy_album_load_from_track_xml(sp_session *session, sp_album *album, ezxml_t album_node) {
+	unsigned char id[20];
+	ezxml_t node;
+
+	{
+		char buf[33];
+		hex_bytes_to_ascii(album->id, buf, 16);
+		DSFYDEBUG("Loading album '%s' from XML returned by track browsing\n", buf);
+	}
+
+	/* Verify we're loading XML for the expected album ID */
+	if((node = ezxml_get(album_node, "album-id", -1)) == NULL) {
+		DSFYDEBUG("Failed to find element 'album-id'\n");
+		return -1;
+	}
+
+	hex_ascii_to_bytes(node->txt, id, sizeof(album->id));
+	assert(memcmp(album->id, id, sizeof(album->id)) == 0);
+
+	
+	/* Album name */
+	if((node = ezxml_get(album_node, "album", -1)) == NULL) {
+		DSFYDEBUG("Failed to find element 'album'\n");
+		return -1;
+	}
+	
+	assert(strlen(node->txt) < 256);
+	album->name = realloc(album->name, strlen(node->txt) + 1);
+	strcpy(album->name, node->txt);
+	
+	
+	/* Album year */
+	if((node = ezxml_get(album_node, "year", -1)) == NULL) {
+		DSFYDEBUG("Failed to find element 'year'\n");
+		return -1;
+	}
+	
+	album->year = atoi(node->txt);
+	
+	
+	/* Album artist */
+	if((node = ezxml_get(album_node, "album-artist-id", -1)) == NULL) {
+		DSFYDEBUG("Failed to find element 'album-artist-id'\n");
+		return -1;
+	}
+	
+	hex_ascii_to_bytes(node->txt, id, 16);
+
+	
+	/* Add artist to album */
+	if(album->artist != NULL)
+		sp_artist_release(album->artist);
+	
+	album->artist = osfy_artist_add(session, id);
+	sp_artist_add_ref(album->artist);
+
+	/* Load album from XML if necessary */
+	if(sp_artist_is_loaded(album->artist) == 0) {
+		{
+			char buf[33];
+			hex_bytes_to_ascii(album->artist->id, buf, 16);
+			DSFYDEBUG("Artist '%s' not yet loaded, trying to load from XML\n", buf);
+		}
+		
+		osfy_artist_load_album_artist_from_xml(session, album->artist, album_node);
+	}
+	
+	assert(sp_artist_is_loaded(album->artist) != 0);
+
+	
+	/* Album cover */
+	if((node = ezxml_get(album_node, "cover", -1)) == NULL) {
+		DSFYDEBUG("Failed to find element 'cover'\n");
+		return -1;
+	}
+	
+	hex_ascii_to_bytes(node->txt, id, 20);
+
+	/* Add cover to album */
+	if(album->image != NULL)
+		sp_image_release(album->image);
+	
+	album->image = osfy_image_create(session, id);
+	sp_image_add_ref(album->image);
+	
+	
+	/* Done loading */
+	album->is_loaded = 1;
+	
+	return 0;
+}
 
 static int osfy_album_browse_callback(struct browse_callback_ctx *brctx);
 
@@ -323,7 +370,8 @@ static int osfy_album_browse_callback(struct browse_callback_ctx *brctx) {
 	
 	albums = brctx->data.albums;
 	for(i = 0; i < brctx->num_in_request; i++) {
-		osfy_album_load_from_xml(brctx->session, albums[brctx->num_browsed + i], root);
+		osfy_album_load_from_album_xml(brctx->session, albums[brctx->num_browsed + i], root);
+		assert(sp_album_is_loaded(albums[brctx->num_browsed + i]));
 	}
 	
 	

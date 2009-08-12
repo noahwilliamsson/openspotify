@@ -60,6 +60,12 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 		lnk->type       = SP_LINKTYPE_TRACK;
 		lnk->data.track = osfy_track_add(session, id);
 		sp_track_add_ref(lnk->data.track);
+
+		/* Browse track if needed */
+		if(sp_track_is_loaded(lnk->data.track) == 0) {
+			DSFYDEBUG("Browsing not yet loaded track\n");
+			osfy_track_browse(session, lnk->data.track);
+		}
 	}
 	/* Link refers to an album. */
 	else if(strncmp("album:", ptr, 6) == 0){

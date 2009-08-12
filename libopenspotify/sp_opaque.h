@@ -196,6 +196,7 @@ struct sp_track {
 	sp_artist **artists;
 
 	char *restricted_countries;
+	char *allowed_countries;
 
 	int index;
 	int disc;
@@ -203,7 +204,6 @@ struct sp_track {
 	int popularity;
 
 	int is_loaded;
-	int playable;
 	sp_error error;
 
 	int ref_count;

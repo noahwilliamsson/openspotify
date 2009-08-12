@@ -11,6 +11,7 @@
 
 #include "album.h"
 #include "artist.h"
+#include "browse.h"
 #include "debug.h"
 #include "ezxml.h"
 #include "hashtable.h"
@@ -130,6 +131,7 @@ sp_track *osfy_track_add(sp_session *session, unsigned char id[16]) {
 	track->artists = NULL;
 
 	track->restricted_countries = NULL;
+	track->allowed_countries = NULL;
 
 	track->index = 0;
 	track->disc = 0;
@@ -137,7 +139,6 @@ sp_track *osfy_track_add(sp_session *session, unsigned char id[16]) {
 	track->popularity = 0;
 
 	track->is_loaded = 0;
-	track->playable = 0;
 	track->error = SP_ERROR_OK;
 
 	track->ref_count = 0;
@@ -155,19 +156,20 @@ void osfy_track_free(sp_track *track) {
 		free(track->name);
 
 
-	for(i = 0; i < track->num_artists; i++) {
-		free(track->artists[i]);
-	}
+	for(i = 0; i < track->num_artists; i++)
+		sp_artist_release(track->artists[i]);
 
 	if(track->num_artists)
 		free(track->artists);
-
 
 	if(track->album)
 		sp_album_release(track->album);
 
 	if(track->restricted_countries)
 		free(track->restricted_countries);
+	
+	if(track->allowed_countries)
+		free(track->allowed_countries);
 
 	free(track);
 }
@@ -187,7 +189,14 @@ int osfy_track_load_from_xml(sp_session *session, sp_track *track, ezxml_t track
 		return -1;
 	}
 	
+	DSFYDEBUG("Found track with ID '%s' in XML\n", node->txt);
 	hex_ascii_to_bytes(node->txt, id, sizeof(track->id));
+	{
+		char buf[33];
+		hex_bytes_to_ascii(track->id, buf, 16);
+		DSFYDEBUG("sp_track id is '%s', sizeof(track->id)=%ld, memcmp() will return %d\n",
+			  buf, sizeof(track->id), memcmp(track->id, id, sizeof(track->id)));
+	}
 	assert(memcmp(track->id, id, sizeof(track->id)) == 0);
 	
 	
@@ -227,6 +236,12 @@ int osfy_track_load_from_xml(sp_session *session, sp_track *track, ezxml_t track
 		track->restricted_countries = realloc(track->restricted_countries, strlen(str) + 1);
 		strcpy(track->restricted_countries, str);
 	}
+
+	node = ezxml_get(track_node, "restrictions", 0, "restriction", -1);
+	if(node && (str = ezxml_attr(node, "forbidden")) != NULL) {
+		track->allowed_countries = realloc(track->allowed_countries, strlen(str) + 1);
+		strcpy(track->allowed_countries, str);
+	}
 	
 	
 	/* ID of file */
@@ -234,41 +249,66 @@ int osfy_track_load_from_xml(sp_session *session, sp_track *track, ezxml_t track
 	if(node && (str = ezxml_attr(node, "id")) != NULL) {
 		hex_ascii_to_bytes(str, id, sizeof(track->file_id));
 		memcpy(track->file_id, id, sizeof(track->file_id));
-		
-		/* FIXME: Also check country restrictions */
-		osfy_track_playable_set(track, 1);
 	}
 
 	
 	/* Add artists */
-	for(node = ezxml_get(track_node, "artist", -1); node; node = node->next) {
+	for(node = ezxml_get(track_node, "artist-id", -1);
+	    node;
+	    node = node->next) {
 		hex_ascii_to_bytes(node->txt, id, 16);
 		for(i = 0; i < track->num_artists; i++)
 			if(memcmp(track->artists[i]->id, id, sizeof(track->artists[i]->id)) == 0)
 				break;
 	
-		/* Skip dupes */
+		/* Do not add already added artists */
 		if(i != track->num_artists)
 			continue;
 		
+		DSFYDEBUG("Adding artist '%s' to track's list\n", node->txt);
+
 		track->artists = realloc(track->artists, sizeof(sp_artist *) * (1 + track->num_artists));
 		track->artists[track->num_artists] = osfy_artist_add(session, id);
 		sp_artist_add_ref(track->artists[track->num_artists]);
+		
+		if(sp_artist_is_loaded(track->artists[track->num_artists]) == 0)
+			osfy_artist_load_track_artist_from_xml(session, 
+							       track->artists[track->num_artists],
+							       track_node);
+			
 		
 		track->num_artists++;
 	}
 
 
 	/* Track album */
+	{
+		char buf[33];
+		hex_bytes_to_ascii(track->id, buf, 16);
+		DSFYDEBUG("Loading album for track '%s'\n", buf);
+	}
 	if((node = ezxml_get(track_node, "album-id", -1)) != NULL) {
-		hex_ascii_to_bytes(node->txt, id, 16);
+		/* Add album to track */
 		if(track->album != NULL)
 			sp_album_release(track->album);
-		
+
+		hex_ascii_to_bytes(node->txt, id, 16);
 		track->album = sp_album_add(session, id);
 		sp_album_add_ref(track->album);
-		if(sp_album_is_loaded(track->album) == 0)
-			osfy_album_load_from_xml(session,track->album, track_node);
+
+		/* Load album from XML if necessary */
+		if(sp_album_is_loaded(track->album) == 0) {
+			{
+				char buf[33];
+				hex_bytes_to_ascii(track->album->id, buf, 16);
+				DSFYDEBUG("Album '%s' not yet loaded, trying to load from XML\n", buf);
+			}
+			osfy_album_load_from_track_xml(session, track->album, track_node);
+		}
+		
+		assert(sp_album_is_loaded(track->album));
+		
+		
 	}
 	
 	
@@ -278,73 +318,93 @@ int osfy_track_load_from_xml(sp_session *session, sp_track *track, ezxml_t track
 }
 
 
-void osfy_track_name_set(sp_track *track, char *name) {
+static int osfy_track_browse_callback(struct browse_callback_ctx *brctx);
 
-	assert(strlen(name) < 256);
-
-	track->name = realloc(track->name, strlen(name) + 1);
-	strcpy(track->name, name);
+/*
+ * Initiate a browse of a single track
+ * Used by sp_link.c if the obtained track is not loaded
+ *
+ */
+int osfy_track_browse(sp_session *session, sp_track *track) {
+	sp_track **tracks;
+	void **container;
+	struct browse_callback_ctx *brctx;
+	
+	/*
+	 * Temporarily increase ref count for the track so it's not free'd
+	 * accidentily. It will be decreaed by the chanel callback.
+	 *
+	 */
+	sp_track_add_ref(track);
+	
+	
+	/* The browse processor requires a list of tracks */
+	tracks = (sp_track **)malloc(sizeof(sp_track *));
+	*tracks = track;
+	
+	
+	/* The track callback context */
+	brctx = (struct browse_callback_ctx *)malloc(sizeof(struct browse_callback_ctx));
+	
+	brctx->session = session;
+	brctx->req = NULL; /* Filled in by the request processor */
+	brctx->buf = NULL; /* Filled in by the request processor */
+	
+	brctx->type = REQ_TYPE_BROWSE_TRACK;
+	brctx->data.tracks = tracks;
+	brctx->num_total = 1;
+	brctx->num_browsed = 0;
+	brctx->num_in_request = 0;
+	
+	
+	/* Our gzip'd XML parser */
+	brctx->browse_parser = osfy_track_browse_callback;
+	
+	/* Request input container. Will be free'd when the request is finished. */
+	container = (void **)malloc(sizeof(void *));
+	*container = brctx;
+	
+	return request_post(session, REQ_TYPE_BROWSE_ALBUM, container);
 }
 
 
-void osfy_track_album_set(sp_track *track, sp_album *album) {
+static int osfy_track_browse_callback(struct browse_callback_ctx *brctx) {
+	sp_track **tracks;
+	int i;
+	struct buf *xml;
+	ezxml_t root, node;
+	
+	xml = despotify_inflate(brctx->buf->ptr, brctx->buf->len);
+	if(xml == NULL) {
+		DSFYDEBUG("Failed to decompress track XML\n");
+		return -1;
+	}
 
-	track->album = album;
-}
-
-
-void osfy_track_file_id_set(sp_track *track, unsigned char id[20]) {
-	memcpy(track->file_id, id, sizeof(track->file_id));
-}
-
-
-void osfy_track_playable_set(sp_track *track, int playable) {
-	track->playable = playable;
-}
-
-
-void osfy_track_duration_set(sp_track *track, int duration) {
-	track->duration = duration;
-}
-
-
-void track_set_index(sp_track *track, int index) {
-	track->index = index;
-}
-
-
-int track_get_duration(sp_track *track) {
-	return track->duration;
-}
-
-
-void track_set_popularity(sp_track *track, int popularity) {
-	track->popularity = popularity;
-}
-
-
-int track_get_popularity(sp_track *track) {
-	return track->popularity;
-}
-
-
-void osfy_track_disc_set(sp_track *track, int disc) {
-	track->disc = disc;
-}
-
-
-int track_get_disc(sp_track *track) {
-	return track->disc;
-}
-
-
-void osfy_track_loaded_set(sp_track *track, int loaded) {
-	track->is_loaded = loaded;
-}
-
-
-int track_get_loaded(sp_track *track) {
-	return track->is_loaded;
+	root = ezxml_parse_str((char *) xml->ptr, xml->len);
+	if(root == NULL) {
+		DSFYDEBUG("Failed to parse XML\n");
+		buf_free(xml);
+		return -1;
+	}
+	
+	tracks = brctx->data.tracks;
+	for(i = 0; i < brctx->num_in_request; i++) {
+		node = ezxml_get(root, "tracks", 0, "track", -1);
+		osfy_track_load_from_xml(brctx->session, tracks[brctx->num_browsed + i], node);
+		assert(sp_track_is_loaded(tracks[brctx->num_browsed + i]));
+	}
+	
+	
+	ezxml_free(root);
+	buf_free(xml);
+	
+	
+	/* Release references made in osfy_track_browse() */
+	for(i = 0; i < brctx->num_in_request; i++)
+		sp_track_release(tracks[brctx->num_browsed + i]);
+	
+	
+	return 0;
 }
 
 
@@ -361,6 +421,8 @@ void osfy_track_garbage_collect(sp_session *session) {
 			continue;
 
 		DSFYDEBUG("Freeing track %p because of zero ref_count\n", track);
+
+		/* FIXME: Won't work as we would have gotten a negative ref_count */
 		osfy_track_free(track);
 	}
 
@@ -399,8 +461,6 @@ int osfy_track_metadata_save_to_disk(sp_session *session, char *filename) {
 		num = htons(track->index);
 		fwrite(&num, sizeof(int), 1, fd);
 		num = htons(track->disc);
-		fwrite(&num, sizeof(int), 1, fd);
-		num = htons(track->playable);
 		fwrite(&num, sizeof(int), 1, fd);
 	}
 
@@ -447,7 +507,9 @@ int osfy_track_metadata_load_from_disk(sp_session *session, char *filename) {
 		if(fread(&len, 1, 1, fd) == 1) {
 			if(len && fread(buf, len, 1, fd) == 1) {
 				buf[len] = 0;
-				osfy_track_name_set(track, buf);
+
+				track->name = realloc(track->name, strlen(buf) + 1);
+				strcpy(track->name, buf);
 			}
 		}
 		else
@@ -469,11 +531,6 @@ int osfy_track_metadata_load_from_disk(sp_session *session, char *filename) {
 		else
 			break;
 
-
-		if(fread(&num, sizeof(int), 1, fd) == 1)
-			track->playable = ntohs(num);
-		else
-			break;
 
 		track->is_loaded = 1;
 	}

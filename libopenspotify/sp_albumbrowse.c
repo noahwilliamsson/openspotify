@@ -1,28 +1,47 @@
 #include <stdlib.h>
+#include <string.h>
+#include <assert.h>
 
 #include <spotify/api.h>
 
+#include "album.h"
+#include "artist.h"
+#include "browse.h"
 #include "debug.h"
+#include "ezxml.h"
 #include "request.h"
 #include "sp_opaque.h"
 #include "track.h"
+#include "util.h"
+
+
+static int osfy_albumbrowse_browse_callback(struct browse_callback_ctx *brctx);
+static int osfy_albumbrowse_load_from_xml(sp_session *session, sp_albumbrowse *alb, ezxml_t root);
+
 
 SP_LIBEXPORT(sp_albumbrowse *) sp_albumbrowse_create(sp_session *session, sp_album *album, albumbrowse_complete_cb *callback, void *userdata) {
-
-	void **container;
 	sp_albumbrowse *alb;
+	void **container;
+	struct browse_callback_ctx *brctx;
 
 	alb = (sp_albumbrowse *)hashtable_find(session->hashtable_albumbrowses, album->id);
-	if(alb)
+	if(alb) {
+		sp_albumbrowse_add_ref(alb);
+		/* FIXME: Make sure it's actually loaded so it isn't called right after a previous call for the same album */
+		request_post_result(session, REQ_TYPE_ALBUMBROWSE, SP_ERROR_OK, alb);
 		return alb;
+	}
 
 	alb = malloc(sizeof(sp_albumbrowse));
 	if(alb == NULL)
 		return NULL;
 
+	DSFYDEBUG("alb malloced at %p\n", alb);
+	
 	alb->album = album;
 	sp_album_add_ref(alb->album);
 
+	
 	alb->artist = NULL;
 
 	alb->num_tracks = 0;
@@ -44,12 +63,207 @@ SP_LIBEXPORT(sp_albumbrowse *) sp_albumbrowse_create(sp_session *session, sp_alb
 	alb->hashtable = session->hashtable_albumbrowses;
 	hashtable_insert(alb->hashtable, album->id, alb);
 
+
+	
+	/*
+	 * Temporarily increase ref count for the albumbrowse so it's not free'd
+	 * accidentily. It will be decreaed by the chanel callback.
+	 *
+	 */
+	sp_albumbrowse_add_ref(alb);
+	
+	
+	/* The album callback context */
+	brctx = (struct browse_callback_ctx *)malloc(sizeof(struct browse_callback_ctx));
+	
+	brctx->session = session;
+	brctx->req = NULL; /* Filled in by the request processor */
+	brctx->buf = NULL; /* Filled in by the request processor */
+	
+	brctx->type = REQ_TYPE_ALBUMBROWSE;
+	brctx->data.albumbrowses = (sp_albumbrowse **)malloc(sizeof(sp_albumbrowse *));
+	brctx->data.albumbrowses[0] = alb;
+	brctx->num_total = 1;
+	brctx->num_browsed = 0;
+	brctx->num_in_request = 0;
+	
+	
+	/* Our gzip'd XML parser */
+	brctx->browse_parser = osfy_albumbrowse_browse_callback;
+	
+	/* Request input container. Will be free'd when the request is finished. */
 	container = (void **)malloc(sizeof(void *));
-	*container = alb;
-	request_post(session, REQ_TYPE_ALBUMBROWSE, container);
+	*container = brctx;
+	
+	DSFYDEBUG("requesting REQ_TYPE_ALBUMBROWSE with container %p\n", container);
+	request_post(session, REQ_TYPE_ALBUMBROWSE, container);	
 
 	return alb;
 }
+
+
+static int osfy_albumbrowse_browse_callback(struct browse_callback_ctx *brctx) {
+	sp_albumbrowse *alb;
+	int i;
+	struct buf *xml;
+	ezxml_t root;
+	
+	xml = despotify_inflate(brctx->buf->ptr, brctx->buf->len);
+	{
+		FILE *fd;
+		DSFYDEBUG("Decompresed %d bytes data, xml=%p\n",
+			  brctx->buf->len, xml);
+		fd = fopen("browse-albumbrowses.xml", "w");
+		if(fd) {
+			fwrite(xml->ptr, xml->len, 1, fd);
+			fclose(fd);
+		}
+	}
+	
+	root = ezxml_parse_str((char *) xml->ptr, xml->len);
+	if(root == NULL) {
+		DSFYDEBUG("Failed to parse XML\n");
+		buf_free(xml);
+		return -1;
+	}
+	
+	for(i = 0; i < brctx->num_in_request; i++) {
+		alb = brctx->data.albumbrowses[brctx->num_browsed + i];
+		osfy_albumbrowse_load_from_xml(brctx->session, alb, root);
+	}
+	
+	
+	ezxml_free(root);
+	buf_free(xml);
+	
+	
+	/* Release references made in sp_albumbrowse_create() */
+	for(i = 0; i < brctx->num_in_request; i++)
+		sp_albumbrowse_release(brctx->data.albumbrowses[brctx->num_browsed + i]);
+	
+	
+	return 0;
+}
+
+
+static int osfy_albumbrowse_load_from_xml(sp_session *session, sp_albumbrowse *alb, ezxml_t root) {
+	unsigned char id[20];
+	int disc_number, i;
+	sp_track *track;
+	ezxml_t node, loop_node, track_node;
+	
+	
+	/* Load album from XML if not yet loaded */
+	if(sp_album_is_loaded(alb->album) == 0)
+		osfy_album_load_from_album_xml(session, alb->album, root);
+
+
+	/* Load artist */
+	if((node = ezxml_get(root, "artist-id", -1)) == NULL) {
+		DSFYDEBUG("Failed to find element 'artist-id'\n");
+		alb->error = SP_ERROR_OTHER_PERMAMENT;
+		return -1;
+	}
+	
+	if(alb->artist != NULL)
+		sp_artist_release(alb->artist);
+	
+	hex_ascii_to_bytes(node->txt, id, 16);
+	alb->artist = osfy_artist_add(session, id);
+	sp_artist_add_ref(alb->artist);
+	
+	if(sp_artist_is_loaded(alb->artist) == 0) {
+		DSFYDEBUG("Loading artist '%s' from XML returned by album browsing\n", node->txt);
+		osfy_artist_load_track_artist_from_xml(session, alb->artist, root);
+	}
+	
+	assert(sp_artist_is_loaded(alb->artist));
+	
+	/* Loop over each disc and add tracks */
+	assert(alb->num_tracks == 0);
+	for(loop_node = ezxml_get(root, "discs", 0, "disc", -1);
+	    loop_node;
+	    loop_node = loop_node->next) {
+
+		/* Cache disc number */
+		if((node = ezxml_get(loop_node, "disc-number", -1)) == NULL) {
+			DSFYDEBUG("BUG: Found no 'disc-numner' under discs -> disc\n");
+			continue;
+		}
+		
+		disc_number = atoi(node->txt);
+
+		
+		/* Loop over each track and add it to the albumbrowse tracks list */
+		for(track_node = ezxml_get(loop_node, "track", -1), i = 1;
+		    track_node;
+		    track_node = track_node->next, i++) {
+		
+			/* Extract track ID and add it */
+			if((node = ezxml_get(track_node, "id", -1)) == NULL)
+				continue;
+				
+			hex_ascii_to_bytes(node->txt, id, 16);
+			track = osfy_track_add(session, id);
+
+			
+			/* Load track details from XML if not already loaded */
+			if(sp_track_is_loaded(track) == 0)
+				osfy_track_load_from_xml(session, track, track_node);
+			
+			assert(sp_track_is_loaded(track));
+
+			
+			/* Set disc number */
+			track->disc = disc_number;
+			
+			
+			/* Set album (as it's not available under the track node) */
+			if(track->album == NULL) {
+				track->album = alb->album;
+				sp_album_add_ref(track->album);
+			}
+			
+			
+			/* Set track index on disc */
+			if(track->index == 0)
+				track->index = i;
+			
+			
+			/* Add track to albumbrowse and increase the track's ref count */
+			alb->tracks = realloc(alb->tracks, sizeof(sp_track *) * (1 + alb->num_tracks));
+			alb->tracks[alb->num_tracks] = track;
+			sp_track_add_ref(alb->tracks[alb->num_tracks]);
+			alb->num_tracks++;
+		}
+		
+		assert(alb->num_tracks > 0);
+	}
+	
+
+	/* Loop over each copyright and add copyright text */
+	assert(alb->num_copyrights == 0);
+	for(node = ezxml_get(root, "copyright", 0, "c", -1);
+	    node;
+	    node = node->next) {
+		alb->copyrights = realloc(alb->copyrights, sizeof(char *) * (1 + alb->num_copyrights));
+		alb->copyrights[alb->num_copyrights] = strdup(node->txt);
+		alb->num_copyrights++;
+	}
+	
+	/* Add review */
+	if((node = ezxml_get(root, "review", -1)) != NULL) {
+		assert(alb->review == NULL);
+		alb->review = strdup(node->txt);
+	}
+	
+
+	alb->is_loaded = 1;
+	alb->error = SP_ERROR_OK;
+	
+	return 0;
+}
+
 
 
 SP_LIBEXPORT(bool) sp_albumbrowse_is_loaded(sp_albumbrowse *alb) {
@@ -121,8 +335,8 @@ SP_LIBEXPORT(void) sp_albumbrowse_add_ref(sp_albumbrowse *alb) {
 SP_LIBEXPORT(void) sp_albumbrowse_release(sp_albumbrowse *alb) {
 	int i;
 
-	if(alb->ref_count)
-		alb->ref_count--;
+	assert(alb->ref_count > 0);
+	alb->ref_count--;
 
 	if(alb->ref_count)
 		return;

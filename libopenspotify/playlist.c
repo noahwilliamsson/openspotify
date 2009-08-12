@@ -18,7 +18,7 @@
  * |            +--- CHANNEL_DATA: Buffer XML-data
  * |            +--+ CHANNEL_END:
  * |               +--- playlist_parse_container_xml()
- * |               +--+ playlist_post_playlist_requests() (REQ_TYPE_PLAYLIST_LOAD_PLAYLIST)
+ * |               +--+ playlist_post_playlist_requests()
  * |               |  +--- request_post(REQ_TYPE_PLAYLIST_LOAD_PLAYLIST)
  * |               +-- request_post_set_result(REQ_TYPE_PLAYLIST_LOAD_CONTAINER)
  * .
@@ -38,8 +38,8 @@
  * |            +--- CHANNEL_DATA: Buffer XML-data
  * |            +--+ CHANNEL_END:
  * |               +--- playlist_parse_playlist_xml()
- * |               +--+ playlist_post_track_requests()
- * |               |  +--- request_post(REQ_TYPE_BROWSE_TRACK)
+ * |               +--+ osfy_playlist_browse() ------ XXXX
+ * |               |  +--- request_post(REQ_TYPE_BROWSE_PLAYLIST_TRACKS)
  * |               +--- request_post_set_result(REQ_TYPE_PLAYLIST_LOAD_PLAYLIST)
  * .  .
  * .  .
@@ -54,6 +54,7 @@
 #include <spotify/api.h>
 
 #include "buf.h"
+#include "browse.h"
 #include "channel.h"
 #include "commands.h"
 #include "debug.h"
@@ -74,7 +75,11 @@ static int playlist_send_playlist_request(sp_session *session, struct request *r
 static int playlist_callback(CHANNEL *ch, unsigned char *payload, unsigned short len);
 static int playlist_parse_playlist_xml(sp_session *session, sp_playlist *playlist);
 
+static int osfy_playlist_browse(sp_session *session, sp_playlist *playlist);
+static int osfy_playlist_browse_callback(struct browse_callback_ctx *brctx);
+#if 0
 static void playlist_post_track_request(sp_session *session, sp_playlist *);
+#endif
 
 unsigned long playlist_checksum(sp_playlist *playlist);
 unsigned long playlistcontainer_checksum(sp_playlistcontainer *container);
@@ -382,10 +387,13 @@ static int playlist_callback(CHANNEL *ch, unsigned char *payload, unsigned short
 			playlist->state = PLAYLIST_STATE_LISTED;
 
 			/* Create new request for loading tracks */
+#if 0
 			playlist_post_track_request(callback_ctx->session, playlist);
-
+#endif
+			osfy_playlist_browse(callback_ctx->session, playlist);
+			
 			/* Note we're done loading this playlist */
-			request_set_result(callback_ctx->session, callback_ctx->req, SP_ERROR_OK, NULL);
+			request_set_result(callback_ctx->session, callback_ctx->req, SP_ERROR_OK, playlist);
 
 			{
 				char idstr[35];
@@ -448,6 +456,133 @@ void playlist_post_track_request(sp_session *session, sp_playlist *playlist) {
 	*ptr = playlist;
 
 	request_post(session, REQ_TYPE_BROWSE_TRACK, ptr);
+}
+
+
+
+/*
+ * Initiate track browsing of a single playlist
+ *
+ */
+int osfy_playlist_browse(sp_session *session, sp_playlist *playlist) {
+	int i;
+	void **container;
+	struct browse_callback_ctx *brctx;
+	
+	/*
+	 * Temporarily increase ref count for the artist so it's not free'd
+	 * accidentily. It will be decreaed by the chanel callback.
+	 *
+	 */
+	for(i = 0; i < playlist->num_tracks; i++)
+		sp_track_add_ref(playlist->tracks[i]);
+
+	
+	/* The playlist callback context */
+	brctx = (struct browse_callback_ctx *)malloc(sizeof(struct browse_callback_ctx));
+	
+	brctx->session = session;
+	brctx->req = NULL; /* Filled in by the request processor */
+	brctx->buf = NULL; /* Filled in by the request processor */
+	
+	brctx->type = REQ_TYPE_BROWSE_PLAYLIST_TRACKS;
+	brctx->data.playlist = playlist;
+	brctx->num_total = playlist->num_tracks;
+	brctx->num_browsed = 0;
+	brctx->num_in_request = 0;
+	
+	
+	/* Our gzip'd XML parser */
+	brctx->browse_parser = osfy_playlist_browse_callback;
+	
+	/* Request input container. Will be free'd when the request is finished. */
+	container = (void **)malloc(sizeof(void *));
+	*container = brctx;
+	
+	return request_post(session, REQ_TYPE_BROWSE_ALBUM, container);
+}
+
+
+static int osfy_playlist_browse_callback(struct browse_callback_ctx *brctx) {
+	int i;
+	struct buf *xml;
+	unsigned char id[16];
+	ezxml_t root, track_node, node;
+	sp_track *track;
+	
+	
+	/* Decompress the XML returned by track browsing */
+	xml = despotify_inflate(brctx->buf->ptr, brctx->buf->len);
+	{
+		FILE *fd;
+		char buf[35];
+		hex_bytes_to_ascii(brctx->data.playlist->id, buf, 17);
+		DSFYDEBUG("Decompresed %d bytes data for playlist '%s', xml=%p, saving raw XML to browse-playlist.xml\n",
+			  brctx->buf->len, buf, xml);
+		fd = fopen("browse-playlists.xml", "w");
+		if(fd) {
+			fwrite(xml->ptr, xml->len, 1, fd);
+			fclose(fd);
+		}
+	}
+	
+
+	/* Load XML */
+	root = ezxml_parse_str((char *) xml->ptr, xml->len);
+	if(root == NULL) {
+		DSFYDEBUG("Failed to parse XML\n");
+		buf_free(xml);
+		return -1;
+	}
+	
+
+	/* Loop over each track in the list */
+	for(i = 1, track_node = ezxml_get(root, "tracks", 0, "track", -1);
+	    track_node;
+	    track_node = track_node->next, i++) {
+		
+		/* Get ID of track */
+		node = ezxml_get(track_node, "id", -1);
+		hex_ascii_to_bytes(node->txt, id, 16);
+		
+		/* We'll simply use ofsy_track_add() to find a track by its ID */
+		track = osfy_track_add(brctx->session, id);
+		{
+			char buf[33];
+			hex_bytes_to_ascii(track->id, buf, 16);
+			DSFYDEBUG("osfy_track_add(%s) gave track with ID '%s'\n", node->txt, buf);
+		}
+		
+		
+		
+		/* Skip loading of already loaded tracks */
+		if(sp_track_is_loaded(track)) {
+			DSFYDEBUG("Track '%s' (%d in playlist) is already loaded\n", node->txt, i);
+			continue;
+		}
+		
+		{
+		char buf[35];
+		hex_bytes_to_ascii(brctx->data.playlist->id, buf, 17);
+		DSFYDEBUG("Loading track '%s' (ref_count %d) in playlist '%s' (track number %d)\n", node->txt, track->ref_count, buf, i);
+		
+		}
+
+		/* Load the track from XML */
+		osfy_track_load_from_xml(brctx->session, track, track_node);
+	}
+
+	/* Free XML structures and buffer */
+	ezxml_free(root);
+	buf_free(xml);
+
+	
+	/* Release references made in osfy_playlist_browse() */
+	for(i = 0; i < brctx->num_in_request; i++)
+		sp_track_release(brctx->data.playlist->tracks[brctx->num_browsed + i]);
+	
+	
+	return 0;
 }
 
 
