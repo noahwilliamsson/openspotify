@@ -290,6 +290,7 @@ static int osfy_artistbrowse_load_from_xml(sp_session *session, sp_artistbrowse 
 				/* Add track to artistbrowse and increase the track's ref count */
 				arb->tracks = realloc(arb->tracks, sizeof(sp_track *) * (1 + arb->num_tracks));
 				arb->tracks[arb->num_tracks] = track;
+				sp_track_add_ref(arb->tracks[arb->num_tracks]);
 				   
 				arb->num_tracks++;
 			}
