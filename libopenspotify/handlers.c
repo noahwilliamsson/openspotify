@@ -13,6 +13,7 @@
 #include "channel.h"
 #include "commands.h"
 #include "debug.h"
+#include "handlers.h"
 #include "packet.h"
 #include "playlist.h"
 #include "request.h"
@@ -160,7 +161,7 @@ static int handle_notify (sp_session * session, unsigned char *payload, int len)
 
 
 int handle_packet (sp_session * session,
-		   int cmd, unsigned char *payload, int len)
+		   int cmd, unsigned char *payload, unsigned short len)
 {
 	int error = 0;
 
