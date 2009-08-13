@@ -134,8 +134,24 @@ static int browse_send_generic_request(sp_session *session, struct request *req)
 
 	/* Don't send too many browse requests at once */
 	brctx->num_in_request = brctx->num_total - brctx->num_browsed;
-	if(brctx->num_in_request > MAX_TRACKS_PER_REQUEST)
-		brctx->num_in_request = MAX_TRACKS_PER_REQUEST;
+	switch(brctx->type) {
+		case REQ_TYPE_ALBUMBROWSE:
+		case REQ_TYPE_ARTISTBROWSE:
+		case REQ_TYPE_BROWSE_ALBUM:
+		case REQ_TYPE_BROWSE_ARTIST:
+			if(brctx->num_in_request > 1)
+				brctx->num_in_request = 1;
+			break;
+
+		case REQ_TYPE_BROWSE_TRACK:
+		case REQ_TYPE_BROWSE_PLAYLIST_TRACKS:
+			if(brctx->num_in_request > MAX_TRACKS_PER_REQUEST)
+				brctx->num_in_request = MAX_TRACKS_PER_REQUEST;
+			break;
+		default:
+			DSFYDEBUG("Unsupported request!\n");
+			break;
+	}
 
 
 	/* Create list of album/artist/track IDs */
