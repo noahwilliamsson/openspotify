@@ -38,7 +38,7 @@ SP_LIBEXPORT(int) sp_playlist_num_tracks (sp_playlist *playlist) {
 
 SP_LIBEXPORT(sp_track *) sp_playlist_track (sp_playlist *playlist, int index) {
 
-	if(index < 0 || index > playlist->num_tracks)
+	if(index < 0 || index >= playlist->num_tracks)
 		return NULL;
 
 	return playlist->tracks[index];
