@@ -1,5 +1,12 @@
+/*
+ * Code to handle sp_link_*() stuff for the public API
+ * Reference: http://developer.spotify.com/en/libspotify/docs/group__link.html
+ *
+ */
+
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 
 #include <spotify/api.h>
 
@@ -16,9 +23,11 @@
 #define snprintf _snprintf
 #endif
 
+
 static void baseconvert(const char *src, char *dest, int frombase, int tobase, int padlen);
 static void id_bytes_to_uri(const unsigned char* id, char* uri);
 static void id_uri_to_bytes(const char* uri, unsigned char* id);
+
 
 SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 	const char *ptr;
@@ -39,7 +48,6 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 	
 	/* Get session. */
 	session = libopenspotify_link_get_session();
-	
 	if(session == NULL)
 		return NULL;
 	
@@ -146,6 +154,7 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 	return lnk;
 }
 
+
 SP_LIBEXPORT(sp_link *) sp_link_create_from_track (sp_track *track, int offset) {
 	sp_link *link;
 	
@@ -166,6 +175,7 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_track (sp_track *track, int offset) 
 	return link;
 }
 
+
 SP_LIBEXPORT(sp_link *) sp_link_create_from_album (sp_album *album) {
 	sp_link *link;
 	
@@ -182,6 +192,7 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_album (sp_album *album) {
 	
 	return link;
 }
+
 
 SP_LIBEXPORT(sp_link *) sp_link_create_from_artist (sp_artist *artist) {
 	sp_link *link;
@@ -200,6 +211,7 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_artist (sp_artist *artist) {
 	return link;
 }
 
+
 SP_LIBEXPORT(sp_link *) sp_link_create_from_search (sp_search *search) {
 	sp_link *link;
 	
@@ -215,6 +227,7 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_search (sp_search *search) {
 	
 	return link;
 }
+
 
 SP_LIBEXPORT(sp_link *) sp_link_create_from_playlist (sp_playlist *playlist) {
 	sp_link *link;
@@ -232,8 +245,10 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_playlist (sp_playlist *playlist) {
 	return link;
 }
 
+
 SP_LIBEXPORT(int) sp_link_as_string (sp_link *link, char *buffer, int buffer_size) {
 	char uri[23];
+	int ret;
 
 	if(link == NULL || buffer == NULL || buffer_size < 0)
 		return -1;
@@ -241,28 +256,37 @@ SP_LIBEXPORT(int) sp_link_as_string (sp_link *link, char *buffer, int buffer_siz
 	switch(link->type){
 		case SP_LINKTYPE_TRACK:
 			id_bytes_to_uri(link->data.track->id, uri);
-
-			return snprintf(buffer, buffer_size, "spotify:track:%s", uri);
+			ret = snprintf(buffer, buffer_size, "spotify:track:%s", uri);
+			break;
+			
 		case SP_LINKTYPE_ALBUM:
 			id_bytes_to_uri(link->data.album->id, uri);
-
-			return snprintf(buffer, buffer_size, "spotify:album:%s", uri);
+			ret = snprintf(buffer, buffer_size, "spotify:album:%s", uri);
+			break;
+			
 		case SP_LINKTYPE_ARTIST:
 			id_bytes_to_uri(link->data.artist->id, uri);
-
-			return snprintf(buffer, buffer_size, "spotify:artist:%s", uri);
+			ret = snprintf(buffer, buffer_size, "spotify:artist:%s", uri);
+			break;
+			
 		case SP_LINKTYPE_SEARCH:
-			//return snprintf(buffer, buffer_size, "spotify:search:%s", link->data.search->query);
-			return snprintf(buffer, buffer_size, "spotify:search:TODO"); // struct sp_search not defined yet.
+			ret = snprintf(buffer, buffer_size, "spotify:search:TODO"); // struct sp_search not defined yet
+			break;
+			
 		case SP_LINKTYPE_PLAYLIST:
 			id_bytes_to_uri(link->data.playlist->id, uri);
+			ret = snprintf(buffer, buffer_size, "spotify:playlist:%s", uri);
+			break;
 
-			return snprintf(buffer, buffer_size, "spotify:playlist:%s", uri);
 		case SP_LINKTYPE_INVALID:
 		default:
-			return -1;
+			ret = -1;
+			break;
 	}
+	
+	return ret;
 }
+
 
 SP_LIBEXPORT(sp_linktype) sp_link_type (sp_link *link) {
 	if(link == NULL)
@@ -271,12 +295,14 @@ SP_LIBEXPORT(sp_linktype) sp_link_type (sp_link *link) {
 	return link->type;
 }
 
+
 SP_LIBEXPORT(sp_track *) sp_link_as_track (sp_link *link) {
 	if(link == NULL || link->type != SP_LINKTYPE_TRACK)
 		return NULL;
 
 	return link->data.track;
 }
+
 
 SP_LIBEXPORT(sp_album *) sp_link_as_album (sp_link *link) {
 	if(link == NULL || link->type != SP_LINKTYPE_ALBUM)
@@ -285,12 +311,14 @@ SP_LIBEXPORT(sp_album *) sp_link_as_album (sp_link *link) {
 	return link->data.album;
 }
 
+
 SP_LIBEXPORT(sp_artist *) sp_link_as_artist (sp_link *link) {
 	if(link == NULL || link->type != SP_LINKTYPE_ARTIST)
 		return NULL;
 
 	return link->data.artist;
 }
+
 
 SP_LIBEXPORT(void) sp_link_add_ref (sp_link *link) {
 	++(link->refs);
@@ -310,9 +338,12 @@ SP_LIBEXPORT(void) sp_link_add_ref (sp_link *link) {
 	}
 }
 
+
 SP_LIBEXPORT(void) sp_link_release (sp_link *link) {
 	if(link == NULL)
 		return;
+	
+	assert(link->refs > 0);
 
 	switch(link->type) {
 	case SP_LINKTYPE_ALBUM:
@@ -325,48 +356,54 @@ SP_LIBEXPORT(void) sp_link_release (sp_link *link) {
 		sp_track_release(link->data.track);
 		break;
 	default:
+		DSFYDEBUG("Not yet implemented\n");
 		break;
 	}
 
-	if(--(link->refs) <= 0) {
-		free(link);
-	}
+	if(--link->refs > 0)
+		return;
+
+	free(link);
 }
+
 
 static void baseconvert(const char *src, char *dest, int frombase, int tobase, int padlen) {
-    static const char alphabet[] =
-        "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/";
-    int number[128];
-    int i, len, newlen, divide;
+	static const char alphabet[] =
+		"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/";
+	int number[128];
+	int i, len, newlen, divide;
 
-    len = strlen(src);
+	len = strlen(src);
+	for (i = 0; i < len; i++)
+		number[i] = strchr(alphabet, src[i]) - alphabet;
 
-    for (i = 0; i < len; i++)
-        number[i] = strchr(alphabet, src[i]) - alphabet;
+	memset(dest, '0', padlen);
+	dest[padlen] = 0;
 
-    memset(dest, '0', padlen);
-    dest[padlen] = 0;
+	padlen--;
 
-    padlen--;
+	do {
+		divide = 0;
+		newlen = 0;
 
-    do {
-        divide = 0;
-        newlen = 0;
+		for (i = 0; i < len; i++) {
+			divide = divide * frombase + number[i];
 
-        for (i = 0; i < len; i++) {
-            divide = divide * frombase + number[i];
-            if (divide >= tobase) {
-                number[newlen++] = divide / tobase;
-                divide = divide % tobase;
-            } else if (newlen > 0) {
-                number[newlen++] = 0;
-            }
-        }
-        len = newlen;
+			if (divide >= tobase) {
+				number[newlen++] = divide / tobase;
+				divide = divide % tobase;
+			}
+			else if (newlen > 0) {
+				number[newlen++] = 0;
+			}
+		}
+		
+		len = newlen;
+		dest[padlen--] = alphabet[divide];
 
-        dest[padlen--] = alphabet[divide];
-    } while (newlen != 0);
+	} while (newlen != 0);
 }
+
 
 /* 
  * Convert an id (16 bytes) to a base62 encoded string.
@@ -380,13 +417,12 @@ static void id_bytes_to_uri(const unsigned char* id, char* uri){
 		return;
 
 	hex_bytes_to_ascii(id, hex, 16);
-
 	hex[32] = 0;
 
-    baseconvert(hex, uri, 16, 62, 22);
-
+	baseconvert(hex, uri, 16, 62, 22);
 	uri[22] = 0;
 }
+
 
 /* 
  * Convert a URI (22 character string, null-terminated) to an id.
@@ -398,8 +434,7 @@ static void id_uri_to_bytes(const char* uri, unsigned char* id){
 	if(uri == NULL || id == NULL)
 		return;
 
-    baseconvert(uri, hex, 62, 16, 32);
-
+	baseconvert(uri, hex, 62, 16, 32);
 	hex[32] = 0;
 
 	hex_ascii_to_bytes(hex, id, 16);
