@@ -1,7 +1,10 @@
 #ifndef LIBOPENSPOTIFY_PLAYLIST_H
 #define LIBOPENSPOTIFY_PLAYLIST_H
 
+#include <spotify/api.h>
+
 #include "buf.h"
+#include "request.h"
 #include "sp_opaque.h"
 
 #define PLAYLIST_RETRY_TIMEOUT	30
