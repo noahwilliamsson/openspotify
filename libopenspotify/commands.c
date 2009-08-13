@@ -357,7 +357,7 @@ int cmd_browse (sp_session * session, unsigned char kind, unsigned char *idlist,
 	for (i = 0; i < num; i++)
 		buf_append_data(b, idlist + i * 16, 16);
 
-	if (kind == BROWSE_ARTIST) {
+	if (kind == BROWSE_ALBUM || kind == BROWSE_ARTIST) {
 		assert (num == 1);
 		buf_append_u32(b, 0);
 	}
