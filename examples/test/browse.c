@@ -115,6 +115,24 @@ void test_artistbrowse(sp_session *session, void *arg) {
 }
 
 
+void test_logout(sp_session *session, void *arg) {
+	sp_error error;
+	static int waiting;
+
+	if(waiting)
+		return;
+
+	DSFYDEBUG("Calling sp_session_logout()\n");
+	error = sp_session_logout(g_session);
+
+	if (SP_ERROR_OK != error) {
+		fprintf(stderr, "failed to log out from Spotify: %s\n", sp_error_message(error));
+		g_exit_code = 5;
+		return;
+	}
+}
+
+
 static void SP_CALLCONV test_artistbrowse_callback(sp_artistbrowse *browse, void *userdata) {
 
 	DSFYDEBUG("Called with args browse=%p, userdata=%p\n", browse, userdata);
@@ -241,26 +259,6 @@ static void print_artistbrowse(sp_artistbrowse *browse) {
 }
 
 
-static void try_terminate(void) {
-	sp_error error;
-
-	if (g_albumbrowse || g_artistbrowse) {
-		DSFYDEBUG("Can't exit, have g_albumbrowse=%p and g_artistbrowse=%p\n",
-			g_albumbrowse, g_artistbrowse);
-		return;
-	}
-
-	DSFYDEBUG("Calling sp_session_logout()\n");
-	error = sp_session_logout(g_session);
-
-	if (SP_ERROR_OK != error) {
-		fprintf(stderr, "failed to log out from Spotify: %s\n", sp_error_message(error));
-		g_exit_code = 5;
-		return;
-	}
-}
-
-
 void session_ready(sp_session *session) {
 
 	/* Add some tests */
@@ -269,6 +267,11 @@ void session_ready(sp_session *session) {
 	test_add("artistbrowse", test_artistbrowse, NULL);
 	test_add("albumbrowse", test_albumbrowse, NULL);
 
+	/* Logout as the final test */
+	test_add("logout", test_logout, NULL);
+
+
+	/* Start tests */
 	test_start();
 
 
@@ -277,5 +280,7 @@ void session_ready(sp_session *session) {
 
 
 void session_terminated(void) {
+
+	/* FIXME: We should call sp_session_release() too, but that isn't available in libspotify.. */
 	DSFYDEBUG("Good bye\n");
 }
