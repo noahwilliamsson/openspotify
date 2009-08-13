@@ -1,10 +1,17 @@
 #ifndef LIBOPENSPOTIFY_HASH_H
 #define LIBOPENSPOTIFY_HASH_H
 
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <pthread.h>
+#endif
+
 struct hashentry {
 	void *key;
 	void *value;
 	unsigned int hash;
+	int dont_free;
 	struct hashentry *next;
 };
 
@@ -12,7 +19,15 @@ struct hashtable {
 	int size;
 	int keysize;
 	int count;
+#ifdef _WIN32
+	HANDLE *mutex;
+#else
+	pthread_mutex_t mutex;
+	pthread_mutexattr_t mutex_attr;
+#endif
 	struct hashentry **entries;
+	int num_to_free;
+	struct hashentry **freelist;
 };
 
 struct hashiterator {

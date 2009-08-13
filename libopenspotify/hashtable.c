@@ -25,6 +25,17 @@ struct hashtable *hashtable_create(int keysize) {
 	hashtable->entries = (struct hashentry **)malloc(sizeof(struct hashentry *) * hashtable->size);
 	memset(hashtable->entries, 0, sizeof(struct hashentry *) * hashtable->size);
 
+	hashtable->num_to_free = 0;
+	hashtable->freelist = NULL;
+
+#ifdef _WIN32
+	hashtable->mutex = CreateMutex(NULL, FALSE, NULL);
+#else
+	pthread_mutexattr_init(&hashtable->mutex_attr);
+	pthread_mutexattr_settype(&hashtable->mutex_attr, PTHREAD_MUTEX_RECURSIVE);
+	pthread_mutex_init(&hashtable->mutex, &hashtable->mutex_attr);
+#endif
+
 	return hashtable;
 }
 
@@ -34,6 +45,13 @@ void hashtable_insert(struct hashtable *hashtable, void *key, void *value) {
 	int index;
 
 	index = *(unsigned int *)key & (hashtable->size - 1u);
+
+#ifdef _WIN32
+	WaitForSingleObject(hashtable->mutex, INFINITE);
+#else
+	pthread_mutex_lock(&hashtable->mutex);
+#endif
+
 	if((entry = hashtable->entries[index]) == NULL)
 		entry = hashtable->entries[index] = malloc(sizeof(struct hashentry));
 	else {
@@ -51,6 +69,13 @@ void hashtable_insert(struct hashtable *hashtable, void *key, void *value) {
 	entry->next = NULL;
 
 	hashtable->count++;
+
+#ifdef _WIN32
+	ReleaseMutex(hashtable->mutex);
+#else
+	pthread_mutex_unlock(&hashtable->mutex);
+#endif
+
 }
 
 
@@ -61,6 +86,12 @@ void hashtable_remove(struct hashtable *hashtable, void *key) {
 	index = *(unsigned int *)key & (hashtable->size - 1u);
 	if((entry = hashtable->entries[index]) == NULL)
 		return;
+
+#ifdef _WIN32
+	WaitForSingleObject(hashtable->mutex, INFINITE);
+#else
+	pthread_mutex_lock(&hashtable->mutex);
+#endif
 
 	for(prev = NULL; entry; entry = entry->next) {
 		if(!memcmp(entry->key, key, hashtable->keysize))
@@ -78,30 +109,65 @@ void hashtable_remove(struct hashtable *hashtable, void *key) {
 		prev->next = entry->next;
 		
 	free(entry->key);
-	free(entry);
+	if(entry->dont_free) {
+		hashtable->freelist = realloc(hashtable->freelist, sizeof(struct hashentry *) * (1 + hashtable->num_to_free));
+		hashtable->freelist[hashtable->num_to_free] = entry;
+		hashtable->num_to_free++;
+	}
+	else {
+		free(entry);
+	}
 
 	hashtable->count--;
+
+#ifdef _WIN32
+	ReleaseMutex(hashtable->mutex);
+#else
+	pthread_mutex_unlock(&hashtable->mutex);
+#endif
 }
 
 
 void *hashtable_find(struct hashtable *hashtable, const void *key) {
 	struct hashentry *entry;
 	int index;
+	void *value  = NULL;
 
 	index = *(unsigned int *)key & (hashtable->size - 1u);
-	if(hashtable->entries[index] == NULL)
-		return NULL;
+
+#ifdef _WIN32
+	WaitForSingleObject(hashtable->mutex, INFINITE);
+#else
+	pthread_mutex_lock(&hashtable->mutex);
+#endif
+
+	if(hashtable->entries[index] != NULL) {
+		for(entry = hashtable->entries[index]; entry; entry = entry->next) {
+			if(memcmp(entry->key, key, hashtable->keysize) == 0) {
+				value = entry->value;
+				break;
+			}
+		}
+	}
+
+#ifdef _WIN32
+	ReleaseMutex(hashtable->mutex);
+#else
+	pthread_mutex_unlock(&hashtable->mutex);
+#endif
 	
-	for(entry = hashtable->entries[index]; entry; entry = entry->next)
-		if(memcmp(entry->key, key, hashtable->keysize) == 0)
-			return entry->value;
-	
-	return NULL;
+	return value;
 }
 
 
 struct hashiterator *hashtable_iterator_init(struct hashtable *hashtable) {
 	struct hashiterator *iter;
+
+#ifdef _WIN32
+	WaitForSingleObject(hashtable->mutex, INFINITE);
+#else
+	pthread_mutex_lock(&hashtable->mutex);
+#endif
 
 	iter = malloc(sizeof(struct hashiterator));
 	iter->hashtable = hashtable;
@@ -113,18 +179,40 @@ struct hashiterator *hashtable_iterator_init(struct hashtable *hashtable) {
 
 
 struct hashentry *hashtable_iterator_next(struct hashiterator *iter) {
-	if(iter->entry != NULL && (iter->entry = iter->entry->next) != NULL)
-		return iter->entry;
+	if(iter->entry != NULL) {
+		iter->entry->dont_free = 0;
 
-	for(++iter->offset; iter->offset < iter->hashtable->size; iter->offset++)
-		if((iter->entry = iter->hashtable->entries[iter->offset]) != NULL)
+		if((iter->entry = iter->entry->next) != NULL) {
+			iter->entry->dont_free = 1;
 			return iter->entry;
+		}
+	}
+
+	for(++iter->offset; iter->offset < iter->hashtable->size; iter->offset++) {
+		if((iter->entry = iter->hashtable->entries[iter->offset]) != NULL) {
+			iter->entry->dont_free = 1;
+			return iter->entry;
+		}
+	}
 
 	return NULL;
 }
 
 
 void hashtable_iterator_free(struct hashiterator *iter) {
+	int i;
+
+	for(i = 0; i < iter->hashtable->num_to_free; i++)
+		free(iter->hashtable->freelist[i]);
+
+	iter->hashtable->num_to_free = 0;
+
+#ifdef _WIN32
+	ReleaseMutex(iter->hashtable->mutex);
+#else
+	pthread_mutex_unlock(&iter->hashtable->mutex);
+#endif
+
 	free(iter);
 }
 
@@ -132,6 +220,9 @@ void hashtable_iterator_free(struct hashiterator *iter) {
 void hashtable_free(struct hashtable *hashtable) {
 	int i;
 	struct hashentry *entry, *next;
+
+	for(i = 0; i < hashtable->num_to_free; i++)
+		free(hashtable->freelist[i]);
 
 	for(i = 0; i < hashtable->size; i++) {
 		if((entry = hashtable->entries[i]) == NULL)
@@ -144,6 +235,13 @@ void hashtable_free(struct hashtable *hashtable) {
 			free(entry);
 		} while((entry = next) != NULL);
 	}
+
+#ifdef _WIN32
+	CloseHandle(hashtable->mutex);
+#else
+	pthread_mutexattr_destroy(&hashtable->mutex_attr);
+	pthread_mutex_destroy(&hashtable->mutex);
+#endif
 
 	free(hashtable);
 }
