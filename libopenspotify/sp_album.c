@@ -335,7 +335,7 @@ int osfy_album_browse(sp_session *session, sp_album *album) {
 	brctx->req = NULL; /* Filled in by the request processor */
 	brctx->buf = NULL; /* Filled in by the request processor */
 	
-	brctx->type = REQ_TYPE_BROWSE_ARTIST;
+	brctx->type = REQ_TYPE_BROWSE_ALBUM;
 	brctx->data.albums = albums;
 	brctx->num_total = 1;
 	brctx->num_browsed = 0;
