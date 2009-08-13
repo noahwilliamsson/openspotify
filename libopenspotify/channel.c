@@ -58,6 +58,8 @@ CHANNEL *channel_register (sp_session *session, char *name, channel_callback cal
 
 	session->num_channels++;
 
+	DSFYDEBUG("Registered channel '%s' with id %d\n", ch->name, ch->channel_id);
+
 	return ch;
 }
 
