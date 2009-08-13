@@ -140,17 +140,17 @@ static void event_loop(sp_session *session) {
 
 	while (g_exit_code < 0) {
 
-		if(test_run() < 0) {
-			DSFYDEBUG("Done running test, existing event loop\n");
-			break;
-		}
-
 #ifndef _WIN32
 		pthread_sigmask(SIG_BLOCK, &sigset, NULL);
 #endif
 
 		DSFYDEBUG("Calling sp_session_process_events()\n");
 		sp_session_process_events(session, &timeout);
+
+		if(test_run() < 0) {
+			DSFYDEBUG("Done running test, existing event loop\n");
+			break;
+		}
 
 #ifdef _WIN32
 		WaitForSingleObject(g_notify_event, timeout);
