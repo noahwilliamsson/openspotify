@@ -12,6 +12,10 @@ targets = $(dirname)
 CFLAGS = -ggdb -I../../include
 LDFLAGS = -L../../libopenspotify
 LDLIBS = -lopenspotify
+ifdef libspotify
+LDLIBS = -lspotify ../../libopenspotify/shn.o
+endif
+
 
 .PHONY: all check-libspotify clean distclean
 all: check-libspotify $(targets)
