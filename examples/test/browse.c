@@ -103,13 +103,14 @@ void test_artistbrowse(sp_session *session, void *arg) {
 
 
 	if(sp_artist_is_loaded(artist) == 0) {
-		DSFYDEBUG("Artist is not loaded\n");
+		DSFYDEBUG("Artist is NOT loaded\n");
 		return;
 	}
 
 	DSFYDEBUG("Calling sp_artistbrowse_create()\n");
 	g_artistbrowse = sp_artistbrowse_create(session, artist, test_artistbrowse_callback, NULL);
 	sp_artist_release(artist);
+	DSFYDEBUG("Released artist\n");
 	waiting++;
 }
 
@@ -152,13 +153,14 @@ void test_albumbrowse(sp_session *session, void *arg) {
 
 
 	if(sp_album_is_loaded(album) == 0) {
-		DSFYDEBUG("Album is not loaded\n");
+		DSFYDEBUG("Album is NOT loaded\n");
 		return;
 	}
 
 	DSFYDEBUG("Calling sp_albumbrowse_create()\n");
 	g_albumbrowse = sp_albumbrowse_create(session, album, test_albumbrowse_callback, NULL);
 	sp_album_release(album);
+	DSFYDEBUG("Released album\n");
 	waiting++;
 }
 
