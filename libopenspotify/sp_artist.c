@@ -162,12 +162,10 @@ int osfy_artist_load_track_artist_from_xml(sp_session *session, sp_artist *artis
 		assert(strlen(name_node->txt) < 256);
 		artist->name = realloc(artist->name, strlen(name_node->txt) + 1);
 		strcpy(artist->name, name_node->txt);
-		
 		break;
 	}
 	
 
-	DSFYDEBUG("Looped over %d artists, id=%p, name=%p\n", i, id_node, name_node);
 	assert(id_node != NULL && name_node != NULL);
 	
 	artist->is_loaded = 1;
