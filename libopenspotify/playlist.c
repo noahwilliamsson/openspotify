@@ -481,7 +481,7 @@ int osfy_playlist_browse(sp_session *session, sp_playlist *playlist) {
 	container = (void **)malloc(sizeof(void *));
 	*container = brctx;
 	
-	return request_post(session, REQ_TYPE_BROWSE_ALBUM, container);
+	return request_post(session, brctx->type, container);
 }
 
 

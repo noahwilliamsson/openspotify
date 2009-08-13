@@ -188,6 +188,7 @@ static int process_request(sp_session *session, struct request *req) {
 	case REQ_TYPE_ARTISTBROWSE:
 	case REQ_TYPE_BROWSE_ALBUM:
 	case REQ_TYPE_BROWSE_ARTIST:
+	case REQ_TYPE_BROWSE_PLAYLIST_TRACKS:
 	case REQ_TYPE_BROWSE_TRACK:
 		return browse_process(session, req);
 		break;
@@ -197,6 +198,7 @@ static int process_request(sp_session *session, struct request *req) {
 		break;
 
 	default:
+		DSFYDEBUG("BUG: Unhandled request type '%s'\n", REQUEST_TYPE_STR(req->type));
 		break;
 	}
 
