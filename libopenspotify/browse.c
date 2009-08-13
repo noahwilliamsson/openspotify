@@ -99,8 +99,8 @@ static int browse_send_generic_request(sp_session *session, struct request *req)
 	brctx = *(struct browse_callback_ctx **)req->input;
 	
 	/* FIXME: Should probably move this one? */
-	brctx->req = req;
 	req->state = REQ_STATE_RUNNING;
+	brctx->req = req;
 
 	
 	/* Are we done yet? */
