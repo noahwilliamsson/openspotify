@@ -346,8 +346,22 @@ int cmd_browse (sp_session * session, unsigned char kind, unsigned char *idlist,
 	assert (((kind == BROWSE_ARTIST || kind == BROWSE_ALBUM) && num == 1)
 		|| kind == BROWSE_TRACK);
 
-	strcpy (buf, "browse-");
-	hex_bytes_to_ascii(idlist, buf + 7, 16);
+	switch(kind) {
+	case BROWSE_ALBUM:
+		strcpy (buf, "browse-album-");
+		break;
+	case BROWSE_ARTIST:
+		strcpy (buf, "browse-artist-");
+		break;
+	case BROWSE_TRACK:
+		strcpy (buf, "browse-tracks-");
+		break;
+	default:
+		strcpy (buf, "browse-BUG-");
+		break;
+	}
+
+	hex_bytes_to_ascii(idlist, buf + strlen(buf), 16);
 	ch = channel_register (session, buf, callback, private);
 
 	b = buf_new();
