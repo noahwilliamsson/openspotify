@@ -1,20 +1,34 @@
-Debug
-Release
-*.o
+# Editing and patching
 *.swp
 *~
 *.orig
 *.rej
-*.ncb
-*.suo
-*.user
-*.cache
+
+# Compiler output
+*.o
 libopenspotify.so
 libopenspotify.dylib
 simple
+browse
+link
+test
+track
+
+# Debugging
 despotify.log
 
-# Xcode and Mac OS X
+# Cache stuff
+*.user
+*.cache
+*.xml
+
+# Visual Studio stuff
+Debug
+Release
+*.ncb
+*.suo
+
+# Xcode and Mac OS X stuff
 build/*
 *.pbxuser
 *.mode1v3
