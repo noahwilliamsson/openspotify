@@ -89,7 +89,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 4FE175A11030903A00FA72BC /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 4FE175AD1030904700FA72BC /* openspotify */;
+			remoteGlobalIDString = 4FE175AD1030904700FA72BC;
 			remoteInfo = openspotify;
 		};
 		4F53296C10309692004139C9 /* PBXContainerItemProxy */ = {
@@ -199,7 +199,6 @@
 		4FFD4A901030A2AB00935706 /* session.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = session.c; sourceTree = "<group>"; };
 		4FFD4B0A1030B7DD00935706 /* track */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = track; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FFD4B121030B81600935706 /* appkey.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = appkey.c; sourceTree = "<group>"; };
-		4FFD4B131030B81600935706 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		4FFD4B141030B81600935706 /* session.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = session.c; sourceTree = "<group>"; };
 		4FFD4B151030B81600935706 /* track.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = track.c; sourceTree = "<group>"; };
 		4FFD4B631030C1F600935706 /* link */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = link; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -362,15 +361,23 @@
 			path = "openspotify-simple";
 			sourceTree = "<group>";
 		};
-		4FE1759F1030903A00FA72BC = {
+		4FAF894410349CC6002A9D18 /* examples */ = {
 			isa = PBXGroup;
 			children = (
-				4F53286C103092D2004139C9 /* libopenspotify */,
-				4F532868103092B0004139C9 /* include */,
 				4F2A3EFC1033C7DA000622F8 /* test */,
 				4FFD4A861030A2AB00935706 /* browse */,
 				4FFD4B691030C22200935706 /* link */,
 				4FFD4B111030B81600935706 /* track */,
+			);
+			name = examples;
+			sourceTree = "<group>";
+		};
+		4FE1759F1030903A00FA72BC = {
+			isa = PBXGroup;
+			children = (
+				4FAF894410349CC6002A9D18 /* examples */,
+				4F53286C103092D2004139C9 /* libopenspotify */,
+				4F532868103092B0004139C9 /* include */,
 				4F53294A10309451004139C9 /* openspotify-simple */,
 				4FE175AF1030904700FA72BC /* Products */,
 			);
@@ -405,7 +412,6 @@
 			isa = PBXGroup;
 			children = (
 				4FFD4B121030B81600935706 /* appkey.c */,
-				4FFD4B131030B81600935706 /* Makefile */,
 				4FFD4B141030B81600935706 /* session.c */,
 				4FFD4B151030B81600935706 /* track.c */,
 			);
