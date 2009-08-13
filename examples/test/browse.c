@@ -26,6 +26,7 @@
 #include <spotify/api.h>
 
 #include "debug.h"
+#include "test.h"
 
 
 extern int g_exit_code;
@@ -59,13 +60,14 @@ void test_username(sp_session *session, void *arg) {
 
 void test_link_artist(sp_session *session, void *arg) {
 	char *uri = "spotify:artist:1cB013ULmW96lglRcrWTut";
-	static sp_link *link;
+	sp_link *link;
 	static sp_artist *artist;
 
 	if(artist == NULL) {
 		link = sp_link_create_from_string(uri);
 		artist = sp_link_as_artist(link);
 		sp_artist_add_ref(artist);
+		sp_link_release(link);
 	}
 
 
@@ -75,7 +77,6 @@ void test_link_artist(sp_session *session, void *arg) {
 	}
 	else {
 		DSFYDEBUG("Artist at %p IS loaded (%s)\n", artist, sp_artist_name(artist));
-		sp_link_release(link);
 		sp_artist_release(artist);
 		test_finish();
 	}
@@ -132,7 +133,9 @@ static void SP_CALLCONV test_artistbrowse_callback(sp_artistbrowse *browse, void
 
 void test_albumbrowse(sp_session *session, void *arg) {
 	/* Carefully chosen with umlauts in track, artist and album name */
-	char *uri = "spotify:album:2iouxw5ZVeqUt59FWoxlz7";
+	//char *uri = "spotify:album:2iouxw5ZVeqUt59FWoxlz7";
+	char *uri = "spotify:album:7aq1X1n4Ps6e2w7WWtiUK6";
+	//char *uri = "spotify:album:0n9UNlm1GEdeCkZ412p2SZ";
 	sp_link *link;
 	static sp_album *album;
 	static int waiting;
