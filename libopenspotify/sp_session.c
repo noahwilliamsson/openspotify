@@ -57,8 +57,8 @@ SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_sess
 	/* Login context, needed by network.c and login.c */
 	s->login = NULL;
 
-	/* Playlist context, needed by playlist.c */
-	s->playlist_ctx = playlist_create();
+	/* Playlist container object */
+	playlist_create(s);
 
 	/* Albums/artists/tracks memory management */
 	s->hashtable_albums = hashtable_create(16);
@@ -272,9 +272,9 @@ SP_LIBEXPORT(void) sp_session_player_unload(sp_session *session) {
 
 
 SP_LIBEXPORT(sp_playlistcontainer *) sp_session_playlistcontainer(sp_session *session) {
-	DSFYDEBUG("FIXME: Not yet implemented\n");
 
-	return NULL;
+	/* FIXME: Docs says "return ... for the currently logged in user. What if not logged in? */
+	return session->playlistcontainer;
 }
 
 
@@ -310,8 +310,7 @@ SP_LIBEXPORT(sp_error) sp_session_release (sp_session *session) {
 	if(session->login)
 		login_release(session->login);
 
-	if(session->playlist_ctx)
-		playlist_release(session->playlist_ctx);
+	playlist_release(session);
 
 	if(session->hashtable_albums)
 		hashtable_free(session->hashtable_albums);

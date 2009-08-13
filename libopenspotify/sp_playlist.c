@@ -121,8 +121,6 @@ SP_LIBEXPORT(int) sp_playlistcontainer_num_playlists (sp_playlistcontainer *pc) 
 	int i;
 	sp_playlist *playlist;
 
-	DSFYDEBUG("Not yet implemented\n");
-
 	for(i = 0, playlist = pc->playlists; playlist; playlist = playlist->next, i++);
 
 	return i;

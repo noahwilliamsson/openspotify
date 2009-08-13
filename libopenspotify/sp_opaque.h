@@ -182,6 +182,9 @@ struct sp_playlistcontainer {
 	void *userdata;
 	sp_playlistcontainer_callbacks *callbacks;
 
+	/* For retrieving the container playlist */
+	struct buf *buf;
+
 	/* List of individual playlists */
 	sp_playlist *playlists;
 };
@@ -225,15 +228,6 @@ struct sp_user {
 };
 
 
-struct playlist_ctx {
-	/* For retrieving the container playlist */
-	struct buf *buf;
-
-	/* Callbacks and list of playlists */
-	sp_playlistcontainer *container;
-};
-
-
 /* sp_session.c and most other API functions */
 struct sp_session {
 	void *userdata;
@@ -274,7 +268,7 @@ struct sp_session {
 
 
 	/* For keeping track of playlists and related states */
-	struct playlist_ctx *playlist_ctx;
+	sp_playlistcontainer *playlistcontainer;
 
 	/* Album/artist/track memory memory management */
 	struct hashtable *hashtable_albumbrowses;

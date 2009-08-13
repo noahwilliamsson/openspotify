@@ -90,67 +90,60 @@ struct callback_ctx {
 
 
 /* Initialize a playlist context, called by sp_session_init() */
-struct playlist_ctx *playlist_create(void) {
-	struct playlist_ctx *playlist_ctx;
+void playlist_create(sp_session *session) {
 
-	playlist_ctx = malloc(sizeof(struct playlist_ctx));
-	if(playlist_ctx == NULL)
-		return NULL;
+	session->playlistcontainer = malloc(sizeof(sp_playlistcontainer));
+	if(session->playlistcontainer == NULL)
+		return;
 
-	playlist_ctx->buf = NULL;
-
-	playlist_ctx->container = malloc(sizeof(sp_playlistcontainer));
-	playlist_ctx->container->playlists = NULL;
+	session->playlistcontainer->buf = NULL;
+	session->playlistcontainer->playlists = NULL;
 
 	/* FIXME: Should be an array of callbacks and userdatas */
-	playlist_ctx->container->userdata = NULL;
-	playlist_ctx->container->callbacks = malloc(sizeof(sp_playlistcontainer_callbacks));
-	memset(playlist_ctx->container->callbacks, 0, sizeof(sp_playlistcontainer_callbacks));
-
-	return playlist_ctx;
+	session->playlistcontainer->userdata = NULL;
+	session->playlistcontainer->callbacks = malloc(sizeof(sp_playlistcontainer_callbacks));
+	memset(session->playlistcontainer->callbacks, 0, sizeof(sp_playlistcontainer_callbacks));
 }
 
 
-/* Release resources held by the playlist context, called by sp_session_release() */
-void playlist_release(struct playlist_ctx *playlist_ctx) {
+/* Release resources held by the playlist container, called by sp_session_release() */
+void playlist_release(sp_session *session) {
 	sp_playlist *playlist, *next_playlist;
 	int i;
+	
+	for(playlist = session->playlistcontainer->playlists;
+		playlist; playlist = next_playlist) {
 
-	if(playlist_ctx->container) {
-		for(playlist = playlist_ctx->container->playlists;
-			playlist; playlist = next_playlist) {
+		if(playlist->buf)
+			buf_free(playlist->buf);
 
-			if(playlist->buf)
-				buf_free(playlist->buf);
+		if(playlist->name)
+			free(playlist->name);
 
-			if(playlist->name)
-				free(playlist->name);
-
-			if(playlist->owner) {
-				/* FIXME: Free sp_user */
-			}
-
-			for(i = 0; i < playlist->num_tracks; i++)
-				sp_track_release(playlist->tracks[i]);
-
-			if(playlist->num_tracks)
-				free(playlist->tracks);
-
-			if(playlist->callbacks)
-				free(playlist->callbacks);
-
-			next_playlist = playlist->next;
-			free(playlist);
+		if(playlist->owner) {
+			/* FIXME: Free sp_user */
 		}
 
-		free(playlist_ctx->container->callbacks);
-		free(playlist_ctx->container);
+		for(i = 0; i < playlist->num_tracks; i++)
+			sp_track_release(playlist->tracks[i]);
+
+		if(playlist->num_tracks)
+			free(playlist->tracks);
+
+		if(playlist->callbacks)
+			free(playlist->callbacks);
+
+		next_playlist = playlist->next;
+		free(playlist);
 	}
 
-	if(playlist_ctx->buf)
-		buf_free(playlist_ctx->buf);
+	if(session->playlistcontainer->buf)
+		buf_free(session->playlistcontainer->buf);
 
-	free(playlist_ctx);
+	free(session->playlistcontainer->callbacks);
+	free(session->playlistcontainer);
+	
+	session->playlistcontainer = NULL;
 }
 
 
@@ -194,8 +187,8 @@ static int playlist_send_playlist_container_request(sp_session *session, struct 
 	callback_ctx->session = session;
 	callback_ctx->req = req;
 
-	session->playlist_ctx->buf = buf_new();
-	buf_append_data(session->playlist_ctx->buf, (char*)decl_and_root, strlen(decl_and_root));
+	session->playlistcontainer->buf = buf_new();
+	buf_append_data(session->playlistcontainer->buf, (char*)decl_and_root, strlen(decl_and_root));
 
 	memset(container_id, 0, 17);
 	return cmd_getplaylist(session, container_id, ~0, 
@@ -206,16 +199,15 @@ static int playlist_send_playlist_container_request(sp_session *session, struct 
 /* Callback for playlist container buffering */
 static int playlist_container_callback(CHANNEL *ch, unsigned char *payload, unsigned short len) {
 	struct callback_ctx *callback_ctx = (struct callback_ctx *)ch->private;
-	struct playlist_ctx *playlist_ctx = callback_ctx->session->playlist_ctx;
 
 	switch(ch->state) {
 	case CHANNEL_DATA:
-		buf_append_data(playlist_ctx->buf, payload, len);
+		buf_append_data(callback_ctx->session->playlistcontainer->buf, payload, len);
 		break;
 
 	case CHANNEL_ERROR:
-		buf_free(playlist_ctx->buf);
-		playlist_ctx->buf = NULL;
+		buf_free(callback_ctx->session->playlistcontainer->buf);
+		callback_ctx->session->playlistcontainer->buf = NULL;
 
 		/* Don't set error on request. It will be retried. */
 		free(callback_ctx);
@@ -234,10 +226,10 @@ static int playlist_container_callback(CHANNEL *ch, unsigned char *payload, unsi
 			request_set_result(callback_ctx->session, callback_ctx->req, SP_ERROR_OK, NULL);
 		}
 
-		free(callback_ctx);
+		buf_free(callback_ctx->session->playlistcontainer->buf);
+		callback_ctx->session->playlistcontainer->buf = NULL;
 
-		buf_free(playlist_ctx->buf);
-		playlist_ctx->buf = NULL;
+		free(callback_ctx);
 
 		break;
 
@@ -258,14 +250,14 @@ static int playlist_parse_container_xml(sp_session *session) {
 	sp_playlist *playlist;
 	sp_playlistcontainer *container;
 
-	buf_append_data(session->playlist_ctx->buf, end_element, strlen(end_element));
-	buf_append_u8(session->playlist_ctx->buf, 0);
+	buf_append_data(session->playlistcontainer->buf, end_element, strlen(end_element));
+	buf_append_u8(session->playlistcontainer->buf, 0);
 
-	root = ezxml_parse_str((char *)session->playlist_ctx->buf->ptr, session->playlist_ctx->buf->len);
+	root = ezxml_parse_str((char *)session->playlistcontainer->buf->ptr, session->playlistcontainer->buf->len);
 	node = ezxml_get(root, "next-change", 0, "change", 0, "ops", 0, "add", 0, "items", -1);
 	id_list = node->txt;
 
-	container = session->playlist_ctx->container;
+	container = session->playlistcontainer;
 	for(id = strtok(id_list, ",\n"); id; id = strtok(NULL, ",\n")) {
 		hex_bytes_to_ascii((unsigned char *)id, idstr, 17);
 		DSFYDEBUG("Playlist ID '%s'\n", idstr);
@@ -317,7 +309,7 @@ static void playlist_post_playlist_requests(sp_session *session) {
 	int i;
 
 	i = 0;
-	for(playlist = session->playlist_ctx->container->playlists;
+	for(playlist = session->playlistcontainer->playlists;
 		playlist; playlist = playlist->next) {
 
 		ptr = (sp_playlist **)malloc(sizeof(sp_playlist *));

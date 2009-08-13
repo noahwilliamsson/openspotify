@@ -3,17 +3,17 @@
 
 #include <spotify/api.h>
 
-#include "buf.h"
 #include "request.h"
-#include "sp_opaque.h"
+
 
 #define PLAYLIST_RETRY_TIMEOUT	30
 
+
+void playlist_create(sp_session *session);
+void playlist_release(sp_session *session);
+int playlist_process(sp_session *session, struct request *req);
+
 unsigned long playlist_checksum(sp_playlist *playlist);
 unsigned long playlistcontainer_checksum(sp_playlistcontainer *container);
-
-struct playlist_ctx *playlist_create(void);
-void playlist_release(struct playlist_ctx *);
-int playlist_process(sp_session *session, struct request *req);
 
 #endif
