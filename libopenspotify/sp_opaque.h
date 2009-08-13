@@ -65,6 +65,7 @@ struct sp_albumbrowse {
 	struct hashtable *hashtable;
 };
 
+
 /* sp_artistbrowse.h */
 struct sp_artistbrowse {
 	sp_artist *artist;
@@ -133,7 +134,7 @@ struct sp_link {
 	sp_linktype type;
 	
 	union {
-		void        *data;
+		void	*data;
 		sp_track    *track;
 		sp_album    *album;
 		sp_artist   *artist;
@@ -152,6 +153,7 @@ enum playlist_state {
 	PLAYLIST_STATE_LISTED,	/* Have track IDs */
 	PLAYLIST_STATE_LOADED	/* Have loaded tracks */
 };
+
 
 struct sp_playlist {
 	unsigned char id[17];
@@ -174,6 +176,7 @@ struct sp_playlist {
 	struct sp_playlist *next;
 };
 
+
 struct sp_playlistcontainer {
 	/* FIXME: Might be an array of userdata and callbacks */
 	void *userdata;
@@ -182,6 +185,7 @@ struct sp_playlistcontainer {
 	/* List of individual playlists */
 	sp_playlist *playlists;
 };
+
 
 /* sp_track.c */
 struct sp_track {
@@ -222,11 +226,11 @@ struct sp_user {
 
 
 struct playlist_ctx {
-        /* For retrieving the container playlist */
-        struct buf *buf;
+	/* For retrieving the container playlist */
+	struct buf *buf;
 
-        /* Callbacks and list of playlists */
-        sp_playlistcontainer *container;
+	/* Callbacks and list of playlists */
+	sp_playlistcontainer *container;
 };
 
 
@@ -248,11 +252,11 @@ struct sp_session {
 	struct login_ctx *login;
 
 
-        /* Stream cipher context */
-        unsigned int key_recv_IV;
-        unsigned int key_send_IV;
-        shn_ctx shn_recv;
-        shn_ctx shn_send;
+	/* Stream cipher context */
+	unsigned int key_recv_IV;
+	unsigned int key_send_IV;
+	shn_ctx shn_recv;
+	shn_ctx shn_send;
 
 	struct buf *packet;
 
