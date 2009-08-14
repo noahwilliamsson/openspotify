@@ -4,17 +4,16 @@
  *
  */
 
+#ifdef __linux__
+#define _GNU_SOURCE	/* Required for PTHREAD_MUTEX_RECURSIVE on Linux */
+#endif
 #include <stdlib.h>
 #include <string.h>
 #ifdef _WIN32
 #include <windows.h>
 #else
-#ifdef __linux__
-#define _GNU_SOURCE
-#endif
 #include <pthread.h>
 #endif
-
 
 #include "hashtable.h"
 
