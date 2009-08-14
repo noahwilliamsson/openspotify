@@ -194,12 +194,6 @@ int osfy_track_load_from_xml(sp_session *session, sp_track *track, ezxml_t track
 	
 	DSFYDEBUG("Found track with ID '%s' in XML\n", node->txt);
 	hex_ascii_to_bytes(node->txt, id, sizeof(track->id));
-	{
-		char buf[33];
-		hex_bytes_to_ascii(track->id, buf, 16);
-		DSFYDEBUG("sp_track id is '%s', sizeof(track->id)=%ld, memcmp() will return %d\n",
-			  buf, sizeof(track->id), memcmp(track->id, id, sizeof(track->id)));
-	}
 	assert(memcmp(track->id, id, sizeof(track->id)) == 0);
 	
 	
