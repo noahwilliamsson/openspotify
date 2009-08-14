@@ -161,25 +161,28 @@ static void request_notify_main_thread(sp_session *session, struct request *requ
 	case REQ_TYPE_IMAGE:
 	case REQ_TYPE_ALBUMBROWSE:
 	case REQ_TYPE_ARTISTBROWSE:
-
-	/* FIXME: Do these really need to be routed to the main thread? */
 	case REQ_TYPE_BROWSE_ALBUM:
 	case REQ_TYPE_BROWSE_ARTIST:
 	case REQ_TYPE_BROWSE_TRACK:
-			
 		session->callbacks->notify_main_thread(session);
-		DSFYDEBUG("Notified main thread for <type %s>\n", REQUEST_TYPE_STR(request->type));
+		DSFYDEBUG("Notified main thread for <type %s, state %s, input %p>\n",
+			REQUEST_TYPE_STR(request->type), REQUEST_STATE_STR(request->state),
+			request->input);
 		break;
 
 	case REQ_TYPE_PLAYLIST_LOAD_CONTAINER:
-		DSFYDEBUG("Playlist container loaded\n");
+		DSFYDEBUG("Request <type %s, state %s, input %p>, playlist container is LOADED\n",
+			REQUEST_TYPE_STR(request->type), REQUEST_STATE_STR(request->state),
+			request->input);
 		break;
 
 	case REQ_TYPE_PLAYLIST_LOAD_PLAYLIST:
 		{
 			char idstr[35];
 			hex_bytes_to_ascii(((sp_playlist *)request->output)->id, idstr, 17);
-			DSFYDEBUG("Playlist '%s' has list of tracks\n", idstr);
+			DSFYDEBUG("Request <type %s, state %s, input %p>, playlist '%s' is LISTED\n",
+				REQUEST_TYPE_STR(request->type), REQUEST_STATE_STR(request->state),
+				request->input, idstr);
 		}
 		break;
 
@@ -187,7 +190,9 @@ static void request_notify_main_thread(sp_session *session, struct request *requ
 		{
 			char idstr[35];
 			hex_bytes_to_ascii(((sp_playlist *)request->output)->id, idstr, 17);
-			DSFYDEBUG("Playlist '%s' is completely loaded\n", idstr);
+			DSFYDEBUG("Request <type %s, state %s, input %p>, playlist '%s' is LOADED\n",
+				REQUEST_TYPE_STR(request->type), REQUEST_STATE_STR(request->state),
+				request->input, idstr);
 		}
 		break;
 
