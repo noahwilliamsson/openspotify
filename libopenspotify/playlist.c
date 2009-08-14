@@ -612,8 +612,8 @@ static int osfy_playlist_browse_callback(struct browse_callback_ctx *brctx) {
 
 
 /* Calculate a playlist checksum. */
-unsigned long playlist_checksum(sp_playlist *playlist) {
-	unsigned long checksum = 1L;
+unsigned int playlist_checksum(sp_playlist *playlist) {
+	unsigned int checksum = 1L;
 	unsigned char id[17];
 	int i;
 
@@ -633,8 +633,8 @@ unsigned long playlist_checksum(sp_playlist *playlist) {
 
 
 /* Calculate a playlists container checksum. */
-unsigned long playlistcontainer_checksum(sp_playlistcontainer *pc) {
-	unsigned long checksum = 1L;
+unsigned int playlistcontainer_checksum(sp_playlistcontainer *pc) {
+	unsigned int checksum = 1L;
 	unsigned char id[17];
 	int i;
 
