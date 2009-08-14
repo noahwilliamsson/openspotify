@@ -58,7 +58,7 @@ SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_sess
 	s->login = NULL;
 
 	/* Playlist container object */
-	playlist_create(s);
+	playlistcontainer_create(s);
 
 	/* Albums/artists/tracks memory management */
 	s->hashtable_albums = hashtable_create(16);
@@ -175,6 +175,9 @@ SP_LIBEXPORT(void) sp_session_process_events(sp_session *session, int *next_time
 	sp_albumbrowse *alb;
 	sp_artistbrowse *arb;
 	sp_image *image;
+	sp_playlist *playlist;
+	sp_playlistcontainer *pc;
+	int i, value;
 
 	while((request = request_fetch_next_result(session, next_timeout)) != NULL) {
 		DSFYDEBUG("Processing finished request of type %d, error %d\n",
@@ -203,7 +206,35 @@ SP_LIBEXPORT(void) sp_session_process_events(sp_session *session, int *next_time
 			/* We'll leak memory here for each login made :( */
 			session->callbacks->message_to_user(session, request->output);
 			break;
+				
+		case REQ_TYPE_PC_PLAYLIST_ADD:
+			value = *(int *)request->output; /* position */
+			pc = session->playlistcontainer;
+			playlist = pc->playlists[value];
+			for(i = 0; i < pc->num_callbacks; i++)
+				if(pc->callbacks[i]->playlist_added)
+					pc->callbacks[i]->playlist_added(pc, playlist, value, pc->userdata[i]);
 
+			break;
+				
+		case REQ_TYPE_PLAYLIST_RENAME:
+			pc = session->playlistcontainer;
+			playlist = (sp_playlist *)request->output;
+			for(i = 0; i < playlist->num_callbacks; i++)
+				if(playlist->callbacks[i]->playlist_renamed)
+					playlist->callbacks[i]->playlist_renamed(playlist, playlist->userdata[i]);
+			
+			break;
+				
+		case REQ_TYPE_PLAYLIST_LOAD:
+			pc = session->playlistcontainer;
+			playlist = (sp_playlist *)request->output;
+			for(i = 0; i < playlist->num_callbacks; i++)
+				if(playlist->callbacks[i]->tracks_added)
+					playlist->callbacks[i]->tracks_added(playlist, (const sp_track **)playlist->tracks, playlist->num_tracks, 0, playlist->userdata[i]);
+			
+			break;
+				
 		case REQ_TYPE_ALBUMBROWSE:
 			alb = (sp_albumbrowse *)request->output;
 			if(alb->callback)
@@ -221,6 +252,7 @@ SP_LIBEXPORT(void) sp_session_process_events(sp_session *session, int *next_time
 		case REQ_TYPE_BROWSE_ALBUM:
 		case REQ_TYPE_BROWSE_ARTIST:
 		case REQ_TYPE_BROWSE_TRACK:
+		case REQ_TYPE_BROWSE_PLAYLIST_TRACKS:
 			DSFYDEBUG("Metadata updated for request <type %s, state %s, input %p> in main thread\n",
 				  REQUEST_TYPE_STR(request->type), REQUEST_STATE_STR(request->type), request->input);
 			session->callbacks->metadata_updated(session);
@@ -310,7 +342,7 @@ SP_LIBEXPORT(sp_error) sp_session_release (sp_session *session) {
 	if(session->login)
 		login_release(session->login);
 
-	playlist_release(session);
+	playlistcontainer_release(session);
 
 	if(session->hashtable_albums)
 		hashtable_free(session->hashtable_albums);

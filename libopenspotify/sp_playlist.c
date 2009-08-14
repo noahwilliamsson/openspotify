@@ -13,20 +13,34 @@ SP_LIBEXPORT(bool) sp_playlist_is_loaded (sp_playlist *playlist) {
 
 
 SP_LIBEXPORT(void) sp_playlist_add_callbacks (sp_playlist *playlist, sp_playlist_callbacks *callbacks, void *userdata) {
-	/* FIXME: Deal with multiple added callbacks on the same playlist !! */
+	
+	playlist->callbacks = realloc(playlist->callbacks, sizeof(sp_playlist_callbacks *) * (1 + playlist->num_callbacks));
+	playlist->userdata = realloc(playlist->userdata, sizeof(void *) * (1 + playlist->num_callbacks));
 
-	playlist->userdata = userdata;
-	playlist->callbacks = malloc(sizeof(sp_playlist_callbacks));
-	memcpy(playlist->callbacks, callbacks, sizeof(sp_playlist_callbacks));
+	playlist->callbacks[playlist->num_callbacks] = callbacks;
+	playlist->userdata[playlist->num_callbacks] = userdata;
+	
+	playlist->num_callbacks++;
 }
 
 
 SP_LIBEXPORT(void) sp_playlist_remove_callbacks (sp_playlist *playlist, sp_playlist_callbacks *callbacks, void *userdata) {
-	/* FIXME: Deal with multiple added callbacks on the same playlist !! */
-
-	free(playlist->callbacks);
-	playlist->callbacks = NULL;
-	playlist->userdata = NULL;
+	
+	int i;
+	
+	do {
+		for(i = 0; i < playlist->num_callbacks; i++) {
+			if(playlist->callbacks[i] != callbacks || playlist->userdata[i] != userdata)
+				continue;
+			
+			playlist->callbacks[i] = playlist->callbacks[playlist->num_callbacks - 1];
+			playlist->userdata[i] = playlist->userdata[playlist->num_callbacks - 1];
+			playlist->num_callbacks--;
+			
+			/* We don't bother with reallocating memory at this point */
+			break;
+		}
+	} while(i != playlist->num_callbacks);
 }
 
 
@@ -65,9 +79,8 @@ SP_LIBEXPORT(sp_user *) sp_playlist_owner (sp_playlist *playlist) {
 
 
 SP_LIBEXPORT(bool) sp_playlist_is_collaborative (sp_playlist *playlist) {
-	DSFYDEBUG("Not yet implemented\n");
 
-	return 0;
+	return playlist->collaborative;
 }
 
 
@@ -106,35 +119,51 @@ SP_LIBEXPORT(sp_error) sp_playlist_reorder_tracks (sp_playlist *playlist, const 
 
 
 SP_LIBEXPORT(void) sp_playlistcontainer_add_callbacks (sp_playlistcontainer *pc, sp_playlistcontainer_callbacks *callbacks, void *userdata) {
-	DSFYDEBUG("Not yet implemented\n");
 
+	
+	pc->callbacks = realloc(pc->callbacks, sizeof(sp_playlistcontainer_callbacks *) * (1 + pc->num_callbacks));
+	pc->userdata = realloc(pc->userdata, sizeof(void *) * (1 + pc->num_callbacks));
+	
+	pc->callbacks[pc->num_callbacks] = callbacks;
+	pc->userdata[pc->num_callbacks] = userdata;
+	
+	pc->num_callbacks++;
+	
 }
 
 
 SP_LIBEXPORT(void) sp_playlistcontainer_remove_callbacks (sp_playlistcontainer *pc, sp_playlistcontainer_callbacks *callbacks, void *userdata) {
-	DSFYDEBUG("Not yet implemented\n");
-
+	int i;
+	
+	do {
+		for(i = 0; i < pc->num_callbacks; i++) {
+			if(pc->callbacks[i] != callbacks || pc->userdata[i] != userdata)
+				continue;
+			
+			pc->callbacks[i] = pc->callbacks[pc->num_callbacks - 1];
+			pc->userdata[i] = pc->userdata[pc->num_callbacks - 1];
+			pc->num_callbacks--;
+			
+			/* We don't bother with reallocating memory at this point */
+			break;
+		}
+	} while(i != pc->num_callbacks);
+	
 }
 
 
 SP_LIBEXPORT(int) sp_playlistcontainer_num_playlists (sp_playlistcontainer *pc) {
-	int i;
-	sp_playlist *playlist;
-
-	for(i = 0, playlist = pc->playlists; playlist; playlist = playlist->next, i++);
-
-	return i;
+	
+	return pc->num_playlists;
 }
 
 
 SP_LIBEXPORT(sp_playlist *) sp_playlistcontainer_playlist (sp_playlistcontainer *pc, int index) {
-	int i;
-	sp_playlist *playlist = pc->playlists;
 
-	for(i = 0; playlist && i < index; i++)
-		playlist = playlist->next;
-
-	return playlist;
+	if(index < 0 || index >= pc->num_playlists)
+		return NULL;
+	
+	return pc->playlists[index];
 }
 
 

@@ -157,36 +157,36 @@ enum playlist_state {
 
 struct sp_playlist {
 	unsigned char id[17];
-	char *name;
+
+	char name[256];
 	sp_user *owner;
 	int position;
+	int collaborative;
 
 	sp_track **tracks;
 	int num_tracks;
 
-	int lastrequest;
-
 	enum playlist_state state;
 
-	/* FIXME: Convert to  an array of userdata and callbacks */
-	void *userdata;
-	sp_playlist_callbacks *callbacks;
+	int num_callbacks;
+	sp_playlist_callbacks **callbacks;
+	void **userdata;
 
 	struct buf *buf;
-	struct sp_playlist *next;
 };
 
 
 struct sp_playlistcontainer {
-	/* FIXME: Might be an array of userdata and callbacks */
-	void *userdata;
-	sp_playlistcontainer_callbacks *callbacks;
+	/* List of individual playlists */
+	int num_playlists;
+	sp_playlist **playlists;
+
+	int num_callbacks;
+	sp_playlistcontainer_callbacks **callbacks;
+	void **userdata;
 
 	/* For retrieving the container playlist */
 	struct buf *buf;
-
-	/* List of individual playlists */
-	sp_playlist *playlists;
 };
 
 

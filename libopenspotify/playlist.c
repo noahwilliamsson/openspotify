@@ -4,7 +4,7 @@
  * Program flow:
  *
  * + network_thread()
- * +--+ playlist_process(REQ_TYPE_PLAYLIST_LOAD_CONTAINER)
+ * +--+ playlist_process(REQ_TYPE_PC_LOAD)
  * |  +--+ playlist_send_playlist_container_request()
  * |  |  +--+ cmd_getplaylist()
  * |  |     +--+ channel_register() with callback playlist_container_callback()
@@ -19,11 +19,11 @@
  * |            +--+ CHANNEL_END:
  * |               +--- playlist_parse_container_xml()
  * |               +--+ playlist_post_playlist_requests()
- * |               |  +--- request_post(REQ_TYPE_PLAYLIST_LOAD_PLAYLIST)
- * |               +-- request_post_set_result(REQ_TYPE_PLAYLIST_LOAD_CONTAINER)
+ * |               |  +--- request_post(REQ_TYPE_PLAYLIST_LOAD)
+ * |               +-- request_post_set_result(REQ_TYPE_PC_LOAD)
  * .
  * .
- * +--+ playlist_process(REQ_TYPE_PLAYLIST_LOAD_PLAYLIST)
+ * +--+ playlist_process(REQ_TYPE_PLAYLIST_LOAD)
  * |  +--+ playlist_send_playlist_request()
  * |  |  +--+ cmd_getplaylist()
  * |  |     +--+ channel_register() with callback playlist_container_callback()
@@ -38,9 +38,9 @@
  * |            +--- CHANNEL_DATA: Buffer XML-data
  * |            +--+ CHANNEL_END:
  * |               +--- playlist_parse_playlist_xml()
- * |               +--+ osfy_playlist_browse() ------ XXXX
+ * |               +--+ osfy_playlist_browse()
  * |               |  +--- request_post(REQ_TYPE_BROWSE_PLAYLIST_TRACKS)
- * |               +--- request_post_set_result(REQ_TYPE_PLAYLIST_LOAD_PLAYLIST)
+ * |               +--- request_post_set_result(REQ_TYPE_PLAYLIST_LOAD)
  * .  .
  * .  .
  * +--- DONE
@@ -89,85 +89,81 @@ struct callback_ctx {
 };
 
 
-/* Initialize a playlist context, called by sp_session_init() */
-void playlist_create(sp_session *session) {
+/* Handle playlist loading event, called by the network thread */
+int playlist_process(sp_session *session, struct request *req) {
+	int ret;
+	
+	if(req->state == REQ_STATE_NEW)
+		req->state = REQ_STATE_RUNNING;
+	
+	if(req->type == REQ_TYPE_PC_LOAD) {
+		req->next_timeout = get_millisecs() + PLAYLIST_RETRY_TIMEOUT*1000;
+		
+		/* Send request (CMD_GETPLAYLIST) to load playlist container */
+		ret = playlist_send_playlist_container_request(session, req);
+	}
+	else if(req->type == REQ_TYPE_PLAYLIST_LOAD) {
+		req->next_timeout = get_millisecs() + PLAYLIST_RETRY_TIMEOUT*1000;
+		
+		/* Send request (CMD_GETPLAYLIST) to load playlist */
+		ret = playlist_send_playlist_request(session, req);
+	}
+	
+	return ret;
+}
+
+
+/* Initialize a playlist context, called once by sp_session_init() */
+void playlistcontainer_create(sp_session *session) {
 
 	session->playlistcontainer = malloc(sizeof(sp_playlistcontainer));
 	if(session->playlistcontainer == NULL)
 		return;
 
 	session->playlistcontainer->buf = NULL;
+	
+	session->playlistcontainer->num_playlists = 0;
 	session->playlistcontainer->playlists = NULL;
 
-	/* FIXME: Should be an array of callbacks and userdatas */
+	session->playlistcontainer->num_callbacks = 0;
+	session->playlistcontainer->callbacks = NULL;
 	session->playlistcontainer->userdata = NULL;
-	session->playlistcontainer->callbacks = malloc(sizeof(sp_playlistcontainer_callbacks));
-	memset(session->playlistcontainer->callbacks, 0, sizeof(sp_playlistcontainer_callbacks));
 }
 
 
-/* Release resources held by the playlist container, called by sp_session_release() */
-void playlist_release(sp_session *session) {
-	sp_playlist *playlist, *next_playlist;
+/* Add a playlist to the playlist container and notify the main thread */
+void playlistcontainer_add_playlist(sp_session *session, sp_playlist *playlist) {
+	session->playlistcontainer->playlists = realloc(session->playlistcontainer->playlists, 
+					     sizeof(sp_playlist *) * (1 + session->playlistcontainer->num_playlists));
+	session->playlistcontainer->playlists[session->playlistcontainer->num_playlists] = playlist;
+
+	/* Set position */
+	playlist->position = session->playlistcontainer->num_playlists;
+	session->playlistcontainer->num_playlists++;
+
+	/* Notify the main thread we added a playlist */
+	request_post_result(session, REQ_TYPE_PC_PLAYLIST_ADD, SP_ERROR_OK, &playlist->position);
+}
+
+
+/* Free resources held by the playlist container, called once by sp_session_release() */
+void playlistcontainer_release(sp_session *session) {
 	int i;
+
+	for(i = 0; i < session->playlistcontainer->num_playlists; i++)
+		playlist_release(session, session->playlistcontainer->playlists[i]);
 	
-	for(playlist = session->playlistcontainer->playlists;
-		playlist; playlist = next_playlist) {
-
-		if(playlist->buf)
-			buf_free(playlist->buf);
-
-		if(playlist->name)
-			free(playlist->name);
-
-		if(playlist->owner) {
-			/* FIXME: Free sp_user */
-		}
-
-		for(i = 0; i < playlist->num_tracks; i++)
-			sp_track_release(playlist->tracks[i]);
-
-		if(playlist->num_tracks)
-			free(playlist->tracks);
-
-		if(playlist->callbacks)
-			free(playlist->callbacks);
-
-		next_playlist = playlist->next;
-		free(playlist);
-	}
+	if(session->playlistcontainer->num_playlists)
+		free(session->playlistcontainer->playlists);
 
 	if(session->playlistcontainer->buf)
 		buf_free(session->playlistcontainer->buf);
 
-	free(session->playlistcontainer->callbacks);
+	if(session->playlistcontainer->callbacks)
+		free(session->playlistcontainer->callbacks);
+
 	free(session->playlistcontainer);
-	
 	session->playlistcontainer = NULL;
-}
-
-
-/* Playlist FSM */
-int playlist_process(sp_session *session, struct request *req) {
-	int ret;
-
-	if(req->state == REQ_STATE_NEW)
-		req->state = REQ_STATE_RUNNING;
-
-	if(req->type == REQ_TYPE_PLAYLIST_LOAD_CONTAINER) {
-		req->next_timeout = get_millisecs() + PLAYLIST_RETRY_TIMEOUT*1000;
-
-		/* Send request (CMD_GETPLAYLIST) to load playlist container */
-		ret = playlist_send_playlist_container_request(session, req);
-	}
-	else if(req->type == REQ_TYPE_PLAYLIST_LOAD_PLAYLIST) {
-		req->next_timeout = get_millisecs() + PLAYLIST_RETRY_TIMEOUT*1000;
-
-		/* Send request (CMD_GETPLAYLIST) to load playlist */
-		ret = playlist_send_playlist_request(session, req);
-	}
-
-	return ret;
 }
 
 
@@ -178,7 +174,6 @@ static int playlist_send_playlist_container_request(sp_session *session, struct 
 		"<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n<playlist>\n";
 
 	struct callback_ctx *callback_ctx;
-
 
 	DSFYDEBUG("Requesting playlist container\n");
 
@@ -208,11 +203,10 @@ static int playlist_container_callback(CHANNEL *ch, unsigned char *payload, unsi
 	case CHANNEL_ERROR:
 		buf_free(callback_ctx->session->playlistcontainer->buf);
 		callback_ctx->session->playlistcontainer->buf = NULL;
-
-		/* Don't set error on request. It will be retried. */
 		free(callback_ctx);
 
-		DSFYDEBUG("Got a channel ERROR\n");
+		DSFYDEBUG("Error on channel '%s', will retry request in %dms\n",
+			ch->name, callback_ctx->req->next_timeout - get_millisecs());
 		break;
 
 	case CHANNEL_END:
@@ -223,12 +217,12 @@ static int playlist_container_callback(CHANNEL *ch, unsigned char *payload, unsi
 			playlist_post_playlist_requests(callback_ctx->session);
 
 			/* Note we're done loading the playlist container */
-			request_set_result(callback_ctx->session, callback_ctx->req, SP_ERROR_OK, NULL);
+			request_set_result(callback_ctx->session, callback_ctx->req,
+				SP_ERROR_OK, callback_ctx->session->playlistcontainer);
 		}
 
 		buf_free(callback_ctx->session->playlistcontainer->buf);
 		callback_ctx->session->playlistcontainer->buf = NULL;
-
 		free(callback_ctx);
 
 		break;
@@ -243,59 +237,37 @@ static int playlist_container_callback(CHANNEL *ch, unsigned char *payload, unsi
 
 static int playlist_parse_container_xml(sp_session *session) {
 	static char *end_element = "</playlist>";
-	char *id_list, *id;
-	char idstr[35];
-	int position;
+	char *id_list, *idstr;
+	unsigned char id[17];
 	ezxml_t root, node;
 	sp_playlist *playlist;
-	sp_playlistcontainer *container;
+	sp_playlistcontainer *pc = session->playlistcontainer;
 
-	buf_append_data(session->playlistcontainer->buf, end_element, strlen(end_element));
-	buf_append_u8(session->playlistcontainer->buf, 0);
-
-	root = ezxml_parse_str((char *)session->playlistcontainer->buf->ptr, session->playlistcontainer->buf->len);
+	
+	buf_append_data(pc->buf, end_element, strlen(end_element));
+	buf_append_u8(pc->buf, 0);
+	{
+		FILE *fd;
+		fd = fopen("playlistcontainer.xml", "w");
+		if(fd) {
+			fwrite(pc->buf->ptr, pc->buf->len, 1, fd);
+			fclose(fd);
+		}
+	}
+	
+	root = ezxml_parse_str((char *)pc->buf->ptr, pc->buf->len);
 	node = ezxml_get(root, "next-change", 0, "change", 0, "ops", 0, "add", 0, "items", -1);
 	id_list = node->txt;
 
-	container = session->playlistcontainer;
-	for(id = strtok(id_list, ",\n"); id; id = strtok(NULL, ",\n")) {
-		hex_bytes_to_ascii((unsigned char *)id, idstr, 17);
+	for(idstr = strtok(id_list, ",\n"); idstr; idstr = strtok(NULL, ",\n")) {
 		DSFYDEBUG("Playlist ID '%s'\n", idstr);
 	
-		position = 0;
-		if((playlist = container->playlists) == NULL) {
-			container->playlists = malloc(sizeof(sp_playlist));
-			playlist = container->playlists;
-		}
-		else {
-			for(position = 0; playlist->next; position++)
-				playlist = playlist->next;
+		hex_ascii_to_bytes(idstr, id, 17);
+		playlist = playlist_create(session, id);
 
-			playlist->next = malloc(sizeof(sp_playlist));
-			playlist = playlist->next;
-		}
-
-		hex_ascii_to_bytes(id, playlist->id, sizeof(playlist->id));
-		playlist->num_tracks = 0;
-		playlist->tracks = NULL;
-
-		/* FIXME: Pull this info from XML ? */
-		playlist->name = NULL;
-		playlist->owner = NULL;
-
-		playlist->lastrequest = 0;
-		playlist->state = PLAYLIST_STATE_ADDED;
-
-		playlist->callbacks = NULL;
-		playlist->userdata = NULL;
-
-		playlist->buf = NULL;
-		playlist->next = NULL;
-
-		/* FIXME: Probably shouldn't carry around playlist positions in the playlist itself! */
-		playlist->position = position;
+		playlistcontainer_add_playlist(session, playlist);
 	}
-	
+
 
 	ezxml_free(root);
 
@@ -303,20 +275,80 @@ static int playlist_parse_container_xml(sp_session *session) {
 }
 
 
+sp_playlist *playlist_create(sp_session *session, unsigned char id[17]) {
+	sp_playlist *playlist;
+
+	
+	playlist = (sp_playlist *)malloc(sizeof(sp_playlist));
+	if(playlist == NULL)
+		return playlist;
+	
+	memcpy(playlist->id, id, sizeof(playlist->id));
+
+	memset(playlist->name, 0, sizeof(playlist->name));
+	playlist->owner = NULL;
+	playlist->position = 0;
+	playlist->collaborative = 0;
+
+	playlist->num_tracks = 0;
+	playlist->tracks = NULL;
+	
+	playlist->state = PLAYLIST_STATE_ADDED;
+	
+	playlist->num_callbacks = 0;
+	playlist->callbacks = NULL;
+	playlist->userdata = NULL;
+	
+	playlist->buf = NULL;
+	
+	return playlist;
+}
+
+
+/* Release resources held by a playlist */
+void playlist_release(sp_session *session, sp_playlist *playlist) {
+	int i;
+	
+	if(playlist->buf)
+		buf_free(playlist->buf);
+	
+	if(playlist->owner) {
+		/* FIXME: Free sp_user */
+	}
+	
+	for(i = 0; i < playlist->num_tracks; i++)
+		sp_track_release(playlist->tracks[i]);
+	
+	if(playlist->num_tracks)
+		free(playlist->tracks);
+	
+	if(playlist->callbacks)
+		free(playlist->callbacks);
+	
+	free(playlist);
+}
+
+
+/* Set name of playlist and notify main thread */
+void playlist_set_name(sp_session *session, sp_playlist *playlist, char *name) {
+	strncpy(playlist->name, name, sizeof(playlist->name) - 1);
+	playlist->name[sizeof(playlist->name) - 1] = 0;
+	
+	request_post_result(session, REQ_TYPE_PLAYLIST_RENAME, SP_ERROR_OK, playlist);
+}
+
+
 /* Create new requests for each playlist in the container */
 static void playlist_post_playlist_requests(sp_session *session) {
-	sp_playlist *playlist, **ptr;
+	sp_playlist **ptr;
 	int i;
 
-	i = 0;
-	for(playlist = session->playlistcontainer->playlists;
-		playlist; playlist = playlist->next) {
+	for(i = 0; i < session->playlistcontainer->num_playlists; i++) {
 
 		ptr = (sp_playlist **)malloc(sizeof(sp_playlist *));
-		*ptr = playlist;
-		request_post(session, REQ_TYPE_PLAYLIST_LOAD_PLAYLIST, ptr);
+		*ptr = session->playlistcontainer->playlists[i];
 
-		i++;
+		request_post(session, REQ_TYPE_PLAYLIST_LOAD, ptr);
 	}
 
 	DSFYDEBUG("Created %d requests to retrieve playlists\n", i);
@@ -413,7 +445,26 @@ static int playlist_parse_playlist_xml(sp_session *session, sp_playlist *playlis
 	buf_append_data(playlist->buf, end_element, strlen(end_element));
 	buf_append_u8(playlist->buf, 0);
 
+	{
+		FILE *fd;
+		char buf[9 + 35];
+		sprintf(buf, "playlist-");
+		hex_bytes_to_ascii(playlist->id, buf + 9, 17);
+		fd = fopen(buf, "w");
+		if(fd) {
+			fwrite(playlist->buf->ptr, playlist->buf->len, 1, fd);
+			fclose(fd);
+		}
+	}
+
 	root = ezxml_parse_str((char *)playlist->buf->ptr, playlist->buf->len);
+
+	/* Set playlist name and notify main thread */
+	node = ezxml_get(root, "next-change", 0, "change", 0, "ops", 0, "name", -1);
+	if(node)
+		playlist_set_name(session, playlist, node->txt);
+
+	/* Loop over each track in the playlist and add it */
 	node = ezxml_get(root, "next-change", 0, "change", 0, "ops", 0, "add", 0, "items", -1);
 	id_list = node->txt;
 	
@@ -563,16 +614,18 @@ static int osfy_playlist_browse_callback(struct browse_callback_ctx *brctx) {
 /* Calculate a playlist checksum. */
 unsigned long playlist_checksum(sp_playlist *playlist) {
 	unsigned long checksum = 1L;
+	unsigned char id[17];
 	int i;
 
 	if(playlist == NULL)
-		return 1L;
+		return checksum;
 
 	/* Loop over all tracks (make sure the last byte is 0x01). */
-	for(i = 0; i < playlist->num_tracks; i++){
-		playlist->tracks[i]->id[16] = 0x01;
+	for(i = 0; i < playlist->num_tracks; i++) {
+		memcpy(id, playlist->tracks[i], 16);
+		id[16] = 0x01;
 
-		checksum = adler32(checksum, playlist->tracks[i]->id, 17);
+		checksum = adler32(checksum, id, 17);
 	}
 
 	return checksum;
@@ -580,18 +633,20 @@ unsigned long playlist_checksum(sp_playlist *playlist) {
 
 
 /* Calculate a playlists container checksum. */
-unsigned long playlistcontainer_checksum(sp_playlistcontainer *container) {
+unsigned long playlistcontainer_checksum(sp_playlistcontainer *pc) {
 	unsigned long checksum = 1L;
-	sp_playlist *playlist;
+	unsigned char id[17];
+	int i;
 
-	if(container == NULL)
-		return 1L;
+	if(pc == NULL)
+		return checksum;
 
 	/* Loop over all playlists (make sure the last byte is 0x02). */
-	for(playlist = container->playlists; playlist != NULL; playlist = playlist->next){
-		playlist->id[16] = 0x02;
+	for(i = 0; i < pc->num_playlists; i++) {
+		memcpy(id, pc->playlists[i]->id, 16);
 
-		checksum = adler32(checksum, playlist->id, 17);
+		id[16] = 0x02;
+		checksum = adler32(checksum, id, 17);
 	}
 
 	return checksum;

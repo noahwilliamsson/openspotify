@@ -175,8 +175,8 @@ static int process_request(sp_session *session, struct request *req) {
 		return process_logout_request(session, req);
 		break;
 	
-	case REQ_TYPE_PLAYLIST_LOAD_CONTAINER:
-	case REQ_TYPE_PLAYLIST_LOAD_PLAYLIST:
+	case REQ_TYPE_PC_LOAD:
+	case REQ_TYPE_PLAYLIST_LOAD:
 		return playlist_process(session, req);
 		break;
 	

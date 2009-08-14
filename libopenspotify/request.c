@@ -159,6 +159,10 @@ static void request_notify_main_thread(sp_session *session, struct request *requ
 	case REQ_TYPE_PLAY_TOKEN_LOST:
 	case REQ_TYPE_NOTIFY:
 	case REQ_TYPE_IMAGE:
+	case REQ_TYPE_PC_PLAYLIST_ADD:
+	case REQ_TYPE_PC_PLAYLIST_REMOVE:
+	case REQ_TYPE_PC_PLAYLIST_MOVE:
+	case REQ_TYPE_PLAYLIST_RENAME:
 	case REQ_TYPE_ALBUMBROWSE:
 	case REQ_TYPE_ARTISTBROWSE:
 	case REQ_TYPE_BROWSE_ALBUM:
@@ -170,13 +174,13 @@ static void request_notify_main_thread(sp_session *session, struct request *requ
 			request->input);
 		break;
 
-	case REQ_TYPE_PLAYLIST_LOAD_CONTAINER:
+	case REQ_TYPE_PC_LOAD:
 		DSFYDEBUG("Request <type %s, state %s, input %p>, playlist container is LOADED\n",
 			REQUEST_TYPE_STR(request->type), REQUEST_STATE_STR(request->state),
 			request->input);
 		break;
 
-	case REQ_TYPE_PLAYLIST_LOAD_PLAYLIST:
+	case REQ_TYPE_PLAYLIST_LOAD:
 		{
 			char idstr[35];
 			hex_bytes_to_ascii(((sp_playlist *)request->output)->id, idstr, 17);

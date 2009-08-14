@@ -9,9 +9,13 @@
 #define PLAYLIST_RETRY_TIMEOUT	30
 
 
-void playlist_create(sp_session *session);
-void playlist_release(sp_session *session);
 int playlist_process(sp_session *session, struct request *req);
+void playlistcontainer_create(sp_session *session);
+void playlistcontainer_release(sp_session *session);
+void playlistcontainer_add_playlist(sp_session *session, sp_playlist *playlist);
+sp_playlist *playlist_create(sp_session *session, unsigned char id[17]);
+void playlist_set_name(sp_session *session, sp_playlist *playlist, char *name);
+void playlist_release(sp_session *session, sp_playlist *playlist);
 
 unsigned long playlist_checksum(sp_playlist *playlist);
 unsigned long playlistcontainer_checksum(sp_playlistcontainer *container);
