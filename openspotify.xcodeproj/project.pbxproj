@@ -69,6 +69,10 @@
 		4F53291B103092D2004139C9 /* util.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F5328C4103092D2004139C9 /* util.h */; };
 		4F53295810309451004139C9 /* simple.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F53295310309451004139C9 /* simple.c */; };
 		4FD21CDE1031146400A0FE4E /* image.h in Headers */ = {isa = PBXBuildFile; fileRef = 4FD21CDD1031146400A0FE4E /* image.h */; };
+		4FD526ED1035354200083306 /* libopenspotify.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F5328E8103092D2004139C9 /* libopenspotify.dylib */; };
+		4FD526F81035355700083306 /* appkey.c in Sources */ = {isa = PBXBuildFile; fileRef = 4FD526F01035355700083306 /* appkey.c */; };
+		4FD526F91035355700083306 /* dummy-audio.c in Sources */ = {isa = PBXBuildFile; fileRef = 4FD526F31035355700083306 /* dummy-audio.c */; };
+		4FD526FA1035355700083306 /* jukebox.c in Sources */ = {isa = PBXBuildFile; fileRef = 4FD526F41035355700083306 /* jukebox.c */; };
 		4FFD4A921030A2AB00935706 /* appkey.c in Sources */ = {isa = PBXBuildFile; fileRef = 4FFD4A871030A2AB00935706 /* appkey.c */; };
 		4FFD4A941030A2AB00935706 /* browse.c in Sources */ = {isa = PBXBuildFile; fileRef = 4FFD4A8A1030A2AB00935706 /* browse.c */; };
 		4FFD4A971030A2AB00935706 /* session.c in Sources */ = {isa = PBXBuildFile; fileRef = 4FFD4A901030A2AB00935706 /* session.c */; };
@@ -97,6 +101,13 @@
 			containerPortal = 4FE175A11030903A00FA72BC /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 4FE175AD1030904700FA72BC;
+			remoteInfo = openspotify;
+		};
+		4FD526EB1035353F00083306 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4FE175A11030903A00FA72BC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4FE175AD1030904700FA72BC /* openspotify */;
 			remoteInfo = openspotify;
 		};
 		4FFD4A821030A18C00935706 /* PBXContainerItemProxy */ = {
@@ -192,6 +203,13 @@
 		4F53295310309451004139C9 /* simple.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = simple.c; sourceTree = "<group>"; };
 		4F53295F103094BD004139C9 /* openspotify-simple */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "openspotify-simple"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FD21CDD1031146400A0FE4E /* image.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = image.h; sourceTree = "<group>"; };
+		4FD526E71035353900083306 /* example-jukebox */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "example-jukebox"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4FD526F01035355700083306 /* appkey.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = appkey.c; sourceTree = "<group>"; };
+		4FD526F11035355700083306 /* audio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = audio.h; sourceTree = "<group>"; };
+		4FD526F21035355700083306 /* debug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = debug.h; sourceTree = "<group>"; };
+		4FD526F31035355700083306 /* dummy-audio.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "dummy-audio.c"; sourceTree = "<group>"; };
+		4FD526F41035355700083306 /* jukebox.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = jukebox.c; sourceTree = "<group>"; };
+		4FD526F61035355700083306 /* queue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = queue.h; sourceTree = "<group>"; };
 		4FFD4A7E1030A18700935706 /* browse */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = browse; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FFD4A871030A2AB00935706 /* appkey.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = appkey.c; sourceTree = "<group>"; };
 		4FFD4A8A1030A2AB00935706 /* browse.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = browse.c; sourceTree = "<group>"; };
@@ -213,6 +231,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				4F2A3F0B1033C828000622F8 /* libopenspotify.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4FD526E51035353900083306 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4FD526ED1035354200083306 /* libopenspotify.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -366,17 +392,32 @@
 			children = (
 				4F2A3EFC1033C7DA000622F8 /* test */,
 				4FFD4A861030A2AB00935706 /* browse */,
+				4FD526EE1035355700083306 /* jukebox */,
 				4FFD4B691030C22200935706 /* link */,
 				4FFD4B111030B81600935706 /* track */,
 			);
 			name = examples;
 			sourceTree = "<group>";
 		};
+		4FD526EE1035355700083306 /* jukebox */ = {
+			isa = PBXGroup;
+			children = (
+				4FD526F01035355700083306 /* appkey.c */,
+				4FD526F11035355700083306 /* audio.h */,
+				4FD526F21035355700083306 /* debug.h */,
+				4FD526F31035355700083306 /* dummy-audio.c */,
+				4FD526F41035355700083306 /* jukebox.c */,
+				4FD526F61035355700083306 /* queue.h */,
+			);
+			name = jukebox;
+			path = examples/jukebox;
+			sourceTree = "<group>";
+		};
 		4FE1759F1030903A00FA72BC = {
 			isa = PBXGroup;
 			children = (
-				4FAF894410349CC6002A9D18 /* examples */,
 				4F53286C103092D2004139C9 /* libopenspotify */,
+				4FAF894410349CC6002A9D18 /* examples */,
 				4F532868103092B0004139C9 /* include */,
 				4F53294A10309451004139C9 /* openspotify-simple */,
 				4FE175AF1030904700FA72BC /* Products */,
@@ -392,6 +433,7 @@
 				4FFD4B0A1030B7DD00935706 /* track */,
 				4FFD4B631030C1F600935706 /* link */,
 				4F2A3EF71033C7A2000622F8 /* example-test */,
+				4FD526E71035353900083306 /* example-jukebox */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -484,6 +526,23 @@
 			name = "example-test";
 			productName = "example-test";
 			productReference = 4F2A3EF71033C7A2000622F8 /* example-test */;
+			productType = "com.apple.product-type.tool";
+		};
+		4FD526E61035353900083306 /* example-jukebox */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4FD526FC1035355700083306 /* Build configuration list for PBXNativeTarget "example-jukebox" */;
+			buildPhases = (
+				4FD526E41035353900083306 /* Sources */,
+				4FD526E51035353900083306 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4FD526EC1035353F00083306 /* PBXTargetDependency */,
+			);
+			name = "example-jukebox";
+			productName = "example-jukebox";
+			productReference = 4FD526E71035353900083306 /* example-jukebox */;
 			productType = "com.apple.product-type.tool";
 		};
 		4FE175AD1030904700FA72BC /* openspotify */ = {
@@ -593,6 +652,7 @@
 				4FFD4B091030B7DD00935706 /* example-track */,
 				4FFD4B621030C1F600935706 /* example-link */,
 				4F2A3EF61033C7A2000622F8 /* example-test */,
+				4FD526E61035353900083306 /* example-jukebox */,
 			);
 		};
 /* End PBXProject section */
@@ -606,6 +666,16 @@
 				4F2A3F051033C7DA000622F8 /* browse.c in Sources */,
 				4F2A3F071033C7DA000622F8 /* session.c in Sources */,
 				4F2A3F081033C7DA000622F8 /* test.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4FD526E41035353900083306 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4FD526F81035355700083306 /* appkey.c in Sources */,
+				4FD526F91035355700083306 /* dummy-audio.c in Sources */,
+				4FD526FA1035355700083306 /* jukebox.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -697,6 +767,11 @@
 			target = 4FE175AD1030904700FA72BC /* openspotify */;
 			targetProxy = 4F53296C10309692004139C9 /* PBXContainerItemProxy */;
 		};
+		4FD526EC1035353F00083306 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4FE175AD1030904700FA72BC /* openspotify */;
+			targetProxy = 4FD526EB1035353F00083306 /* PBXContainerItemProxy */;
+		};
 		4FFD4A831030A18C00935706 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 4FE175AD1030904700FA72BC /* openspotify */;
@@ -730,6 +805,7 @@
 					"-Iinclude",
 					"-DDEBUG",
 				);
+				OTHER_LDFLAGS = "-Llibopenspotify";
 				PREBINDING = NO;
 				PRODUCT_NAME = "example-test";
 			};
@@ -746,6 +822,42 @@
 				INSTALL_PATH = /usr/local/bin;
 				PREBINDING = NO;
 				PRODUCT_NAME = "example-test";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		4FD526E91035353A00083306 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				OTHER_CFLAGS = (
+					"-ggdb",
+					"-Iinclude",
+					"-DDEBUG",
+				);
+				OTHER_LDFLAGS = "-Llibopenspotify";
+				PREBINDING = NO;
+				PRODUCT_NAME = "example-jukebox";
+			};
+			name = Debug;
+		};
+		4FD526EA1035353A00083306 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				PREBINDING = NO;
+				PRODUCT_NAME = "example-jukebox";
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -1013,6 +1125,15 @@
 			buildConfigurations = (
 				4F2A3EF91033C7A3000622F8 /* Debug */,
 				4F2A3EFA1033C7A3000622F8 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4FD526FC1035355700083306 /* Build configuration list for PBXNativeTarget "example-jukebox" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4FD526E91035353A00083306 /* Debug */,
+				4FD526EA1035353A00083306 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
