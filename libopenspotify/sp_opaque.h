@@ -161,7 +161,7 @@ struct sp_playlist {
 	char name[256];
 	sp_user *owner;
 	int position;
-	int collaborative;
+	int shared;
 
 	sp_track **tracks;
 	int num_tracks;

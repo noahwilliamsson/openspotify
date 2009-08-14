@@ -80,7 +80,7 @@ SP_LIBEXPORT(sp_user *) sp_playlist_owner (sp_playlist *playlist) {
 
 SP_LIBEXPORT(bool) sp_playlist_is_collaborative (sp_playlist *playlist) {
 
-	return playlist->collaborative;
+	return playlist->shared;
 }
 
 

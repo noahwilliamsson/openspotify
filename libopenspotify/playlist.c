@@ -285,7 +285,7 @@ sp_playlist *playlist_create(sp_session *session, unsigned char id[17]) {
 	memset(playlist->name, 0, sizeof(playlist->name));
 	playlist->owner = NULL;
 	playlist->position = 0;
-	playlist->collaborative = 0;
+	playlist->shared = 0;
 
 	playlist->num_tracks = 0;
 	playlist->tracks = NULL;
@@ -460,6 +460,13 @@ static int playlist_parse_xml(sp_session *session, sp_playlist *playlist) {
 	node = ezxml_get(root, "next-change", 0, "change", 0, "ops", 0, "name", -1);
 	if(node)
 		playlist_set_name(session, playlist, node->txt);
+
+	/* Collaborative playlist? */
+	playlist->shared = 0;
+        node = ezxml_get(root, "next-change", 0, "change", 0, "ops", 0, "pub", -1);
+        if(node && strcmp(node->txt, "1"))
+                playlist->shared = 1;
+
 
 	/* Loop over each track in the playlist and add it */
 	node = ezxml_get(root, "next-change", 0, "change", 0, "ops", 0, "add", 0, "items", -1);
