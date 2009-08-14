@@ -78,9 +78,6 @@ static int playlist_parse_playlist_xml(sp_session *session, sp_playlist *playlis
 static int osfy_playlist_browse(sp_session *session, sp_playlist *playlist);
 static int osfy_playlist_browse_callback(struct browse_callback_ctx *brctx);
 
-unsigned long playlist_checksum(sp_playlist *playlist);
-unsigned long playlistcontainer_checksum(sp_playlistcontainer *container);
-
 
 /* For giving the channel handler access to both the session and the request */
 struct callback_ctx {
