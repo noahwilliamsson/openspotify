@@ -9,9 +9,24 @@
 #include <spotify/api.h>
 
 typedef enum {
+	/* All requests created with request_post() have this state */
 	REQ_STATE_NEW = 0,
+
+	/* As soon as they start being processed they're upgraded to this state */
 	REQ_STATE_RUNNING,
+
+	/*
+	 * When the iothread is done processing a request (or one is posted with
+	 * request_post_result()) the request ends up with this state.
+	 *
+	 */
 	REQ_STATE_RETURNED,
+
+	/*
+	 * request_mark_processed() sets this state to schedule the request
+	 * for deletion by request_cleanup()
+	 *
+	 */
 	REQ_STATE_PROCESSED
 } request_state;
 
@@ -23,23 +38,107 @@ typedef enum {
  *
  */
 typedef enum {
+	/*
+	 * Request the iothread to login to Spotify's servers.
+	 * Posted by sp_session_login() and processed by login_process().
+	 * Also used by sp_session_process_events() to run the login callback.
+	 *
+	 */
 	REQ_TYPE_LOGIN = 0,
+
+	/*
+	 * Request the iothread to logout the session.
+	 * Posted by sp_session_logout() and processed by login_process()
+	 * Also used by sp_session_process_events() to run the login callback.
+	 *
+	 */
 	REQ_TYPE_LOGOUT,
+
+	/*
+	 * Whenever a CMD_PAUSE (play token lost) packet is received this
+	 * notified the main thread about the fact so
+	 * sp_session_process_events() can run the appropriate callback
+	 *
+	 */
 	REQ_TYPE_PLAY_TOKEN_LOST,
+
+	/* To notify the main thread with a message when CMD_NOTIFY is received */
 	REQ_TYPE_NOTIFY,
+
+	/*
+	 * When the CMD_WELCOME packet is received a request_post() is made with REQ_TYPE_PC_LOAD.
+	 * playlist_process() will then handle requesting the playlist container and loading 
+	 * the playlist IDs contained.
+	 *
+	 */
 	REQ_TYPE_PC_LOAD,
+
+	/* Sent to the main thread to notify it about a new playlist being added */
 	REQ_TYPE_PC_PLAYLIST_ADD,
+
+	/* FIXME: Not yet supported */
 	REQ_TYPE_PC_PLAYLIST_REMOVE,
 	REQ_TYPE_PC_PLAYLIST_MOVE,
+
+	/*
+	 * When the playlist container is loaded, a REQ_TYPE_PLAYLIST_LOAD is posted to
+	 * cause playlist_process() to initiate downloading of the playlist in question
+	 * The main thread will be notified with this request type when the playlist is added.
+	 *
+	 */
 	REQ_TYPE_PLAYLIST_LOAD,
+
+	/* Sent to the main thread to notify the name of the playlist was set/updated */
 	REQ_TYPE_PLAYLIST_RENAME,
+
+	/*
+	 * Posted by playlist loading functions to cause browse_process() to send
+	 * track browsing requests for tracks contained in a playlist.
+	 * Also 
+	 * Also used to notify the main thread that metadata has been updated.
+	 *
+	 */
 	REQ_TYPE_BROWSE_PLAYLIST_TRACKS,
+
+	/*
+	 * These three are used by sp_link_create_from_*() to initiate browsing of
+	 * a single, not yet loaded album/artist/track.
+	 * Also used to notify the main thread that metadata has been updated.
+	 *
+	 */
 	REQ_TYPE_BROWSE_TRACK,
 	REQ_TYPE_BROWSE_ALBUM,
 	REQ_TYPE_BROWSE_ARTIST,
+
+	/*
+	 * Used to cause osfy_image_process_request() to download an image.
+	 * Also used to notify the main thread that metadata has been updated.
+	 *
+	 */
 	REQ_TYPE_IMAGE,
+
+	/*
+	 * Used by sp_albumbrowse.c to cause an album to be browsed.
+	 * Also used to cause sp_session_process_events() to call the
+	 * album browsing callback.
+	 *
+	 */
 	REQ_TYPE_ALBUMBROWSE,
+
+	/*
+	 * Used by sp_albumbrowse.c to cause an album to be browsed.
+	 * Also used to cause sp_session_process_events() to call the
+	 * album browsing callback.
+	 *
+	 */
 	REQ_TYPE_ARTISTBROWSE,
+
+	/*
+	 * An always running request that is periodically run by the
+	 * iothread to save stuff to the cache and to do GC.
+	 * Never returns.
+	 *
+	 */
 	REQ_TYPE_CACHE_PERIODIC
 } request_type;
 
