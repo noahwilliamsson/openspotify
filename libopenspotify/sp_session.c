@@ -12,11 +12,11 @@
 
 #include "cache.h"
 #include "debug.h"
-#include "request.h"
+#include "iothread.h"
 #include "link.h"
 #include "login.h"
-#include "network.h"
 #include "playlist.h"
+#include "request.h"
 #include "sp_opaque.h"
 
 
@@ -92,13 +92,13 @@ SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_sess
 	s->request_mutex = CreateMutex(NULL, FALSE, NULL);
 	s->idle_wakeup = CreateEvent(NULL, FALSE, FALSE, NULL);
 	s->thread_main = GetCurrentThread();
-	s->thread_network = CreateThread(NULL, 0, network_thread, s, 0, NULL);
+	s->thread_io = CreateThread(NULL, 0, iothread, s, 0, NULL);
 #else
 	pthread_mutex_init(&s->request_mutex, NULL);
 	pthread_cond_init(&s->idle_wakeup, NULL);
 
 	s->thread_main = pthread_self();
-	if(pthread_create(&s->thread_network, NULL, network_thread, s))
+	if(pthread_create(&s->thread_io, NULL, iothread, s))
 		return SP_ERROR_OTHER_TRANSIENT;
 #endif
 
@@ -324,14 +324,14 @@ SP_LIBEXPORT(sp_error) sp_session_release (sp_session *session) {
 	/* Kill networking thread */
 	DSFYDEBUG("Terminating network thread\n");
 #ifdef _WIN32
-	TerminateThread(session->thread_network, 0);
-	session->thread_network = (HANDLE)0;
+	TerminateThread(session->thread_io, 0);
+	session->thread_io = (HANDLE)0;
 	CloseHandle(session->idle_wakeup);
 	CloseHandle(session->request_mutex);
 #else
-	pthread_cancel(session->thread_network);
-	pthread_join(session->thread_network, NULL);
-	session->thread_network = (pthread_t)0;
+	pthread_cancel(session->thread_io);
+	pthread_join(session->thread_io, NULL);
+	session->thread_io = (pthread_t)0;
 	pthread_mutex_destroy(&session->request_mutex);
 	pthread_cond_destroy(&session->idle_wakeup);
 #endif

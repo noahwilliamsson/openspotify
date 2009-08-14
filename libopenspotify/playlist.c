@@ -3,7 +3,7 @@
  *
  * Program flow:
  *
- * + network_thread()
+ * + iothread()
  * +--+ playlist_process(REQ_TYPE_PC_LOAD)
  * |  +--+ playlistcontainer_send_request()
  * |  |  +--+ cmd_getplaylist()

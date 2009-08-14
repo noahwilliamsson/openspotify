@@ -3,7 +3,7 @@
  *
  * Program flow:
  *
- * + network_thread()
+ * + iothread()
  * +--+ browse_process(REQ_TYPE_BROWSE_TRACK)
  * |  +--+ browse_send_browsetrack_request()
  * |  |  +--+ cmd_getplaylist()

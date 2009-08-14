@@ -40,8 +40,8 @@
 		4F5328EA103092D2004139C9 /* link.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F532892103092D2004139C9 /* link.h */; };
 		4F5328EC103092D2004139C9 /* login.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F532894103092D2004139C9 /* login.c */; };
 		4F5328ED103092D2004139C9 /* login.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F532895103092D2004139C9 /* login.h */; };
-		4F5328F0103092D2004139C9 /* network.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F532898103092D2004139C9 /* network.c */; };
-		4F5328F1103092D2004139C9 /* network.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F532899103092D2004139C9 /* network.h */; };
+		4F5328F0103092D2004139C9 /* iothread.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F532898103092D2004139C9 /* iothread.c */; };
+		4F5328F1103092D2004139C9 /* iothread.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F532899103092D2004139C9 /* iothread.h */; };
 		4F5328F3103092D2004139C9 /* packet.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F53289B103092D2004139C9 /* packet.c */; };
 		4F5328F4103092D2004139C9 /* packet.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F53289C103092D2004139C9 /* packet.h */; };
 		4F5328F6103092D2004139C9 /* playlist.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F53289E103092D2004139C9 /* playlist.c */; };
@@ -169,8 +169,8 @@
 		4F532892103092D2004139C9 /* link.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = link.h; sourceTree = "<group>"; };
 		4F532894103092D2004139C9 /* login.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = login.c; sourceTree = "<group>"; };
 		4F532895103092D2004139C9 /* login.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = login.h; sourceTree = "<group>"; };
-		4F532898103092D2004139C9 /* network.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = network.c; sourceTree = "<group>"; };
-		4F532899103092D2004139C9 /* network.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = network.h; sourceTree = "<group>"; };
+		4F532898103092D2004139C9 /* iothread.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = iothread.c; sourceTree = "<group>"; };
+		4F532899103092D2004139C9 /* iothread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iothread.h; sourceTree = "<group>"; };
 		4F53289B103092D2004139C9 /* packet.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = packet.c; sourceTree = "<group>"; };
 		4F53289C103092D2004139C9 /* packet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = packet.h; sourceTree = "<group>"; };
 		4F53289E103092D2004139C9 /* playlist.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = playlist.c; sourceTree = "<group>"; };
@@ -345,8 +345,8 @@
 				4F532892103092D2004139C9 /* link.h */,
 				4F532894103092D2004139C9 /* login.c */,
 				4F532895103092D2004139C9 /* login.h */,
-				4F532898103092D2004139C9 /* network.c */,
-				4F532899103092D2004139C9 /* network.h */,
+				4F532898103092D2004139C9 /* iothread.c */,
+				4F532899103092D2004139C9 /* iothread.h */,
 				4F53289B103092D2004139C9 /* packet.c */,
 				4F53289C103092D2004139C9 /* packet.h */,
 				4F53289E103092D2004139C9 /* playlist.c */,
@@ -495,7 +495,7 @@
 				4F5328E5103092D2004139C9 /* hmac.h in Headers */,
 				4F5328EA103092D2004139C9 /* link.h in Headers */,
 				4F5328ED103092D2004139C9 /* login.h in Headers */,
-				4F5328F1103092D2004139C9 /* network.h in Headers */,
+				4F5328F1103092D2004139C9 /* iothread.h in Headers */,
 				4F5328F4103092D2004139C9 /* packet.h in Headers */,
 				4F5328F7103092D2004139C9 /* playlist.h in Headers */,
 				4F5328FA103092D2004139C9 /* request.h in Headers */,
@@ -695,7 +695,7 @@
 				4F5328E4103092D2004139C9 /* hmac.c in Sources */,
 				4F5328E9103092D2004139C9 /* link.c in Sources */,
 				4F5328EC103092D2004139C9 /* login.c in Sources */,
-				4F5328F0103092D2004139C9 /* network.c in Sources */,
+				4F5328F0103092D2004139C9 /* iothread.c in Sources */,
 				4F5328F3103092D2004139C9 /* packet.c in Sources */,
 				4F5328F6103092D2004139C9 /* playlist.c in Sources */,
 				4F5328F9103092D2004139C9 /* request.c in Sources */,

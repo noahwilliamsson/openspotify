@@ -348,7 +348,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\network.c"
+				RelativePath=".\iothread.c"
 				>
 			</File>
 			<File
@@ -482,7 +482,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\network.h"
+				RelativePath=".\iothread.h"
 				>
 			</File>
 			<File
