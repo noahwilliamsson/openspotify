@@ -17,6 +17,13 @@
 
 #include <spotify/api.h>
 
+#if defined(__GNUC__) && __GNUC__ < 4
+#error "Old compiler. :( You need to remove these lines and -fvisibility=hidden from the Makefile"
+#elif defined(__GNUC__)
+#undef SP_LIBEXPORT
+#define SP_LIBEXPORT(x) __attribute__((visibility("default"))) x
+#endif
+
 #include "channel.h"
 #include "hashtable.h"
 #include "login.h"
