@@ -388,6 +388,37 @@ int cmd_browse (sp_session * session, unsigned char kind, unsigned char *idlist,
 	return ret;
 }
 
+int cmd_userinfo (sp_session * session, char *username,
+		     channel_callback callback, void *private)
+{
+	CHANNEL *ch;
+	char buf[256];
+	unsigned char len;
+	int ret;
+	struct buf *b;
+
+	sprintf(buf, "user-%.128s", username);
+	ch = channel_register (session, buf, callback, private);
+
+	b = buf_new();
+	buf_append_u16(b, ch->channel_id);
+
+	len = strlen(username);
+	buf_append_u8(b, len);
+	buf_append_data(b, username, len);
+
+	if ((ret =
+	     packet_write (session, CMD_USERINFO, b->ptr, b->len)) != 0) {
+		DSFYDEBUG
+			("packet_write(cmd=0x57) returned %d, aborting!\n",
+			 ret);
+	}
+
+	buf_free(b);
+	
+	return ret;
+}
+
 /*
  * Request playlist details
  * The response comes as plain XML
@@ -425,6 +456,7 @@ int cmd_getplaylist (sp_session * session, unsigned char *playlist_id,
 	
 	return ret;
 }
+
 
 /*
  * Modify playlist

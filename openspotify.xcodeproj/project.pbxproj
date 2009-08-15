@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4F02CDA01036205B00243248 /* user.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F02CD9F1036205B00243248 /* user.c */; };
 		4F2A3F041033C7DA000622F8 /* appkey.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F2A3EFD1033C7DA000622F8 /* appkey.c */; };
 		4F2A3F051033C7DA000622F8 /* browse.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F2A3EFE1033C7DA000622F8 /* browse.c */; };
 		4F2A3F071033C7DA000622F8 /* session.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F2A3F011033C7DA000622F8 /* session.c */; };
@@ -107,7 +108,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 4FE175A11030903A00FA72BC /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 4FE175AD1030904700FA72BC /* openspotify */;
+			remoteGlobalIDString = 4FE175AD1030904700FA72BC;
 			remoteInfo = openspotify;
 		};
 		4FFD4A821030A18C00935706 /* PBXContainerItemProxy */ = {
@@ -134,6 +135,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		4F02CD9F1036205B00243248 /* user.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = user.c; sourceTree = "<group>"; };
 		4F2A3EF71033C7A2000622F8 /* example-test */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "example-test"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4F2A3EFD1033C7DA000622F8 /* appkey.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = appkey.c; sourceTree = "<group>"; };
 		4F2A3EFE1033C7DA000622F8 /* browse.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = browse.c; sourceTree = "<group>"; };
@@ -371,6 +373,7 @@
 				4F5328BF103092D2004139C9 /* sp_user.c */,
 				4F5328C1103092D2004139C9 /* TODO.txt */,
 				4F5328C2103092D2004139C9 /* track.h */,
+				4F02CD9F1036205B00243248 /* user.c */,
 				4F5328C3103092D2004139C9 /* util.c */,
 				4F5328C4103092D2004139C9 /* util.h */,
 			);
@@ -713,6 +716,7 @@
 				4F532915103092D2004139C9 /* sp_track.c in Sources */,
 				4F532917103092D2004139C9 /* sp_user.c in Sources */,
 				4F53291A103092D2004139C9 /* util.c in Sources */,
+				4F02CDA01036205B00243248 /* user.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

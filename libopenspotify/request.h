@@ -111,6 +111,12 @@ typedef enum {
 	REQ_TYPE_BROWSE_ARTIST,
 
 	/*
+	 * Used to get information about a username
+	 *
+	 */
+	REQ_TYPE_USER,
+
+	/*
 	 * Used to cause osfy_image_process_request() to download an image.
 	 * Also used to notify the main thread that metadata has been updated.
 	 *

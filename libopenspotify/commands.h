@@ -20,6 +20,7 @@
 #define CMD_SHAHASH     0x10
 #define CMD_IMAGE	0x19
 #define CMD_TOKENNOTIFY	0x4f
+#define CMD_USERINFO	0x57
 
 /* Rights management */
 #define CMD_COUNTRYCODE	0x1b
@@ -68,6 +69,8 @@ int cmd_getsubstreams (sp_session *, unsigned char *, unsigned int, unsigned int
 		       unsigned int, channel_callback, void *);
 int cmd_browse (sp_session *, unsigned char, unsigned char *, int,
 		channel_callback, void *);
+int cmd_userinfo (sp_session * session, char *username,
+                     channel_callback callback, void *private);
 int cmd_getplaylist (sp_session *, unsigned char *, int, channel_callback,
 		     void *);
 int cmd_changeplaylist (sp_session *, unsigned char *, char*, int, int, int, int,

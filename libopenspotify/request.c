@@ -159,6 +159,7 @@ static void request_notify_main_thread(sp_session *session, struct request *requ
 	case REQ_TYPE_PLAY_TOKEN_LOST:
 	case REQ_TYPE_NOTIFY:
 	case REQ_TYPE_IMAGE:
+	case REQ_TYPE_USER:
 	case REQ_TYPE_PC_PLAYLIST_ADD:
 	case REQ_TYPE_PC_PLAYLIST_REMOVE:
 	case REQ_TYPE_PC_PLAYLIST_MOVE:

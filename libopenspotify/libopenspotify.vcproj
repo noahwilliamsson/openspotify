@@ -412,6 +412,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\user.c"
+				>
+			</File>
+			<File
 				RelativePath=".\util.c"
 				>
 			</File>
@@ -511,6 +515,10 @@
 			</File>
 			<File
 				RelativePath=".\track.h"
+				>
+			</File>
+			<File
+				RelativePath=".\user.h"
 				>
 			</File>
 			<File

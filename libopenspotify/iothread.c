@@ -27,9 +27,10 @@
 #include "packet.h"
 #include "playlist.h"
 #include "request.h"
-#include "sp_opaque.h"
-#include "util.h"
 #include "shn.h"
+#include "sp_opaque.h"
+#include "user.h"
+#include "util.h"
 
 
 static int process_request(sp_session *s, struct request *req);
@@ -180,6 +181,10 @@ static int process_request(sp_session *session, struct request *req) {
 		return playlist_process(session, req);
 		break;
 	
+	case REQ_TYPE_USER:
+		return user_process_request(session, req);
+		break;
+
 	case REQ_TYPE_IMAGE:
 		return osfy_image_process_request(session, req);
 		break;

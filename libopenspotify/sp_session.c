@@ -18,6 +18,7 @@
 #include "playlist.h"
 #include "request.h"
 #include "sp_opaque.h"
+#include "user.h"
 
 
 SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_session **sess) {
@@ -46,17 +47,22 @@ SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_sess
 	memset(s, 0, sizeof(sp_session));
 	
 	/* Allocate memory for callbacks and copy them to our session. */
+	s->userdata        = config->userdata;
 	s->callbacks = (sp_session_callbacks *)malloc(sizeof(sp_session_callbacks));
-	
 	memcpy(s->callbacks, config->callbacks, sizeof(sp_session_callbacks));
 
+	
 	/* Connection state is undefined (We were never logged in).*/
 	s->connectionstate = SP_CONNECTION_STATE_UNDEFINED;
-	s->userdata        = config->userdata;
 
+	s->user = NULL;
+	
 	/* Login context, needed by network.c and login.c */
 	s->login = NULL;
+	memset(s->username, 0, sizeof(s->username));
+	memset(s->password, 0, sizeof(s->password));
 
+	
 	/* Playlist container object */
 	playlistcontainer_create(s);
 
@@ -67,6 +73,7 @@ SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_sess
 	s->hashtable_artists = hashtable_create(16);
 	s->hashtable_images = hashtable_create(20);
 	s->hashtable_tracks = hashtable_create(16);
+	s->hashtable_users = hashtable_create(256);
 
 	/* Allocate memory for user info. */
 	if((s->user = (sp_user *)malloc(sizeof(sp_user))) == NULL)
@@ -126,6 +133,9 @@ SP_LIBEXPORT(sp_error) sp_session_login (sp_session *session, const char *userna
 	strncpy(session->password, password, sizeof(session->password) - 1);
 	session->password[sizeof(session->password) - 1] = 0;
 
+	session->user = user_add(session, username);
+	user_add_ref(session->user);
+	
 	DSFYDEBUG("Posting REQ_TYPE_LOGIN\n");
 	request_post(session, REQ_TYPE_LOGIN, NULL);
 
@@ -140,11 +150,16 @@ SP_LIBEXPORT(sp_connectionstate) sp_session_connectionstate (sp_session *session
 
 
 SP_LIBEXPORT(sp_error) sp_session_logout (sp_session *session) {
+
 	if(session->login) {
 		login_release(session->login);
 		session->login = NULL;
 	}
-
+	
+	if(session->user) {
+		user_release(session->user);
+		session->user = NULL;
+	}
 
 	DSFYDEBUG("Posting REQ_TYPE_LOGOUT\n");
 	request_post(session, REQ_TYPE_LOGOUT, NULL);
@@ -154,13 +169,7 @@ SP_LIBEXPORT(sp_error) sp_session_logout (sp_session *session) {
 
 
 SP_LIBEXPORT(sp_user *) sp_session_user(sp_session *session) {
-	/* TODO: fetch that info via command 0x57. */
-	if(session->user){
-		session->user->canonical_name = session->username;
-		session->user->display_name   = session->username;
-		session->user->next           = NULL;
-	}
-
+	
 	return session->user;
 }
 
@@ -362,6 +371,12 @@ SP_LIBEXPORT(sp_error) sp_session_release (sp_session *session) {
 	if(session->hashtable_tracks)
 		hashtable_free(session->hashtable_tracks);
 
+	if(session->user)
+		user_release(session->user);
+	
+	if(session->hashtable_users)
+		hashtable_free(session->hashtable_users);
+	
 	free(session->callbacks);
 
 	/* Helper function for sp_link_create_from_string() */

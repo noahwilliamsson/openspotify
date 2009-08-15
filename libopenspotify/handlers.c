@@ -18,6 +18,7 @@
 #include "playlist.h"
 #include "request.h"
 #include "sp_opaque.h"
+#include "user.h"
 #include "util.h"
 
 
@@ -205,6 +206,10 @@ int handle_packet (sp_session * session,
 		break;
 
 	case CMD_WELCOME:
+		/* Lookup the session's username */
+		if(!sp_user_is_loaded(session->user))
+			user_lookup(session, session->user);
+		
 		/* Trigger loading of playlist container and contained playlists */
 		request_post(session, REQ_TYPE_PC_LOAD, NULL);
 		break;

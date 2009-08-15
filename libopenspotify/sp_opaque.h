@@ -228,28 +228,30 @@ struct sp_track {
 
 /* sp_user.c */
 struct sp_user {
-	char *canonical_name;
+	char canonical_name[256];
 	char *display_name;
+	
+	struct hashtable *hashtable;
 
-	struct sp_user *next;
+	int is_loaded;
+	int ref_count;
 };
 
 
 /* sp_session.c and most other API functions */
 struct sp_session {
 	void *userdata;
-
-	struct sp_user *user;
-
 	sp_session_callbacks *callbacks;
+	
+	sp_user *user;
 
 	/* Low-level network stuff */
 	int sock;
 
-	char username[256];
-	char password[256];
 
 	/* Used when logging in */
+	char username[256];
+	char password[256];
 	struct login_ctx *login;
 
 
@@ -284,6 +286,7 @@ struct sp_session {
 	struct hashtable *hashtable_artists;
 	struct hashtable *hashtable_images;
 	struct hashtable *hashtable_tracks;
+	struct hashtable *hashtable_users;
 
 
 #ifdef _WIN32
