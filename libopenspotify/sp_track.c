@@ -181,7 +181,7 @@ void osfy_track_free(sp_track *track) {
 int osfy_track_load_from_xml(sp_session *session, sp_track *track, ezxml_t track_node) {
 	unsigned char id[20];
 	const char *str;
-	float popularity;
+	double popularity;
 	int i;
 	ezxml_t node;
 	
@@ -223,7 +223,7 @@ int osfy_track_load_from_xml(sp_session *session, sp_track *track, ezxml_t track
 		return -1;
 	}
 	
-	sscanf(node->txt, "%f", &popularity);
+	sscanf(node->txt, "%lf", &popularity);
 	track->popularity = (int)popularity;
 
 
