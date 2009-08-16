@@ -1,13 +1,20 @@
 TODO list
 =========
-* Initialize PRNG !!!
-* Searching
+* Initialize PRNG
+* Session
+  -- Implement music decryption, decoding and the music delivery callback
+  -- Implement the sp_session_player_*() API calls
+  -- Adhere to paths configured in sp_session_init()
+  -- Caching of data
 * Playlists
-  -- Add support for changing/removing
-* Request and decryption of audio
-* Audio decoding to PCM
+  -- Add support for creating/adding/modifying/removing tracks and playlists
 * Images
   -- Add JPG decoder to support images fully
+* General
+  -- Verify more functionality against libspotify
+  -- Split up request processing in io requests and main thread notifications
+  -- Less debugging code and output
+  -- Code cleanups, naming conventions, move internal stuff out of sp_*.c
 
 
 KNOWN ISSUES
