@@ -33,11 +33,13 @@ extern int g_exit_code;
 static sp_session *g_session;
 static sp_albumbrowse *g_albumbrowse;
 static sp_artistbrowse *g_artistbrowse;
+static sp_search *g_search;
 
 
 static void print_artistbrowse(sp_artistbrowse *browse);
 static void SP_CALLCONV test_artistbrowse_callback(sp_artistbrowse *browse, void *userdata);
 static void SP_CALLCONV test_albumbrowse_callback(sp_albumbrowse *browse, void *userdata);
+static void test_search_callback(sp_search *result, void *userdata);
 static void print_albumbrowse(sp_albumbrowse *browse);
 
 
@@ -198,6 +200,45 @@ static void SP_CALLCONV test_albumbrowse_callback(sp_albumbrowse *browse, void *
 }
 
 
+static void SP_CALLCONV test_search(sp_session *session, void *arg) {
+	static int waiting;
+
+	if(waiting)
+		return;
+
+	g_search = sp_search_create(session, "knark", 0, 5, test_search_callback, NULL);
+	waiting++;
+	DSFYDEBUG("Initiated search\n");
+}
+
+static void test_search_callback(sp_search *result, void *userdata) {
+	DSFYDEBUG("Search completed, tracks=%d, albums=%d, artists=%d\n", 
+		sp_search_num_tracks(result), sp_search_num_albums(result),
+		sp_search_num_artists(result));
+
+	test_finish();
+}
+
+
+static void SP_CALLCONV test_search_as_link(sp_session *session, void *arg) {
+	char buf[256];
+	sp_link *link;
+
+	link = sp_link_create_from_search(g_search);
+	sp_search_release(g_search);
+
+	sp_link_as_string(link, buf, sizeof(buf) - 1);
+	buf[sizeof(buf) - 1] = 0;
+
+	DSFYDEBUG("Previous search as an URI: '%s'\n", buf);
+
+	sp_link_release(link);
+
+	test_finish();
+}
+
+
+
 void SP_CALLCONV metadata_updated(sp_session *session) {
 	DSFYDEBUG("SESSION CALLBACK\n");
 	test_run();
@@ -264,6 +305,8 @@ void session_ready(sp_session *session) {
 	/* Add some tests */
 	test_add("get username", test_username, NULL);
 	test_add("link artist", test_link_artist, NULL);
+	test_add("search: knark", test_search, NULL);
+	test_add("search as link", test_search_as_link, NULL);
 	test_add("artistbrowse", test_artistbrowse, NULL);
 	test_add("albumbrowse", test_albumbrowse, NULL);
 
