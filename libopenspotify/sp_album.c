@@ -83,7 +83,7 @@ sp_album *sp_album_add(sp_session *session, unsigned char id[16]) {
 	album->image = NULL;
 
 	album->name = NULL;
-	album->year = -1;
+	album->year = 0;
 
 	album->is_loaded = 0;
 	album->ref_count = 0;
