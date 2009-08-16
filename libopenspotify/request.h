@@ -111,6 +111,13 @@ typedef enum {
 	REQ_TYPE_BROWSE_ARTIST,
 
 	/*
+	 * Used to initiate a search.
+	 * Also used to run search complete callback in the context of the main thread.
+	 *
+	 */
+	REQ_TYPE_SEARCH,
+
+	/*
 	 * Used to get information about a username
 	 *
 	 */
@@ -173,6 +180,7 @@ struct request {
 				type == REQ_TYPE_BROWSE_ARTIST? "BROWSE_ARTIST": \
 				type == REQ_TYPE_BROWSE_PLAYLIST_TRACKS? "BROWSE_PLAYLIST_TRACKS": \
 				type == REQ_TYPE_BROWSE_TRACK? "BROWSE_TRACK": \
+				type == REQ_TYPE_SEARCH? "SEARCH": \
 				type == REQ_TYPE_USER? "USER": \
 				type == REQ_TYPE_IMAGE? "IMAGE": \
 				type == REQ_TYPE_ALBUMBROWSE? "ALBUMBROWSE": \

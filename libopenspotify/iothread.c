@@ -27,6 +27,7 @@
 #include "packet.h"
 #include "playlist.h"
 #include "request.h"
+#include "search.h"
 #include "shn.h"
 #include "sp_opaque.h"
 #include "user.h"
@@ -181,6 +182,10 @@ static int process_request(sp_session *session, struct request *req) {
 		return playlist_process(session, req);
 		break;
 	
+	case REQ_TYPE_SEARCH:
+		return search_process_request(session, req);
+		break;
+
 	case REQ_TYPE_USER:
 		return user_process_request(session, req);
 		break;

@@ -73,6 +73,7 @@ SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_sess
 	s->hashtable_artists = hashtable_create(16);
 	s->hashtable_images = hashtable_create(20);
 	s->hashtable_tracks = hashtable_create(16);
+	s->hashtable_searches = hashtable_create(256);
 	s->hashtable_users = hashtable_create(256);
 
 	/* Allocate memory for user info. */
@@ -183,6 +184,7 @@ SP_LIBEXPORT(void) sp_session_process_events(sp_session *session, int *next_time
 	struct request *request;
 	sp_albumbrowse *alb;
 	sp_artistbrowse *arb;
+	sp_search *search;
 	sp_image *image;
 	sp_playlist *playlist;
 	sp_playlistcontainer *pc;
@@ -265,6 +267,13 @@ SP_LIBEXPORT(void) sp_session_process_events(sp_session *session, int *next_time
 			DSFYDEBUG("Metadata updated for request <type %s, state %s, input %p> in main thread\n",
 				  REQUEST_TYPE_STR(request->type), REQUEST_STATE_STR(request->type), request->input);
 			session->callbacks->metadata_updated(session);
+			break;
+
+		case REQ_TYPE_SEARCH:
+	                search = (sp_search *)request->output;
+	                if(search->callback)
+	                        search->callback(search, search->userdata);
+
 			break;
 
 		case REQ_TYPE_IMAGE:
@@ -367,7 +376,10 @@ SP_LIBEXPORT(sp_error) sp_session_release (sp_session *session) {
 
 	if(session->hashtable_images)
 		hashtable_free(session->hashtable_images);
-
+	
+	if(session->hashtable_searches)
+		hashtable_free(session->hashtable_searches);
+	
 	if(session->hashtable_tracks)
 		hashtable_free(session->hashtable_tracks);
 

@@ -368,6 +368,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\search.c"
+				>
+			</File>
+			<File
 				RelativePath=".\shn.c"
 				>
 			</File>
@@ -397,6 +401,10 @@
 			</File>
 			<File
 				RelativePath=".\sp_link.c"
+				>
+			</File>
+			<File
+				RelativePath=".\sp_search.c"
 				>
 			</File>
 			<File
@@ -503,6 +511,10 @@
 			</File>
 			<File
 				RelativePath=".\sha1.h"
+				>
+			</File>
+			<File
+				RelativePath=".\search.h"
 				>
 			</File>
 			<File

@@ -197,6 +197,37 @@ struct sp_playlistcontainer {
 };
 
 
+/* sp_search.c */
+struct sp_search {
+	char *query;
+	int offset;
+	int count;
+	
+	search_complete_cb *callback;
+	void *userdata;
+	
+	char *did_you_mean;
+	
+	int num_albums;
+	sp_album **albums;
+	
+	int num_artists;
+	sp_artist **artists;
+	
+	int num_tracks;
+	sp_track **tracks;
+	
+	int total_tracks;
+	
+	int is_loaded;
+	sp_error error;
+	
+	int ref_count;
+	
+	struct hashtable *hashtable;
+};
+
+
 /* sp_track.c */
 struct sp_track {
 	unsigned char id[16];
@@ -285,6 +316,7 @@ struct sp_session {
 	struct hashtable *hashtable_albums;
 	struct hashtable *hashtable_artists;
 	struct hashtable *hashtable_images;
+	struct hashtable *hashtable_searches;
 	struct hashtable *hashtable_tracks;
 	struct hashtable *hashtable_users;
 
