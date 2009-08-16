@@ -389,6 +389,7 @@ SP_LIBEXPORT(void) sp_artistbrowse_release(sp_artistbrowse *arb) {
 	if(arb->ref_count)
 		return;
 
+	hashtable_remove(arb->hashtable, arb->artist->id);
 
 	if(arb->artist)
 		sp_artist_release(arb->artist);
