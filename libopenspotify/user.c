@@ -26,6 +26,7 @@ struct user_ctx {
 static int user_callback(CHANNEL *ch, unsigned char *payload, unsigned short len);
 static int user_parse_xml(struct user_ctx *user_ctx);
 
+
 sp_user *user_add(sp_session *session, const char *name) {
 	char name_key[256];
 	sp_user *user;
@@ -144,7 +145,7 @@ static int user_callback(CHANNEL *ch, unsigned char *payload, unsigned short len
 		case CHANNEL_ERROR:
 			DSFYDEBUG("Got a channel ERROR, retrying within %d seconds\n", USER_RETRY_TIMEOUT);
 			buf_free(user_ctx->buf);
-			user_ctx = buf_new();
+			user_ctx->buf = buf_new();
 			
 			/* The request processor will retry this round */
 			break;
@@ -158,7 +159,7 @@ static int user_callback(CHANNEL *ch, unsigned char *payload, unsigned short len
 			}
 			else {
 				buf_free(user_ctx->buf);
-				user_ctx = buf_new();
+				user_ctx->buf = buf_new();
 			}
 			break;
 			
