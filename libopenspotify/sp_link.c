@@ -112,7 +112,8 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 		ptr += 7;
 
 		lnk->type        = SP_LINKTYPE_SEARCH;
-		lnk->data.search = NULL; //FIXME: search_add / query is @ ptr and refcount
+		lnk->data.search = sp_search_create(session, ptr, 0, 10, NULL, NULL);
+		sp_search_add_ref(lnk->data.search);
 	}
 	/* Link probably refers to a playlist. */
 	else if(strncmp("user:", ptr, 5) == 0){
@@ -223,6 +224,7 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_search (sp_search *search) {
 	
 	link->type        = SP_LINKTYPE_SEARCH;
 	link->data.search = search;
+	sp_search_add_ref(search);
 	link->refs        = 1;
 	
 	return link;
@@ -240,6 +242,7 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_playlist (sp_playlist *playlist) {
 	
 	link->type          = SP_LINKTYPE_PLAYLIST;
 	link->data.playlist = playlist;
+	/* FIXME: Add ref for playlist? */
 	link->refs          = 1;
 	
 	return link;
@@ -270,7 +273,7 @@ SP_LIBEXPORT(int) sp_link_as_string (sp_link *link, char *buffer, int buffer_siz
 			break;
 			
 		case SP_LINKTYPE_SEARCH:
-			ret = snprintf(buffer, buffer_size, "spotify:search:TODO"); // struct sp_search not defined yet
+			ret = snprintf(buffer, buffer_size, "spotify:search:%s", link->data.search->query);
 			break;
 			
 		case SP_LINKTYPE_PLAYLIST:
@@ -330,6 +333,9 @@ SP_LIBEXPORT(void) sp_link_add_ref (sp_link *link) {
 	case SP_LINKTYPE_ARTIST:
 		sp_artist_add_ref(link->data.artist);
 		break;
+	case SP_LINKTYPE_SEARCH:
+		sp_search_add_ref(link->data.search);
+		break;
 	case SP_LINKTYPE_TRACK:
 		sp_track_add_ref(link->data.track);
 		break;
@@ -354,6 +360,9 @@ SP_LIBEXPORT(void) sp_link_release (sp_link *link) {
 		break;
 	case SP_LINKTYPE_TRACK:
 		sp_track_release(link->data.track);
+		break;
+	case SP_LINKTYPE_SEARCH:
+		sp_search_release(link->data.search);
 		break;
 	default:
 		DSFYDEBUG("Not yet implemented\n");
