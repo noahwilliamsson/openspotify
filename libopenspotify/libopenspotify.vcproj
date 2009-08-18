@@ -22,6 +22,7 @@
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="1"
+			EnableManagedIncrementalBuild="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -340,15 +341,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\iothread.c"
+				>
+			</File>
+			<File
 				RelativePath=".\link.c"
 				>
 			</File>
 			<File
 				RelativePath=".\login.c"
-				>
-			</File>
-			<File
-				RelativePath=".\iothread.c"
 				>
 			</File>
 			<File
@@ -364,11 +365,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\sha1.c"
+				RelativePath=".\search.c"
 				>
 			</File>
 			<File
-				RelativePath=".\search.c"
+				RelativePath=".\sha1.c"
 				>
 			</File>
 			<File
@@ -401,6 +402,10 @@
 			</File>
 			<File
 				RelativePath=".\sp_link.c"
+				>
+			</File>
+			<File
+				RelativePath=".\sp_playlist.c"
 				>
 			</File>
 			<File
@@ -486,15 +491,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\iothread.h"
+				>
+			</File>
+			<File
 				RelativePath=".\link.h"
 				>
 			</File>
 			<File
 				RelativePath=".\login.h"
-				>
-			</File>
-			<File
-				RelativePath=".\iothread.h"
 				>
 			</File>
 			<File
@@ -510,11 +515,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\sha1.h"
+				RelativePath=".\search.h"
 				>
 			</File>
 			<File
-				RelativePath=".\search.h"
+				RelativePath=".\sha1.h"
 				>
 			</File>
 			<File
