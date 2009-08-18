@@ -1,0 +1,10 @@
+* Fix issue with the listview not resizing properly
+* Populate the listview with data
+  -- Use itemRecord with sp_playlist_track()
+  -- Issue ListView_RedrawItems()
+  -- Add support for WM_NOTIFY + LV messages
+* Sorting/searching for playlist tracks
+* Figure out Winamp playlist stuff 
+  -- Write handler for spotify: URIs
+* Wait for audio support in libopenspotify
+* Send output to the Ogg/Vorbis decoder included with Winamp
