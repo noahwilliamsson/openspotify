@@ -266,7 +266,9 @@ SP_LIBEXPORT(void) sp_session_process_events(sp_session *session, int *next_time
 		case REQ_TYPE_BROWSE_PLAYLIST_TRACKS:
 			DSFYDEBUG("Metadata updated for request <type %s, state %s, input %p> in main thread\n",
 				  REQUEST_TYPE_STR(request->type), REQUEST_STATE_STR(request->type), request->input);
-			session->callbacks->metadata_updated(session);
+				
+			if(session->callbacks->metadata_updated != NULL)
+				session->callbacks->metadata_updated(session);
 			break;
 
 		case REQ_TYPE_SEARCH:
