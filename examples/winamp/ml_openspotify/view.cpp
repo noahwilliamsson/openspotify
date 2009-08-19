@@ -40,10 +40,10 @@ static ChildWndResizeItem resize_rlist[] = {
 	 * The bit field represents what corners to max out
 	 * The corners are: left (0x1000), top (0x0100), right (0x0010) and bottom (0x0001)
 	 */
-	{ IDC_QUICKSEARCH,		0x0010 /* Update right position (width) */ },
-	{ IDD_VIEW_PLAYLIST,	0x0011 /* Update right position (width) and bottom-left corner */ },
+	{ IDC_QUICKSEARCH,	0x0010 /* Update right position (width) */ },
+	{ IDC_LIST,		0x0011 /* Update right position (width) and bottom-left corner */ },
 	{ IDC_BUTTON_CONFIG,	0x0101 /* Grow/shrink top and bottom */ },
-	{ IDC_STATUS,			0x0111 /* Grow/shrink top, right and bottom */ }
+	{ IDC_STATUS,		0x0111 /* Grow/shrink top, right and bottom */ }
 };
 
 
