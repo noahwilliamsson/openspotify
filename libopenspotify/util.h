@@ -24,7 +24,7 @@ void hexdump8x32 (char *, void *, int);
 void fhexdump8x32 (FILE *, char *, void *, int);
 void logdata (char *, int, void *, int);
 ssize_t block_read (int, void *, size_t);
-ssize_t block_write (int, void *, size_t);
+ssize_t block_write (int, const void *, size_t);
 int get_millisecs(void);
 struct buf* despotify_inflate(unsigned char* data, int len);
 
