@@ -63,6 +63,7 @@
 #include "request.h"
 #include "sp_opaque.h"
 #include "track.h"
+#include "user.h"
 #include "util.h"
 
 
@@ -309,9 +310,8 @@ void playlist_release(sp_session *session, sp_playlist *playlist) {
 	if(playlist->buf)
 		buf_free(playlist->buf);
 	
-	if(playlist->owner) {
-		/* FIXME: Free sp_user */
-	}
+	if(playlist->owner)
+		user_release(playlist->owner);
 	
 	for(i = 0; i < playlist->num_tracks; i++)
 		sp_track_release(playlist->tracks[i]);
@@ -483,6 +483,15 @@ static int playlist_parse_xml(sp_session *session, sp_playlist *playlist) {
 		sp_track_add_ref(track);
 	}
 	
+	node = ezxml_get(root, "next-change", 0, "change", 0, "user", -1);
+	if(node) {
+		playlist->owner = user_add(session, node->txt);
+		if(!sp_user_is_loaded(playlist->owner)) {
+			DSFYDEBUG("Playlist owner '%s' is a not-yet loaded user, requesting details\n", node->txt);
+			user_lookup(session, playlist->owner);
+		}
+	}
+
 	ezxml_free(root);
 
 	return 0;
