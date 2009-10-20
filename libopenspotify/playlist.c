@@ -449,7 +449,7 @@ static int playlist_parse_xml(sp_session *session, sp_playlist *playlist) {
 		hex_bytes_to_ascii(playlist->id, buf + 9, 17);
 		fd = fopen(buf, "w");
 		if(fd) {
-			fwrite(playlist->buf->ptr, playlist->buf->len, 1, fd);
+			fwrite(playlist->buf->ptr, playlist->buf->len - 1, 1, fd);
 			fclose(fd);
 		}
 	}
