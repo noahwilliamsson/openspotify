@@ -112,7 +112,7 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 		ptr += 7;
 
 		lnk->type        = SP_LINKTYPE_SEARCH;
-		lnk->data.search = sp_search_create(session, ptr, 0, 10, NULL, NULL);
+		lnk->data.search = sp_search_create(session, ptr, 0, 10, 0, 10, 0, 10, NULL, NULL);
 		sp_search_add_ref(lnk->data.search);
 	}
 	/* Link probably refers to a playlist. */

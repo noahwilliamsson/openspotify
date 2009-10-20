@@ -28,11 +28,14 @@ int search_process_request(sp_session *session, struct request *req) {
 	req->state = REQ_STATE_RUNNING;
 	req->next_timeout = get_millisecs() + SEARCH_RETRY_TIMEOUT;
 	
-	DSFYDEBUG("Initiating search with query '%s', offset %d and limit %d\n", 
-		  search->query, search->offset, search->count);
+	DSFYDEBUG("Initiating search with query '%s', track %d/%d, album %d/%d, artist %d/%d\n",
+		  search->query, search->track_offset, search->track_count,
+		  search->album_offset, search->album_count,
+		  search->artist_offset, search->artist_count);
 	
 	
-	return cmd_search(session, search->query, search->offset, search->count, search_callback, search_ctx);
+	/* FIXME: Should investigate how album/artist offset/count is supplied */
+	return cmd_search(session, search->query, search->track_offset, search->track_count, search_callback, search_ctx);
 }
 
 

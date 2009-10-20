@@ -17,7 +17,7 @@
 #include "search.h"
 
 
-SP_LIBEXPORT(sp_search *) sp_search_create (sp_session *session, const char *query, int offset, int count, search_complete_cb *callback, void *userdata) {
+SP_LIBEXPORT(sp_search *) sp_search_create (sp_session *session, const char *query, int track_offset, int track_count, int album_offset, int album_count, int artist_offset, int artist_count, search_complete_cb *callback, void *userdata) {
 	char query_key[256];
 	sp_search *search;
 	void **container;
@@ -42,8 +42,16 @@ SP_LIBEXPORT(sp_search *) sp_search_create (sp_session *session, const char *que
 
 	search->query = strdup(query);
 	search->did_you_mean = NULL;
-	search->offset = offset;
-	search->count = count;
+
+	search->track_offset = track_offset;
+	search->track_count = track_count;
+
+	/* Currently not used due to lack of support in cmd_search() */
+	search->album_offset = album_offset;
+	search->album_count = album_count;
+	search->artist_offset = artist_offset;
+	search->artist_count = artist_count;
+
 	search->callback = callback;
 	search->userdata = userdata;
 	

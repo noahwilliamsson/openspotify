@@ -201,8 +201,15 @@ struct sp_playlistcontainer {
 /* sp_search.c */
 struct sp_search {
 	char *query;
-	int offset;
-	int count;
+
+	int track_offset;
+	int track_count;
+
+	int album_offset;
+	int album_count;
+
+	int artist_offset;
+	int artist_count;
 	
 	search_complete_cb *callback;
 	void *userdata;
