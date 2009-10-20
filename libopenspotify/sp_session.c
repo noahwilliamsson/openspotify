@@ -28,7 +28,7 @@ SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_sess
 		return SP_ERROR_INVALID_INDATA;
 
 	/* Check if API version matches. */
-	if(config->api_version != 1)
+	if(config->api_version != 1 || config->api_version != 2)
 		return SP_ERROR_BAD_API_VERSION;
 
 	/* Maximum user-agent length is 4096 bytes (including null-terminator). */
