@@ -40,6 +40,7 @@ struct sp_album {
 
 	sp_artist *artist;
 
+	int is_available;
 	int is_loaded;
 	int ref_count;
 

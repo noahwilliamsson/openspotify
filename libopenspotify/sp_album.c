@@ -21,6 +21,12 @@ SP_LIBEXPORT(bool) sp_album_is_loaded(sp_album *album) {
 }
 
 
+SP_LIBEXPORT(bool) sp_album_is_available(sp_album *album) {
+
+	return album->is_available;
+}
+
+
 SP_LIBEXPORT(sp_artist *) sp_album_artist(sp_album *album) {
 
 	return album->artist;
@@ -85,6 +91,7 @@ sp_album *sp_album_add(sp_session *session, unsigned char id[16]) {
 	album->name = NULL;
 	album->year = 0;
 
+	album->is_available = 1; /* FIXME: */
 	album->is_loaded = 0;
 	album->ref_count = 0;
 
