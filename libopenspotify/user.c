@@ -52,6 +52,7 @@ sp_user *user_add(sp_session *session, const char *name) {
 	user->hashtable = session->hashtable_users;
 	hashtable_insert(user->hashtable, user->canonical_name, user);
 
+	user->error = SP_ERROR_RESOURCE_NOT_LOADED;
 	user->is_loaded = 0;
 
 	user->ref_count = 0;
@@ -63,6 +64,17 @@ sp_user *user_add(sp_session *session, const char *name) {
 int user_lookup(sp_session *session, sp_user *user) {
 	struct user_ctx *user_ctx;
 	void **container;
+
+	if(user->is_loaded || user->error != SP_ERROR_RESOURCE_NOT_LOADED) {
+		DSFYDEBUG("Attempt to lookup user '%s', which is either loaded (is_loaded=%d) "
+			"or in a different state than SP_ERROR_RESOURCE_NOT_LOADED (currently %d)\n",
+			user->canonical_name, user->is_loaded, user->error);
+
+		return 0;
+	}
+
+	/* Note that we're loading this resource */
+	user->error = SP_ERROR_IS_LOADING;
 
 	user_ctx = (struct user_ctx *)malloc(sizeof(struct user_ctx));
 	if(user_ctx == NULL)
@@ -189,7 +201,9 @@ static int user_parse_xml(struct user_ctx *user_ctx) {
 
 	{
 		FILE *fd;
-		fd = fopen("user.xml", "w");
+		char buf[512];
+		sprintf(buf, "user-%s.xml", user_ctx->user->canonical_name);
+		fd = fopen(buf, "w");
 		if(fd) {
 			fwrite(xml->ptr, xml->len, 1, fd);
 			fclose(fd);
@@ -205,6 +219,7 @@ static int user_parse_xml(struct user_ctx *user_ctx) {
 		user_ctx->user->display_name = strdup(node->txt);
 
 		DSFYDEBUG("User '%s' is LOADED\n", user_ctx->user->canonical_name);
+		user_ctx->user->error = SP_ERROR_OK;
 		user_ctx->user->is_loaded = 1;
 	}
 

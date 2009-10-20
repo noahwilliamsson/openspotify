@@ -273,6 +273,7 @@ struct sp_user {
 	
 	struct hashtable *hashtable;
 
+	sp_error error;
 	int is_loaded;
 	int ref_count;
 };
