@@ -38,6 +38,8 @@ sp_image *osfy_image_create(sp_session *session, const byte image_id[20]) {
 	image->height = -1;
 	image->data = NULL;
 
+	image->error = SP_ERROR_RESOURCE_NOT_LOADED;
+
 	image->callback = NULL;
 	image->userdata = NULL;
 
@@ -63,8 +65,13 @@ SP_LIBEXPORT(sp_image *) sp_image_create(sp_session *session, const byte image_i
 	if(sp_image_is_loaded(image))
 		return image;
 
-	/* FIXME: Should probably make sure this image isn't currently being loaded aswell, too. Flag maybe? */
 
+	/* Prevent the image from being loaded twice */
+	if(image->error == SP_ERROR_IS_LOADING)
+		return image;
+	
+	image->error = SP_ERROR_IS_LOADING;
+	
 	
 	image_ctx = malloc(sizeof(struct image_ctx));
 	image_ctx->session = session;
