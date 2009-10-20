@@ -243,6 +243,7 @@ struct sp_track {
 
 	char *restricted_countries;
 	char *allowed_countries;
+	int is_available;
 
 	int index;
 	int disc;

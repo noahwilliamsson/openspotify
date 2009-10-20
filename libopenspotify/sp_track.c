@@ -26,6 +26,12 @@ SP_LIBEXPORT(bool) sp_track_is_loaded(sp_track *track) {
 }
 
 
+SP_LIBEXPORT(bool) sp_track_is_available(sp_track *track) {
+
+	return track->is_available;
+}
+
+
 SP_LIBEXPORT(sp_error) sp_track_error(sp_track *track) {
 
 	return track->error;
@@ -131,6 +137,8 @@ sp_track *osfy_track_add(sp_session *session, unsigned char id[16]) {
 	track->num_artists = 0;
 	track->artists = NULL;
 
+	/* FIXME: */
+	track->is_available = 1;
 	track->restricted_countries = NULL;
 	track->allowed_countries = NULL;
 
