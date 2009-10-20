@@ -385,6 +385,14 @@ static int osfy_track_browse_callback(struct browse_callback_ctx *brctx) {
 		return -1;
 	}
 
+	{
+		FILE *fd = fopen("browse-track.xml", "w");
+		if(fd) {
+			fwrite(xml->ptr, xml->len, 1, fd);
+			fclose(fd);
+		}
+	}
+
 	root = ezxml_parse_str((char *) xml->ptr, xml->len);
 	if(root == NULL) {
 		DSFYDEBUG("Failed to parse XML\n");
