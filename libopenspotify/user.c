@@ -192,13 +192,6 @@ static int user_parse_xml(struct user_ctx *user_ctx) {
 	if(xml == NULL)
 		return -1;
 	
-	root = ezxml_parse_str((char *) xml->ptr, xml->len);
-	if(root == NULL) {
-		DSFYDEBUG("Failed to parse XML\n");
-		buf_free(xml);
-		return -1;
-	}
-
 	{
 		FILE *fd;
 		char buf[512];
@@ -208,6 +201,14 @@ static int user_parse_xml(struct user_ctx *user_ctx) {
 			fwrite(xml->ptr, xml->len, 1, fd);
 			fclose(fd);
 		}
+	}
+
+
+	root = ezxml_parse_str((char *) xml->ptr, xml->len);
+	if(root == NULL) {
+		DSFYDEBUG("Failed to parse XML\n");
+		buf_free(xml);
+		return -1;
 	}
 
 	node = ezxml_get(root, "user", 0, "username", -1);
