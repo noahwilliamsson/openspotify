@@ -28,8 +28,11 @@ SP_LIBEXPORT(sp_artistbrowse *) sp_artistbrowse_create(sp_session *session, sp_a
 	arb = (sp_artistbrowse *)hashtable_find(session->hashtable_artistbrowses, artist->id);
 	if(arb) {
 		sp_artistbrowse_add_ref(arb);
-		/* FIXME: Make sure it's actually loaded so it isn't called right after a previous call for the same artist */
-		request_post_result(session, REQ_TYPE_ARTISTBROWSE, SP_ERROR_OK, arb);
+
+		/* Only send result notification if the artist browsing has completed */
+		if(arb->error != SP_ERROR_IS_LOADING)
+			request_post_result(session, REQ_TYPE_ARTISTBROWSE, arb->error, arb);
+
 		return arb;
 	}
 

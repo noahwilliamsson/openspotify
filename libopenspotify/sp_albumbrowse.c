@@ -27,8 +27,11 @@ SP_LIBEXPORT(sp_albumbrowse *) sp_albumbrowse_create(sp_session *session, sp_alb
 	alb = (sp_albumbrowse *)hashtable_find(session->hashtable_albumbrowses, album->id);
 	if(alb) {
 		sp_albumbrowse_add_ref(alb);
-		/* FIXME: Make sure it's actually loaded so it isn't called right after a previous call for the same album */
-		request_post_result(session, REQ_TYPE_ALBUMBROWSE, SP_ERROR_OK, alb);
+
+		/* Only send result notification if the album browsing has completed */
+		if(alb->error != SP_ERROR_IS_LOADING)
+			request_post_result(session, REQ_TYPE_ALBUMBROWSE, alb->error, alb);
+
 		return alb;
 	}
 
