@@ -464,7 +464,7 @@ static int playlist_parse_xml(sp_session *session, sp_playlist *playlist) {
 	/* Collaborative playlist? */
 	playlist->shared = 0;
         node = ezxml_get(root, "next-change", 0, "change", 0, "ops", 0, "pub", -1);
-        if(node && strcmp(node->txt, "1"))
+        if(node && !strcmp(node->txt, "1"))
                 playlist->shared = 1;
 
 
