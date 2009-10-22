@@ -33,7 +33,7 @@ sp_image *osfy_image_create(sp_session *session, const byte image_id[20]) {
 			hex_bytes_to_ascii(image->id, buf, 20);
 			DSFYDEBUG("Returning existing image '%s'\n", buf);
 		}
-		
+
 		return image;
 	}
 
@@ -65,7 +65,7 @@ SP_LIBEXPORT(sp_image *) sp_image_create(sp_session *session, const byte image_i
 	sp_image *image;
 	void **container;
 	struct image_ctx *image_ctx;
-	
+
 
 	image = osfy_image_create(session, image_id);
 	sp_image_add_ref(image);
@@ -77,17 +77,17 @@ SP_LIBEXPORT(sp_image *) sp_image_create(sp_session *session, const byte image_i
 	/* Prevent the image from being loaded twice */
 	if(image->error == SP_ERROR_IS_LOADING)
 		return image;
-	
+
 	image->error = SP_ERROR_IS_LOADING;
-	
-	
+
+
 	image_ctx = malloc(sizeof(struct image_ctx));
 	image_ctx->session = session;
 	image_ctx->req = NULL;
 	image_ctx->image = image;
 
-        container = (void **)malloc(sizeof(void *));
-        *container = image_ctx;
+	container = (void **)malloc(sizeof(void *));
+	*container = image_ctx;
 
 	{
 		char buf[41];
@@ -95,7 +95,7 @@ SP_LIBEXPORT(sp_image *) sp_image_create(sp_session *session, const byte image_i
 		DSFYDEBUG("Requesting download of image '%s'\n", buf);
 	}
 
-        request_post(session, REQ_TYPE_IMAGE, container);
+	request_post(session, REQ_TYPE_IMAGE, container);
 
 	return image;
 }
@@ -106,7 +106,7 @@ SP_LIBEXPORT(void) sp_image_add_load_callback(sp_image *image, image_loaded_cb *
 	image->callback = callback;
 	image->userdata = userdata;
 
-	
+
 	/* FIXME: Check with libspotify */
 	if(image->is_loaded)
 		callback(image, userdata);
@@ -197,7 +197,7 @@ SP_LIBEXPORT(void) sp_image_release(sp_image *image) {
 		hex_bytes_to_ascii(image->id, buf, 20);
 		DSFYDEBUG("Freeing image '%s'\n", buf);
 	}
-	
+
 	if(image->data)
 		buf_free(image->data);
 
@@ -222,29 +222,29 @@ int osfy_image_process_request(sp_session *session, struct request *req) {
 
 	assert(image_ctx->image->data == NULL);
 	image_ctx->image->data = buf_new();
-	
+
 	req->next_timeout = get_millisecs() + IMAGE_RETRY_TIMEOUT * 1000;
-	
+
 	return cmd_request_image(session, image_ctx->image->id, osfy_image_callback, image_ctx);
 }
 
 
 static int osfy_image_callback(CHANNEL *ch, unsigned char *payload, unsigned short len) {
 	struct image_ctx *image_ctx = (struct image_ctx *)ch->private;
-	
+
 	switch(ch->state) {
 		case CHANNEL_DATA:
 			buf_append_data(image_ctx->image->data, payload, len);
 			break;
-			
+
 		case CHANNEL_ERROR:
 			DSFYDEBUG("Got a channel ERROR, retrying within %d seconds\n", IMAGE_RETRY_TIMEOUT);
 			buf_free(image_ctx->image->data);
 			image_ctx->image->data = NULL;
-			
+
 			/* The request processor will retry this round */
 			break;
-			
+
 		case CHANNEL_END:
 			/* FIXME: Decode image ->data */
 			ofsy_image_update_from_header(image_ctx->image);
@@ -255,11 +255,11 @@ static int osfy_image_callback(CHANNEL *ch, unsigned char *payload, unsigned sho
 
 			free(image_ctx);
 			break;
-			
+
 		default:
 			break;
 	}
-	
+
 	return 0;
 }
 
@@ -286,7 +286,7 @@ static int jpeglib_source_fill(j_decompress_ptr cinfo) {
 	int num_bytes_to_copy;
 
 	src->pub.next_input_byte = src->jpegbuf;
-	
+
 	num_bytes_to_copy = src->buflen - src->bufpos;
 	if(num_bytes_to_copy > JPEGBUFSIZE)
 		num_bytes_to_copy = JPEGBUFSIZE;
@@ -294,7 +294,7 @@ static int jpeglib_source_fill(j_decompress_ptr cinfo) {
 	if(num_bytes_to_copy) {
 		memcpy(src->jpegbuf, src->buf + src->bufpos, num_bytes_to_copy);
 		src->bufpos += num_bytes_to_copy;
-		src->pub.bytes_in_buffer = num_bytes_to_copy;	
+		src->pub.bytes_in_buffer = num_bytes_to_copy;
 	}
 	else {
 		src->jpegbuf[0] = 0xFF;
@@ -348,13 +348,13 @@ static void osfy_jpeglib_source(j_decompress_ptr cinfo, unsigned char *buf, int 
 	src->pub.skip_input_data = jpeglib_source_slip;
 	src->pub.resync_to_restart = jpeg_resync_to_restart;
 	src->pub.term_source = jpeglib_source_destroy;
-	
+
 	cinfo->src = (struct jpeg_source_mgr *)src;
 }
 
 
 int ofsy_image_update_from_header(sp_image *image) {
-        struct jpeg_decompress_struct cinfo;
+	struct jpeg_decompress_struct cinfo;
 	struct jpeg_error_mgr jerr;
 
 	cinfo.err = jpeg_std_error(&jerr);
@@ -367,19 +367,19 @@ int ofsy_image_update_from_header(sp_image *image) {
 	image->height = cinfo.image_height;
 	image->format = SP_IMAGE_FORMAT_RGB;
 
-        cinfo.out_color_space = JCS_RGB;
-        cinfo.buffered_image = TRUE;
-        jpeg_start_decompress(&cinfo);
+	cinfo.out_color_space = JCS_RGB;
+	cinfo.buffered_image = TRUE;
+	jpeg_start_decompress(&cinfo);
 
-        jpeg_finish_decompress(&cinfo);
-        jpeg_destroy_decompress(&cinfo);
+	jpeg_finish_decompress(&cinfo);
+	jpeg_destroy_decompress(&cinfo);
 
 	return 0;
 }
 
 
 struct buf *ofsy_image_decompress(sp_image *image, int *pitch) {
-        struct jpeg_decompress_struct cinfo;
+	struct jpeg_decompress_struct cinfo;
 	struct jpeg_error_mgr jerr;
 	struct buf *data;
 	JSAMPARRAY scanline;
@@ -397,8 +397,8 @@ struct buf *ofsy_image_decompress(sp_image *image, int *pitch) {
 	image->height = cinfo.image_height;
 	image->format = SP_IMAGE_FORMAT_RGB;
 
-        cinfo.out_color_space = JCS_RGB;
-        jpeg_start_decompress(&cinfo);
+	cinfo.out_color_space = JCS_RGB;
+	jpeg_start_decompress(&cinfo);
 
 	*pitch = cinfo.output_width * cinfo.output_components;
 	scanline = (*cinfo.mem->alloc_sarray)((j_common_ptr)&cinfo, JPOOL_IMAGE, *pitch, 1);
@@ -407,8 +407,8 @@ struct buf *ofsy_image_decompress(sp_image *image, int *pitch) {
 		buf_append_data(data, scanline[0], *pitch);
 	}
 
-        jpeg_finish_decompress(&cinfo);
-        jpeg_destroy_decompress(&cinfo);
+	jpeg_finish_decompress(&cinfo);
+	jpeg_destroy_decompress(&cinfo);
 
 	return data;
 }
