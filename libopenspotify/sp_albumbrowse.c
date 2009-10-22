@@ -55,7 +55,7 @@ SP_LIBEXPORT(sp_albumbrowse *) sp_albumbrowse_create(sp_session *session, sp_alb
 	alb->callback = callback;
 	alb->userdata = userdata;
 
-	alb->error = SP_ERROR_OK;
+	alb->error = SP_ERROR_RESOURCE_NOT_LOADED;
 
 	alb->is_loaded = 0;
 	alb->ref_count = 1;
