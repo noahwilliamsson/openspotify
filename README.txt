@@ -22,7 +22,7 @@ http://developer.spotify.com/en/libspotify/docs/modules.html
 * Artist subsystem	- Completed
 * Album browsing	- Completed
 * Artist browsing	- Completed
-* Image handling	- Partly, no image decoding is done and width/height/format can't be retrieved
+* Image handling	- Completed
 * Search subsysten	- Completed
 * Playlist subsystem	- Read-only (loading), no support for create/modify/remove playlists or tracks
 * User handling		- Completed
