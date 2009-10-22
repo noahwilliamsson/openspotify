@@ -25,9 +25,9 @@ It was built using the static release and debug configurations.
 
 UNIX
 ====
-Requires openssl and zlib development headers and libraries
+Requires openssl, zlib and libjpeg development headers and libraries
 
-$ sudo apt-get install libssl-dev zlib1g-dev
+$ sudo apt-get install libssl-dev zlib1g-dev libjpeg62-dev
 $ cd libopenspotify && make clean all
 $ cd openspotify-simple && make clean all
 
