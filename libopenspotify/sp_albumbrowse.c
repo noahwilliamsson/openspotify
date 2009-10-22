@@ -55,7 +55,7 @@ SP_LIBEXPORT(sp_albumbrowse *) sp_albumbrowse_create(sp_session *session, sp_alb
 	alb->callback = callback;
 	alb->userdata = userdata;
 
-	alb->error = SP_ERROR_RESOURCE_NOT_LOADED;
+	alb->error = SP_ERROR_IS_LOADING;
 
 	alb->is_loaded = 0;
 	alb->ref_count = 1;
@@ -152,6 +152,8 @@ static int osfy_albumbrowse_load_from_xml(sp_session *session, sp_albumbrowse *a
 	sp_track *track;
 	ezxml_t node, loop_node, track_node;
 	
+
+	DSFYDEBUG("Loading from XML\n");
 	
 	/* Load album from XML if not yet loaded */
 	if(sp_album_is_loaded(alb->album) == 0)

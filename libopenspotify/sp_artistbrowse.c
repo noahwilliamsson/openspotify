@@ -55,7 +55,7 @@ SP_LIBEXPORT(sp_artistbrowse *) sp_artistbrowse_create(sp_session *session, sp_a
 	arb->callback = callback;
 	arb->userdata = userdata;
 
-	arb->error = SP_ERROR_RESOURCE_NOT_LOADED;
+	arb->error = SP_ERROR_IS_LOADING;
 
 	arb->is_loaded = 0;
 	arb->ref_count = 1;
