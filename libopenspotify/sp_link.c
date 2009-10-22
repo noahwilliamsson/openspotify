@@ -365,7 +365,7 @@ SP_LIBEXPORT(void) sp_link_release (sp_link *link) {
 		sp_search_release(link->data.search);
 		break;
 	default:
-		DSFYDEBUG("Not yet implemented\n");
+		DSFYDEBUG("Release not implemented for link of type %d\n", link->type);
 		break;
 	}
 
