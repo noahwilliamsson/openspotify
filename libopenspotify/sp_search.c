@@ -33,7 +33,7 @@ SP_LIBEXPORT(sp_search *) sp_search_create (sp_session *session, const char *que
 
 		/* Only send result notification if the search has completed */
 		if(search->error != SP_ERROR_IS_LOADING)
-			request_post_result(session, REQ_TYPE_SEARCH, alb->error, search);
+			request_post_result(session, REQ_TYPE_SEARCH, search->error, search);
 
 		return search;
 	}
