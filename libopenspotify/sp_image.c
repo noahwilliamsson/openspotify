@@ -386,7 +386,6 @@ struct buf *ofsy_image_decompress(sp_image *image, int *pitch) {
         struct jpeg_decompress_struct cinfo;
 	struct jpeg_error_mgr jerr;
 	struct buf *data;
-	int stride;
 	JSAMPARRAY scanline;
 
 	if((data = buf_new()) == NULL)
@@ -403,16 +402,14 @@ struct buf *ofsy_image_decompress(sp_image *image, int *pitch) {
 	image->height = cinfo.image_height;
 	image->format = SP_IMAGE_FORMAT_RGB;
 
-	*pitch = 3;
         cinfo.out_color_space = JCS_RGB;
-        cinfo.buffered_image = TRUE;
         jpeg_start_decompress(&cinfo);
 
-	stride = cinfo.output_width * *pitch;
-	scanline = (*cinfo.mem->alloc_sarray)((j_common_ptr)&cinfo, JPOOL_IMAGE, stride, 1);
+	*pitch = cinfo.output_width * cinfo.output_components;
+	scanline = (*cinfo.mem->alloc_sarray)((j_common_ptr)&cinfo, JPOOL_IMAGE, *pitch, 1);
 	while(cinfo.output_scanline < cinfo.output_height) {
 		jpeg_read_scanlines(&cinfo, scanline, 1);
-		buf_append_data(data, scanline, stride);
+		buf_append_data(data, scanline[0], *pitch);
 	}
 
         jpeg_finish_decompress(&cinfo);
