@@ -62,7 +62,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="dnsapi.lib ws2_32.lib libeay32MDd.lib ssleay32MDd.lib zlibd.lib"
+				AdditionalDependencies="dnsapi.lib ws2_32.lib libeay32MDd.lib ssleay32MDd.lib zlibd.lib jpegd.lib"
 				OutputFile="$(OutDir)\$(ProjectName).lib"
 				AdditionalLibraryDirectories="..\win32\lib"
 			/>
@@ -128,7 +128,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="dnsapi.lib ws2_32.lib libeay32MD.lib ssleay32MD.lib zlib.lib"
+				AdditionalDependencies="dnsapi.lib ws2_32.lib libeay32MD.lib ssleay32MD.lib zlib.lib jpeg.lib"
 				OutputFile="$(OutDir)\$(ProjectName).lib"
 				AdditionalLibraryDirectories="..\win32\lib"
 			/>
@@ -193,7 +193,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="dnsapi.lib ws2_32.lib libeay32MD.lib ssleay32MD.lib zlib.lib"
+				AdditionalDependencies="dnsapi.lib ws2_32.lib libeay32MD.lib ssleay32MD.lib zlibd.lib jpegd.lib"
 				AdditionalLibraryDirectories="..\win32\lib"
 			/>
 			<Tool
@@ -264,7 +264,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="dnsapi.lib ws2_32.lib libeay32MD.lib ssleay32MD.lib zlib.lib"
+				AdditionalDependencies="dnsapi.lib ws2_32.lib libeay32MD.lib ssleay32MD.lib zlib.lib jpeg.lib"
 				AdditionalLibraryDirectories="..\win32\lib"
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames=""
