@@ -70,11 +70,15 @@ static int search_callback(CHANNEL *ch, unsigned char *payload, unsigned short l
 			break;
 			
 		case CHANNEL_END:
-			if(search_parse_xml(search_ctx) == 0)
-				request_set_result(search_ctx->session, search_ctx->req, SP_ERROR_OK, search_ctx->search);
+			if(search_parse_xml(search_ctx) == 0) {
+				search_ctx->search->error = SP_ERROR_OK;
+				search_ctx->search->is_loaded = 1;
+			}
 			else
-				request_set_result(search_ctx->session, search_ctx->req, SP_ERROR_OTHER_PERMAMENT, search_ctx->search);
-				
+				search_ctx->search->error = SP_ERROR_OTHER_PERMAMENT;
+
+			request_set_result(search_ctx->session, search_ctx->req, search_ctx->search->error, search_ctx->search);
+
 			buf_free(search_ctx->buf);
 			free(search_ctx);
 			break;
