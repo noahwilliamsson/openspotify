@@ -22,6 +22,11 @@ A static build (/MD) of Zlib 1.2.3 is bundled in win32/{lib,include}
 http://www.winimage.com/zLibDll/
 It was built using the static release and debug configurations.
 
+A static build (/MD) of jpeg 7 is bundled in win32/{lib,include}
+http://ijg.org/
+It was built using the release configuration and a modified (/MDd)
+debug configuration based on the release configuration
+
 
 UNIX
 ====

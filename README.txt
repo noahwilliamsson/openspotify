@@ -30,7 +30,6 @@ http://developer.spotify.com/en/libspotify/docs/modules.html
 
 BUGS
 ====
-* Does not build on Windows after image handling was introduced (libjpeg library needs to be built)
 * Searches don't adhere to album and artist offset and count
 * No local data cache
 * The reference counting could have been done better and is likely buggy
