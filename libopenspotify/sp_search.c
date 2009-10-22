@@ -64,7 +64,7 @@ SP_LIBEXPORT(sp_search *) sp_search_create (sp_session *session, const char *que
 	search->num_tracks = 0;
 	search->tracks = NULL;
 	
-	search->error = SP_ERROR_OK;
+	search->error = SP_ERROR_IS_LOADING;
 	search->is_loaded = 0;
 	search->ref_count = 1;
 
