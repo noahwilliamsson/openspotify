@@ -23,6 +23,7 @@ SP_LIBEXPORT(sp_search *) sp_search_create (sp_session *session, const char *que
 	void **container;
 	struct search_ctx *search_ctx;
 
+	/* FIXME: Should hash on all input parameters! */
 	strncpy(query_key, query, sizeof(query_key) - 1);
 	query_key[sizeof(query_key) - 1] = 0;
 	
