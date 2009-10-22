@@ -28,6 +28,17 @@ http://developer.spotify.com/en/libspotify/docs/modules.html
 * User handling		- Completed
 
 
+BUGS
+====
+* Does not build on Windows after image handling was introduced (libjpeg library needs to be built)
+* Searches don't adhere to album and artist offset and count
+* No local data cache
+* The reference counting could have been done better and is likely buggy
+* Not all routines support multiple callbacks (different function ptrs and userdata)
+* Not all resources have their initial error set to SP_ERROR_RESOURCE_NOT_LOADED and they never fail with a permanent error
+* The internal thread notification/message passing part is a bit messy.. 
+
+
 DIRECTORIES
 ===========
 examples/
