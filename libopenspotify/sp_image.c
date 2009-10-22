@@ -291,7 +291,6 @@ static int jpeglib_source_fill(j_decompress_ptr cinfo) {
 	if(num_bytes_to_copy > JPEGBUFSIZE)
 		num_bytes_to_copy = JPEGBUFSIZE;
 
-	DSFYDEBUG("%d bytes copied (len: %d, pos: %d)\n", num_bytes_to_copy, src->buflen, src->bufpos);
 	if(num_bytes_to_copy) {
 		memcpy(src->jpegbuf, src->buf + src->bufpos, num_bytes_to_copy);
 		src->bufpos += num_bytes_to_copy;
@@ -310,7 +309,6 @@ static int jpeglib_source_fill(j_decompress_ptr cinfo) {
 static void jpeglib_source_slip(j_decompress_ptr cinfo, long num_bytes) {
 	struct jpegsource *src = (struct jpegsource *)cinfo->src;
 
-	DSFYDEBUG("Skipping %ld bytes\n", num_bytes);
 	if(!num_bytes)
 		return;
 
@@ -327,7 +325,6 @@ static void jpeglib_source_slip(j_decompress_ptr cinfo, long num_bytes) {
 static void jpeglib_source_destroy(j_decompress_ptr cinfo) {
 	struct jpegsource *src = (struct jpegsource *)cinfo->src;
 
-	printf("jpeglib_source_destroy()\n");
 	free(src->jpegbuf);
 }
 
@@ -366,7 +363,6 @@ int ofsy_image_update_from_header(sp_image *image) {
 	osfy_jpeglib_source(&cinfo, image->data->ptr, image->data->len);
 	jpeg_read_header(&cinfo, 1);
 
-	DSFYDEBUG("%dx%d (pitch %d, colorspace %d)\n", cinfo.image_width, cinfo.image_height, cinfo.num_components, cinfo.out_color_space);
 	image->width = cinfo.image_width;
 	image->height = cinfo.image_height;
 	image->format = SP_IMAGE_FORMAT_RGB;
@@ -397,7 +393,6 @@ struct buf *ofsy_image_decompress(sp_image *image, int *pitch) {
 	osfy_jpeglib_source(&cinfo, image->data->ptr, image->data->len);
 	jpeg_read_header(&cinfo, 1);
 
-	DSFYDEBUG("%dx%d (pitch %d, colorspace %d)\n", cinfo.image_width, cinfo.image_height, cinfo.num_components, cinfo.out_color_space);
 	image->width = cinfo.image_width;
 	image->height = cinfo.image_height;
 	image->format = SP_IMAGE_FORMAT_RGB;
