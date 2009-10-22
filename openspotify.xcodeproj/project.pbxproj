@@ -122,7 +122,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 4FE175A11030903A00FA72BC /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 4FE175AD1030904700FA72BC /* openspotify */;
+			remoteGlobalIDString = 4FE175AD1030904700FA72BC;
 			remoteInfo = openspotify;
 		};
 		4FFD4A821030A18C00935706 /* PBXContainerItemProxy */ = {
@@ -987,6 +987,7 @@
 					"-DDEBUG",
 				);
 				OTHER_LDFLAGS = (
+					"-ljpeg",
 					"-lcrypto",
 					"-lresolv",
 					"-lz",
@@ -1018,6 +1019,7 @@
 					"-fPIC",
 				);
 				OTHER_LDFLAGS = (
+					"-ljpeg",
 					"-lcrypto",
 					"-lresolv",
 					"-lz",

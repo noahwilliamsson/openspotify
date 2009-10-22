@@ -4,6 +4,7 @@
 
 #include <spotify/api.h>
 
+#include "buf.h"
 #include "commands.h"
 #include "debug.h"
 #include "image.h"
@@ -12,8 +13,14 @@
 #include "sp_opaque.h"
 #include "util.h"
 
+#include <jconfig.h>
+#include <jerror.h>
+#include <jpeglib.h>
+
 
 static int osfy_image_callback(CHANNEL *ch, unsigned char *payload, unsigned short len);
+static int ofsy_image_update_from_header(sp_image *image);
+struct buf *ofsy_image_decompress(sp_image *image, int *pitch);
 
 
 sp_image *osfy_image_create(sp_session *session, const byte image_id[20]) {
@@ -37,6 +44,7 @@ sp_image *osfy_image_create(sp_session *session, const byte image_id[20]) {
 	image->width = -1;
 	image->height = -1;
 	image->data = NULL;
+	image->raw = NULL;
 
 	image->error = SP_ERROR_RESOURCE_NOT_LOADED;
 
@@ -143,14 +151,24 @@ SP_LIBEXPORT(sp_imageformat) sp_image_format(sp_image *image) {
 
 
 SP_LIBEXPORT(void *) sp_image_lock_pixels(sp_image *image, int *pitch) {
-	DSFYDEBUG("Not yet implemented\n");
+	struct buf *raw;
 
-	return NULL;
+	raw = ofsy_image_decompress(image, pitch);
+
+	if(image->raw)
+		buf_free(image->raw);
+
+	image->raw = raw;
+
+	return raw->ptr;
 }
 
 
 SP_LIBEXPORT(void) sp_image_unlock_pixels(sp_image *image) {
-	DSFYDEBUG("Not yet implemented\n");
+	if(image->raw)
+		buf_free(image->raw);
+
+	image->raw = NULL;
 }
 
 
@@ -182,6 +200,9 @@ SP_LIBEXPORT(void) sp_image_release(sp_image *image) {
 	
 	if(image->data)
 		buf_free(image->data);
+
+	if(image->raw)
+		buf_free(image->raw);
 
 	free(image);
 }
@@ -225,6 +246,8 @@ static int osfy_image_callback(CHANNEL *ch, unsigned char *payload, unsigned sho
 			break;
 			
 		case CHANNEL_END:
+			/* FIXME: Decode image ->data */
+			ofsy_image_update_from_header(image_ctx->image);
 			image_ctx->image->is_loaded = 1;
 			image_ctx->image->error = SP_ERROR_OK;
 
@@ -238,4 +261,162 @@ static int osfy_image_callback(CHANNEL *ch, unsigned char *payload, unsigned sho
 	}
 	
 	return 0;
+}
+
+
+/* jpeglib parser */
+#define JPEGBUFSIZE 16*1024
+struct jpegsource {
+	struct jpeg_source_mgr pub;
+	JOCTET *jpegbuf;
+	unsigned char *buf;
+	int bufpos;
+	int buflen;
+};
+
+
+/* jpeglib callbacks */
+static void jpeglib_source_init(j_decompress_ptr cinfo) {
+	DSFYDEBUG("Initializing source\n");
+}
+
+
+static int jpeglib_source_fill(j_decompress_ptr cinfo) {
+	struct jpegsource *src = (struct jpegsource *)cinfo->src;
+	int num_bytes_to_copy;
+
+	src->pub.next_input_byte = src->jpegbuf;
+	
+	num_bytes_to_copy = src->buflen - src->bufpos;
+	if(num_bytes_to_copy > JPEGBUFSIZE)
+		num_bytes_to_copy = JPEGBUFSIZE;
+
+	DSFYDEBUG("%d bytes copied (len: %d, pos: %d)\n", num_bytes_to_copy, src->buflen, src->bufpos);
+	if(num_bytes_to_copy) {
+		memcpy(src->jpegbuf, src->buf + src->bufpos, num_bytes_to_copy);
+		src->bufpos += num_bytes_to_copy;
+		src->pub.bytes_in_buffer = num_bytes_to_copy;	
+	}
+	else {
+		src->jpegbuf[0] = 0xFF;
+		src->jpegbuf[1] = JPEG_EOI;
+		src->pub.bytes_in_buffer = 2;
+	}
+
+	return 1;
+}
+
+
+static void jpeglib_source_slip(j_decompress_ptr cinfo, long num_bytes) {
+	struct jpegsource *src = (struct jpegsource *)cinfo->src;
+
+	DSFYDEBUG("Skipping %ld bytes\n", num_bytes);
+	if(!num_bytes)
+		return;
+
+	while(num_bytes > src->pub.bytes_in_buffer) {
+		num_bytes -= src->pub.bytes_in_buffer;
+		src->pub.fill_input_buffer(cinfo);
+	}
+
+	src->pub.next_input_byte += num_bytes;
+	src->pub.bytes_in_buffer -= num_bytes;
+}
+
+
+static void jpeglib_source_destroy(j_decompress_ptr cinfo) {
+	struct jpegsource *src = (struct jpegsource *)cinfo->src;
+
+	printf("jpeglib_source_destroy()\n");
+	free(src->jpegbuf);
+}
+
+
+/* jpeglib custom input source */
+static void osfy_jpeglib_source(j_decompress_ptr cinfo, unsigned char *buf, int buflen) {
+	struct jpegsource *src;
+
+	src = (struct jpegsource *)
+		(*cinfo->mem->alloc_small)((j_common_ptr)cinfo, JPOOL_PERMANENT, sizeof(struct jpegsource));
+
+	src->buf = buf;
+	src->buflen = buflen;
+	src->bufpos = 0;
+
+	src->jpegbuf = malloc(JPEGBUFSIZE);
+
+	src->pub.bytes_in_buffer = 0;
+	src->pub.init_source = jpeglib_source_init;
+	src->pub.fill_input_buffer = jpeglib_source_fill;
+	src->pub.skip_input_data = jpeglib_source_slip;
+	src->pub.resync_to_restart = jpeg_resync_to_restart;
+	src->pub.term_source = jpeglib_source_destroy;
+	
+	cinfo->src = (struct jpeg_source_mgr *)src;
+}
+
+
+int ofsy_image_update_from_header(sp_image *image) {
+        struct jpeg_decompress_struct cinfo;
+	struct jpeg_error_mgr jerr;
+
+	cinfo.err = jpeg_std_error(&jerr);
+	jpeg_create_decompress(&cinfo);
+
+	osfy_jpeglib_source(&cinfo, image->data->ptr, image->data->len);
+	jpeg_read_header(&cinfo, 1);
+
+	DSFYDEBUG("%dx%d (pitch %d, colorspace %d)\n", cinfo.image_width, cinfo.image_height, cinfo.num_components, cinfo.out_color_space);
+	image->width = cinfo.image_width;
+	image->height = cinfo.image_height;
+	image->format = SP_IMAGE_FORMAT_RGB;
+
+        cinfo.out_color_space = JCS_RGB;
+        cinfo.buffered_image = TRUE;
+        jpeg_start_decompress(&cinfo);
+
+        jpeg_finish_decompress(&cinfo);
+        jpeg_destroy_decompress(&cinfo);
+
+	return 0;
+}
+
+
+struct buf *ofsy_image_decompress(sp_image *image, int *pitch) {
+        struct jpeg_decompress_struct cinfo;
+	struct jpeg_error_mgr jerr;
+	struct buf *data;
+	int stride;
+	JSAMPARRAY scanline;
+
+	if((data = buf_new()) == NULL)
+		return NULL;
+
+	cinfo.err = jpeg_std_error(&jerr);
+	jpeg_create_decompress(&cinfo);
+
+	osfy_jpeglib_source(&cinfo, image->data->ptr, image->data->len);
+	jpeg_read_header(&cinfo, 1);
+
+	DSFYDEBUG("%dx%d (pitch %d, colorspace %d)\n", cinfo.image_width, cinfo.image_height, cinfo.num_components, cinfo.out_color_space);
+	image->width = cinfo.image_width;
+	image->height = cinfo.image_height;
+	image->format = SP_IMAGE_FORMAT_RGB;
+
+	*pitch = 3;
+        cinfo.out_color_space = JCS_RGB;
+        cinfo.buffered_image = TRUE;
+        jpeg_start_decompress(&cinfo);
+
+	stride = cinfo.output_width * *pitch;
+	scanline = (*cinfo.mem->alloc_sarray)((j_common_ptr)&cinfo, JPOOL_IMAGE, stride, 1);
+	while(cinfo.output_scanline < cinfo.output_height) {
+		jpeg_read_scanlines(&cinfo, scanline, 1);
+		buf_append_data(data, scanline, stride);
+	}
+
+        jpeg_finish_decompress(&cinfo);
+        jpeg_destroy_decompress(&cinfo);
+
+	return data;
 }

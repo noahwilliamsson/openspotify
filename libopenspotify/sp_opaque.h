@@ -121,7 +121,11 @@ struct sp_image {
 	int width;
 	int height;
 
+	/* compressed JPG */
 	struct buf *data;
+
+	/* raw format, default NULL, set after sp_image_lock_pixels() */
+	struct buf *raw;
 
 	sp_imageformat format;
 
