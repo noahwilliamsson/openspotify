@@ -197,7 +197,7 @@ SP_LIBEXPORT(void) sp_search_release(sp_search *search) {
 
 	
 	for(i = 0; i < search->num_albums; i++)
-		free(search->albums[i]);
+		sp_album_release(search->albums[i]);
 	
 	if(search->num_albums)
 		free(search->albums);
