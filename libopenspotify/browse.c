@@ -108,11 +108,11 @@ static int browse_send_generic_request(sp_session *session, struct request *req)
 		DSFYDEBUG("Offset reached total count of %d, returning results for <type %s>!\n", brctx->num_total, REQUEST_TYPE_STR(req->type));
 		switch(brctx->type) {
 			case REQ_TYPE_ALBUMBROWSE:
-				ret = request_set_result(session, req, SP_ERROR_OK, brctx->data.albumbrowses[0]);
+				ret = request_set_result(session, req, brctx->data.albumbrowses[0]->error, brctx->data.albumbrowses[0]);
 				break;
 
 			case REQ_TYPE_ARTISTBROWSE:
-				ret = request_set_result(session, req, SP_ERROR_OK, brctx->data.artistbrowses[0]);
+				ret = request_set_result(session, req, brctx->data.artistbrowses[0]->error, brctx->data.artistbrowses[0]);
 				break;
 
 			case REQ_TYPE_BROWSE_PLAYLIST_TRACKS:
