@@ -167,6 +167,7 @@ static int search_parse_xml(struct search_ctx *search_ctx) {
 		if(!sp_artist_is_loaded(artist))
 			osfy_artist_load_artist_from_xml(search_ctx->session, artist, artist_node);
 		
+		sp_artist_add_ref(artist);
 		search->artists[i] = artist;
 	}
 	
@@ -197,6 +198,7 @@ static int search_parse_xml(struct search_ctx *search_ctx) {
 		if(!sp_album_is_loaded(album))
 			osfy_album_load_from_search_xml(search_ctx->session, album, album_node);
 		
+		sp_album_add_ref(album);
 		search->albums[i] = album;
 	}
 	
@@ -227,10 +229,10 @@ static int search_parse_xml(struct search_ctx *search_ctx) {
 			osfy_track_load_from_xml(search_ctx->session, track, track_node);
 		
 		search->tracks = realloc(search->tracks, sizeof(sp_track *) * (1 + search->num_tracks));
+		sp_track_add_ref(track);
 		search->tracks[search->num_tracks] = track;
 		search->num_tracks++;
 	}
-	
 	
 	
 	ezxml_free(root);
