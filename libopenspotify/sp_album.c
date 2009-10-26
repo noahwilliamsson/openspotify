@@ -51,6 +51,12 @@ SP_LIBEXPORT(int) sp_album_year(sp_album *album) {
 }
 
 
+SP_LIBEXPORT(sp_albumtype) sp_album_type(sp_album *album) {
+
+	return album->type;
+}
+
+
 SP_LIBEXPORT(void) sp_album_add_ref(sp_album *album) {
 
 	album->ref_count++;
@@ -90,6 +96,7 @@ sp_album *sp_album_add(sp_session *session, unsigned char id[16]) {
 
 	album->name = NULL;
 	album->year = 0;
+	album->type = SP_ALBUMTYPE_UNKNOWN;
 
 	album->is_available = 1; /* FIXME: */
 	album->is_loaded = 0;
@@ -346,13 +353,26 @@ int osfy_album_load_from_track_xml(sp_session *session, sp_album *album, ezxml_t
 	
 	album->year = atoi(node->txt);
 	
+
+	/* Album type */
+	if((node = ezxml_get(album_node, "album-type", -1)) != NULL) {
+		if(!strcmp(node->txt, "album"))
+			album->type = SP_ALBUMTYPE_ALBUM;
+		else if(!strcmp(node->txt, "single"))
+			album->type = SP_ALBUMTYPE_SINGLE;
+		else if(!strcmp(node->txt, "compilation"))
+			album->type = SP_ALBUMTYPE_COMPILATION;
+		else
+			album->type = SP_ALBUMTYPE_UNKNOWN;
+	}
+	
 	
 	/* Album artist */
 	if((node = ezxml_get(album_node, "album-artist-id", -1)) == NULL) {
 		DSFYDEBUG("Failed to find element 'album-artist-id'\n");
 		return -1;
 	}
-	
+
 	hex_ascii_to_bytes(node->txt, id, 16);
 
 	

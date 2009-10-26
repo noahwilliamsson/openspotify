@@ -37,6 +37,7 @@ struct sp_album {
 
 	char *name;
 	int year;
+	sp_albumtype type;
 
 	sp_artist *artist;
 
