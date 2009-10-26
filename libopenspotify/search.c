@@ -190,6 +190,7 @@ static int search_parse_xml(struct search_ctx *search_ctx) {
 	
 	
 	/* Load albums */
+	search->num_albums = 0;
 	for(i = 0, album_node = ezxml_get(root, "albums", 0, "album", -1);
 	    i < count && album_node;
 	    i++, album_node = album_node->next) {
@@ -205,12 +206,9 @@ static int search_parse_xml(struct search_ctx *search_ctx) {
 			osfy_album_load_from_search_xml(search_ctx->session, album, album_node);
 		
 		sp_album_add_ref(album);
-		search->albums[i] = album;
+		search->albums[search->num_albums] = album;
+		search->num_albums++;
 	}
-	
-	assert(i == count);
-	search->num_albums = count;
-	
 	
 	
 	search->total_tracks = atoi(node->txt);
