@@ -158,6 +158,7 @@ static int search_parse_xml(struct search_ctx *search_ctx) {
 	
 	
 	/* Load artists */
+	search->num_artists = 0;
 	for(i = 0, artist_node = ezxml_get(root, "artists", 0, "artist", -1);
 	    i < count && artist_node;
 	    i++, artist_node = artist_node->next) {
@@ -173,14 +174,11 @@ static int search_parse_xml(struct search_ctx *search_ctx) {
 			osfy_artist_load_artist_from_xml(search_ctx->session, artist, artist_node);
 		
 		sp_artist_add_ref(artist);
-		search->artists[i] = artist;
+		search->artists[search->num_artists] = artist;
+		search->num_artists++;
 	}
 
 	
-	/* The number of artists we actually got */
-	search->num_artists = i;
-	
-
 	/* Get number of total albums */
 	if((node = ezxml_get(root, "total-albums", -1)) == NULL)
 		return -1;
