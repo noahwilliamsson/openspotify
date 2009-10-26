@@ -144,7 +144,12 @@ static int search_parse_xml(struct search_ctx *search_ctx) {
 
 	
 	
-	/* Get number of total artists */
+	/*
+	 * Get number of total artists
+	 * The value of the 'total-artists' element might be larger than the
+	 * number of artists actually returned.
+	 *
+	 */
 	if((node = ezxml_get(root, "total-artists", -1)) == NULL)
 		return -1;
 	
@@ -170,9 +175,10 @@ static int search_parse_xml(struct search_ctx *search_ctx) {
 		sp_artist_add_ref(artist);
 		search->artists[i] = artist;
 	}
+
 	
-	assert(i == count);
-	search->num_artists = count;
+	/* The number of artists we actually got */
+	search->num_artists = i;
 	
 
 	/* Get number of total albums */
