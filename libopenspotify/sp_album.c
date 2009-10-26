@@ -203,6 +203,25 @@ int osfy_album_load_from_album_xml(sp_session *session, sp_album *album, ezxml_t
 	assert(sp_artist_is_loaded(album->artist));
 	
 	
+	/*
+	 * Load album type
+	 * FIXME: Not sure if this code is actually used ever.
+	 */
+	if((node = ezxml_get(album_node, "album-type", -1)) != NULL) {
+		DSFYDEBUG("Got album-type %s\n", node->txt);
+		if(!strcmp(node->txt, "album"))
+			album->type = SP_ALBUMTYPE_ALBUM;
+		else if(!strcmp(node->txt, "single"))
+			album->type = SP_ALBUMTYPE_SINGLE;
+		else if(!strcmp(node->txt, "compilation"))
+			album->type = SP_ALBUMTYPE_COMPILATION;
+		else
+			album->type = SP_ALBUMTYPE_UNKNOWN;
+	}
+	else
+		DSFYDEBUG("Failed to find album-type element\n");
+	
+	
 	/* Album cover */
 	if((node = ezxml_get(album_node, "cover", -1)) == NULL) {
 		DSFYDEBUG("Failed to find element 'cover'\n");
@@ -354,19 +373,6 @@ int osfy_album_load_from_track_xml(sp_session *session, sp_album *album, ezxml_t
 	album->year = atoi(node->txt);
 	
 
-	/* Album type */
-	if((node = ezxml_get(album_node, "album-type", -1)) != NULL) {
-		if(!strcmp(node->txt, "album"))
-			album->type = SP_ALBUMTYPE_ALBUM;
-		else if(!strcmp(node->txt, "single"))
-			album->type = SP_ALBUMTYPE_SINGLE;
-		else if(!strcmp(node->txt, "compilation"))
-			album->type = SP_ALBUMTYPE_COMPILATION;
-		else
-			album->type = SP_ALBUMTYPE_UNKNOWN;
-	}
-	
-	
 	/* Album artist */
 	if((node = ezxml_get(album_node, "album-artist-id", -1)) == NULL) {
 		DSFYDEBUG("Failed to find element 'album-artist-id'\n");
