@@ -500,6 +500,7 @@ static int receive_server_parameters(struct login_ctx *l) {
 	char buf[512];
 	unsigned char padlen, username_len;
         unsigned short chalen[4];
+	int normalize;
 	int ret;
         struct buf* save = buf_new();
 
@@ -659,7 +660,8 @@ static int receive_server_parameters(struct login_ctx *l) {
 
             if (b->ptr[0] == 1) {
 		l->puzzle_denominator = b->ptr[1];
-		l->puzzle_magic = ntohl( *((int*)(b->ptr + 2)));
+		memcpy(&normalize, b->ptr + 2, sizeof(int));
+		l->puzzle_magic = ntohl(normalize);
             }
             else {
 		DSFYDEBUG("Unexpected puzzle challenge with first byte 0x%02x\n", b->ptr[0]);
