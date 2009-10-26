@@ -8,8 +8,8 @@ TODO list
   -- Caching of data
 * Playlists
   -- Add support for creating/adding/modifying/removing tracks and playlists
-* Images
-  -- Add JPG decoder to support images fully
+* Links
+  -- libspotify doesn't pull metadata on sp_link_create_from_string() so we shouldn't either
 * General
   -- Verify more functionality against libspotify
   -- Split up request processing in io requests and main thread notifications
@@ -21,3 +21,4 @@ KNOWN ISSUES
 ============
 1. Apparently there's a race between posting of requests and
    sleeping while waiting for new.. seen on Mac OS X
+2. The Win32 event/mutex stuff in iothread.c vs request.c is broken
