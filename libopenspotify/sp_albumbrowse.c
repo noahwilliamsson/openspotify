@@ -163,6 +163,19 @@ static int osfy_albumbrowse_load_from_xml(sp_session *session, sp_albumbrowse *a
 		osfy_album_load_from_album_xml(session, alb->album, root);
 
 
+	/* Load album type */
+	if((node = ezxml_get(root, "album-type", -1)) != NULL) {
+		if(!strcmp(node->txt, "album"))
+			alb->album->type = SP_ALBUMTYPE_ALBUM;
+		else if(!strcmp(node->txt, "single"))
+			alb->album->type = SP_ALBUMTYPE_SINGLE;
+		else if(!strcmp(node->txt, "compilation"))
+			alb->album->type = SP_ALBUMTYPE_COMPILATION;
+		else
+			alb->album->type = SP_ALBUMTYPE_UNKNOWN;
+	}
+
+
 	/* Load artist */
 	if((node = ezxml_get(root, "artist-id", -1)) == NULL) {
 		DSFYDEBUG("Failed to find element 'artist-id'\n");
