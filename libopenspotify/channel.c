@@ -112,8 +112,8 @@ int channel_process (sp_session *session, unsigned char *buf, unsigned short len
 	unsigned short header_len, consumed_len;
 	
 	/* Extract channel ID */
-	channel_id = *(unsigned short *) buf;
-	channel_id = ntohs (channel_id);
+	memcpy(&channel_id, buf, 2);
+	channel_id = ntohs(channel_id);
 	buf += 2;
 	len -= 2;
 
@@ -150,8 +150,8 @@ int channel_process (sp_session *session, unsigned char *buf, unsigned short len
 		consumed_len = 0;
 		while (consumed_len < len) {
 			/* Extract length of next data */
-			header_len = *(unsigned short *) ptr;
-			header_len = ntohs (header_len);
+			memcpy(&header_len, ptr, 2);
+			header_len = ntohs(header_len);
 
 			ptr += 2;
 			consumed_len += 2;
