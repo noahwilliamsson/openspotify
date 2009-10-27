@@ -114,7 +114,11 @@ void *iothread(void *data) {
 		}
 
 
-		/* Read and process zero or more packets */
+		/*
+		 * Read and process zero or more packets
+		 * Will sleep somewhere around 64ms if no
+		 * data is available
+		 */
 		ret = packet_read_and_process(s);
 		if(ret < 0) {
 			DSFYDEBUG("process_packets() returned %d, disconnecting!\n", ret);
