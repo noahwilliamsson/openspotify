@@ -10,7 +10,8 @@ Open openspotify.sln and choose Build->Build Solution from the menu.
 Depending on which configuration is selected, output will either be
 in the directories Release/ or Debug/
 
-Libopenspotify is currently built as a static library (/MD).
+Libopenspotify can be built in either Release or Debug mode and 
+as either a static or shared (.DLL) library
 
 
 WIN32 BUNDLES
@@ -38,30 +39,3 @@ $ cd openspotify-simple && make clean all
 
 If you want to test openspotify-simple with the official library:
 $ cd openspotify-simple && make libspotify=1 clean all
-
-
-NOTES for WIN32
-===============
-These are the changes that are made in Visual C++ for libopenspotify:
-
-1. Select the libopenspotify project, right click on it and choose Properties
-   Make sure "All configurations" is selected in the top-left menu
-
-2. Under Configurations Properties, Project Defaults -> Configuration Type, set
-     Static Library (.lib)
-
-3. Under C/C++ -> General -> Additional Include Directories, add
-     ..\include, ..\win32\lib
-
-4. Under C/C++ -> Preprocessor -> Preprocessor Definitions, add
-    WIN32_LEAN_AND_MEAN
-    _CRT_SECURE_NO_WARNINGS
-
-5. Switch to the debug configuration
-   Under Librarian -> General -> Additional Dependencies, add
-     dnsapi.lib ws2_32.lib zlibd.lib libeay32MDd.lib libssl32MDd.lib
-
-6. Switch to the release configuration
-   Under Librarian -> General -> Additional Dependencies, add
-     dnsapi.lib ws2_32.lib zlib.lib libeay32MD.lib libssl32MD.lib
-

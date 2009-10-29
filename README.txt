@@ -3,6 +3,12 @@ ABOUT
 An attempt to write an ABI-compatible libspotify clone with
 technology from the despotify project.
 
+Most API calls in libspotify 0.0.2 are implemented. Some have stubs.
+See STATUS for more information.
+
+Questions?
+Post them to noah.williamsson at gmail.com
+
 
 DEVELOPMENT
 ===========
@@ -14,8 +20,8 @@ STATUS
 ======
 Modules (from the below link) that are implemented so far are:
 http://developer.spotify.com/en/libspotify/docs/modules.html
-* Error Handling	- Completed
-* Session handling 	- All but sp_session_player_*() API calls and music delivery
+* Error Handling	- Completed, but likely a bit buggy
+* Session handling 	- All but sp_session_player_*() API calls and music delivery (WIP as of October)
 * Links (Spotify URIs)	- All but spotify:user: (playlist) URIs
 * Tracks subsystem	- Completed
 * Album subsystem	- Completed
@@ -28,13 +34,20 @@ http://developer.spotify.com/en/libspotify/docs/modules.html
 * User handling		- Completed
 
 
+BUILDING
+========
+Project files for Microsoft Visual Studio C++, Apple Xcode aswell as
+a UNIX makefile are included. 
+
+There are a few random notes in BUILDING.txt with additional information.
+
+
 BUGS
 ====
 * Searches don't adhere to album and artist offset and count
 * No local data cache
-* The reference counting could have been done better and is likely buggy
+* GC of ref counted objects could have been done better and is likely buggy
 * Not all routines support multiple callbacks (different function ptrs and userdata)
-* Not all resources have their initial error set to SP_ERROR_RESOURCE_NOT_LOADED and they never fail with a permanent error
 * The internal thread notification/message passing part is a bit messy.. 
 
 
@@ -45,15 +58,15 @@ examples/
   to link against libopenspotify.
 
 include/
-- Only contains <spotify/api.h>
+- Only contains <spotify/api.h> from libspotify 0.0.2
 
 libopenspotify/
 - The libspotify clone, built as a shared library on Unix
-  and as a static library on Windows
+  and with static and shared (.DLL) release and debug targets
+  on Windows
 
 openspotify-simple/
-- Test client that login and logouts twice
+- Test code that simply logs in and out twice
  
 win32/
-- Bundled openssl and zlib headers and libraries for Windows 
-
+- Bundled openssl, zlib and jpeglib headers and libraries for Windows 
