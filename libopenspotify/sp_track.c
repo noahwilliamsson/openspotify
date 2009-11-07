@@ -241,7 +241,6 @@ int osfy_track_load_from_xml(sp_session *session, sp_track *track, ezxml_t track
 		return -1;
 	}
 
-	assert(strlen(node->txt) < 256);
 	track->name = realloc(track->name, strlen(node->txt) + 1);
 	strcpy(track->name, node->txt);
 	
@@ -522,6 +521,7 @@ int osfy_track_metadata_load_from_disk(sp_session *session, char *filename) {
 	if((fd = fopen(filename, "r")) == NULL)
 		return -1;
 	
+	/* FIXME: Don't assume lengths on track/artist/album names */
 	buf[256] = 0;
 	while(!feof(fd)) {
 		if(fread(id16, sizeof(id16), 1, fd) == 1)

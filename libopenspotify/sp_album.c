@@ -157,7 +157,6 @@ int osfy_album_load_from_album_xml(sp_session *session, sp_album *album, ezxml_t
 		return -1;
 	}
 	
-	assert(strlen(node->txt) < 256);
 	album->name = realloc(album->name, strlen(node->txt) + 1);
 	strcpy(album->name, node->txt);
 	
@@ -270,7 +269,6 @@ int osfy_album_load_from_search_xml(sp_session *session, sp_album *album, ezxml_
 		return -1;
 	}
 	
-	assert(strlen(node->txt) < 256);
 	album->name = realloc(album->name, strlen(node->txt) + 1);
 	strcpy(album->name, node->txt);
 	
@@ -359,7 +357,6 @@ int osfy_album_load_from_track_xml(sp_session *session, sp_album *album, ezxml_t
 		return -1;
 	}
 	
-	assert(strlen(node->txt) < 256);
 	album->name = realloc(album->name, strlen(node->txt) + 1);
 	strcpy(album->name, node->txt);
 	

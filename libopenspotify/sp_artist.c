@@ -120,7 +120,6 @@ int osfy_artist_load_artist_from_xml(sp_session *session, sp_artist *artist, ezx
 		return -1;
 	}
 
-	assert(strlen(node->txt) < 256);
 	artist->name = realloc(artist->name, strlen(node->txt) + 1);
 	strcpy(artist->name, node->txt);
 
@@ -159,7 +158,6 @@ int osfy_artist_load_track_artist_from_xml(sp_session *session, sp_artist *artis
 		}
 		
 		/* Artist name */
-		assert(strlen(name_node->txt) < 256);
 		artist->name = realloc(artist->name, strlen(name_node->txt) + 1);
 		strcpy(artist->name, name_node->txt);
 		break;
@@ -201,7 +199,6 @@ int osfy_artist_load_album_artist_from_xml(sp_session *session, sp_artist *artis
 		return -1;
 	}
 	
-	assert(strlen(node->txt) < 256);
 	artist->name = realloc(artist->name, strlen(node->txt) + 1);
 	strcpy(artist->name, node->txt);
 	
