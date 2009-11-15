@@ -209,10 +209,12 @@ static int search_parse_xml(struct search_ctx *search_ctx) {
 	}
 	
 	
-	search->total_tracks = atoi(node->txt);
+	/* Get number of total tracks */
 	if((node = ezxml_get(root, "total-tracks", -1)) == NULL)
 		return -1;
 	
+	search->total_tracks = atoi(node->txt);
+
 	
 	/* Load tracks */
 	search->num_tracks = 0;
