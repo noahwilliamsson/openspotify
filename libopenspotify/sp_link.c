@@ -60,8 +60,18 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 	lnk->refs      = 1;
 	
 	/* Link refers to a track. */
-	if(strncmp("track:", ptr, 6) == 0){
+	if(strncmp("track:", ptr, 6) == 0 && strlen(ptr) >= 28) {
+		unsigned int minutes, seconds;
 		ptr += 6;
+
+		if(strlen(ptr) > 28 && ptr[28] == '#') {
+			if(sscanf(ptr + 29, "%u:%u", &minutes, &seconds) != 2) {
+				sp_link_release(lnk);
+				return NULL;
+			}
+
+			/* XXX - Calculate track offset */
+		}
 
 		id_uri_to_bytes(ptr, id);
 
@@ -76,7 +86,7 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 		}
 	}
 	/* Link refers to an album. */
-	else if(strncmp("album:", ptr, 6) == 0){
+	else if(strncmp("album:", ptr, 6) == 0 && strlen(ptr) == 28) {
 		ptr += 6;
 
 		id_uri_to_bytes(ptr, id);
@@ -92,7 +102,7 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 		}
 	}
 	/* Link refers to an artist. */
-	else if(strncmp("artist:", ptr, 7) == 0){
+	else if(strncmp("artist:", ptr, 7) == 0 && strlen(ptr) == 29) {
 		ptr += 7;
 
 		id_uri_to_bytes(ptr, id);
@@ -108,7 +118,7 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 		}
 	}
 	/* Link is a search query. */
-	else if(strncmp("search:", ptr, 7) == 0){
+	else if(strncmp("search:", ptr, 7) == 0 && strlen(ptr) >= 29) {
 		ptr += 7;
 
 		lnk->type        = SP_LINKTYPE_SEARCH;
@@ -116,11 +126,16 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 		sp_search_add_ref(lnk->data.search);
 	}
 	/* Link probably refers to a playlist. */
-	else if(strncmp("user:", ptr, 5) == 0){
+	else if(strncmp("user:", ptr, 5) == 0) {
 		char username[256];
 		unsigned char len;
 		
 		ptr += 5;
+		if(strchr(ptr, ':') == NULL) {
+			sp_link_release(lnk);
+			return NULL;
+		}
+
 		len  = strchr(ptr, ':') - ptr;
 		
 		/* Copy username from link. */
@@ -130,7 +145,7 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 		ptr += len + 1;
 		
 		/* Link actually refers to a playlist. */
-		if(strncmp("playlist:", ptr, 9) == 0){
+		if(strncmp("playlist:", ptr, 9) == 0) {
 			ptr += 9;
 
 			id_uri_to_bytes(ptr, id);
@@ -138,7 +153,7 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 			lnk->type          = SP_LINKTYPE_PLAYLIST;
 			lnk->data.playlist = NULL; //FIXME: playlist_add and refcount
 		}
-		else{
+		else {
 			sp_link_release(lnk);
 			
 			return NULL;
