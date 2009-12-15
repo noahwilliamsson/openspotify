@@ -8,6 +8,9 @@ TODO list
   -- Caching of data
 * Playlists
   -- Add support for creating/adding/modifying/removing tracks and playlists
+  -- Adding an invalid playlist URI will trigger the add callback, will mark
+     the playlist not loaded, and after 30 seconds the remove callback will 
+     be called (libspotify 0.0.2)
 * Links
   -- libspotify doesn't pull metadata on sp_link_create_from_string() so we shouldn't either
 * General
