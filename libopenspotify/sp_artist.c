@@ -39,7 +39,7 @@ SP_LIBEXPORT(void) sp_artist_release(sp_artist *artist) {
 	if(--artist->ref_count)
 		return;
 
-	DSFYDEBUG("Freeing artist %p because of zero ref count\n", artist);
+	DSFYDEBUG("Deallocated artist at %p\n", artist);
 	osfy_artist_free(artist);
 }
 
@@ -63,6 +63,8 @@ sp_artist *osfy_artist_add(sp_session *session, unsigned char id[16]) {
 	if(artist == NULL)
 		return NULL;
 	
+	DSFYDEBUG("Allocated artist at %p\n", artist);
+
 	memcpy(artist->id, id, sizeof(artist->id));
 
 	artist->name = NULL;
@@ -73,8 +75,6 @@ sp_artist *osfy_artist_add(sp_session *session, unsigned char id[16]) {
 	artist->hashtable = session->hashtable_artists;
 	hashtable_insert(artist->hashtable, artist->id, artist);
 
-
-	DSFYDEBUG("Returning new artist at %p (ref_count 0)\n", artist);
 	return artist;
 }
 

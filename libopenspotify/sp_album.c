@@ -88,6 +88,7 @@ sp_album *sp_album_add(sp_session *session, unsigned char id[16]) {
 		return album;
 
 	album = malloc(sizeof(sp_album));
+	DSFYDEBUG("Allocated album at %p\n", album);
 
 	memcpy(album->id, id, sizeof(album->id));
 
@@ -126,6 +127,7 @@ void osfy_album_free(sp_album *album) {
 	if(album->image)
 		sp_image_release(album->image);
 
+	DSFYDEBUG("Deallocated album at %p\n", album);
 	free(album);
 }
 

@@ -43,6 +43,7 @@ SP_LIBEXPORT(sp_albumbrowse *) sp_albumbrowse_create(sp_session *session, sp_alb
 	
 	alb->album = album;
 	sp_album_add_ref(alb->album);
+	DSFYDEBUG("Referenced album at %p\n", alb->album);
 
 	
 	alb->artist = NULL;
@@ -380,8 +381,10 @@ SP_LIBEXPORT(void) sp_albumbrowse_release(sp_albumbrowse *alb) {
 		free(alb->review);
 
 
-	if(alb->album)
+	if(alb->album) {
 		sp_album_release(alb->album);
+		DSFYDEBUG("Unreferenced album at %p\n", alb->album);
+	}
 
 
 	if(alb->artist)

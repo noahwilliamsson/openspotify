@@ -125,6 +125,8 @@ sp_track *osfy_track_add(sp_session *session, unsigned char id[16]) {
 	if(track == NULL)
 		return NULL;
 
+	DSFYDEBUG("Allocated track at %p\n", track);
+
 	track->hashtable = session->hashtable_tracks;
 	hashtable_insert(track->hashtable, id, track);
 
@@ -181,6 +183,8 @@ void osfy_track_free(sp_track *track) {
 	
 	if(track->allowed_countries)
 		free(track->allowed_countries);
+
+	DSFYDEBUG("Deallocated track at %p\n", track);
 
 	free(track);
 }

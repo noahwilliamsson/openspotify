@@ -44,6 +44,7 @@ SP_LIBEXPORT(sp_artistbrowse *) sp_artistbrowse_create(sp_session *session, sp_a
 
 	arb->artist = artist;
 	sp_artist_add_ref(artist);
+	DSFYDEBUG("Referenced artist at %p\n", arb->artist);
 
 	arb->num_tracks = 0;
 	arb->tracks = NULL;
@@ -395,8 +396,10 @@ SP_LIBEXPORT(void) sp_artistbrowse_release(sp_artistbrowse *arb) {
 
 	hashtable_remove(arb->hashtable, arb->artist->id);
 
-	if(arb->artist)
+	if(arb->artist) {
 		sp_artist_release(arb->artist);
+		DSFYDEBUG("Unreferenced artist at %p\n", arb->artist);
+	}
 
 
 	for(i = 0; i < arb->num_tracks; i++)
@@ -421,6 +424,5 @@ SP_LIBEXPORT(void) sp_artistbrowse_release(sp_artistbrowse *arb) {
 
 
 	DSFYDEBUG("Deallocated artistbrowse at %p\n", arb);
-
 	free(arb);
 }

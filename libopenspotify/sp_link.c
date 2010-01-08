@@ -55,6 +55,7 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_string (const char *link) {
 	if((lnk = (sp_link *)malloc(sizeof(sp_link))) == NULL)
 		return NULL;
 	
+	DSFYDEBUG("Allocated link at %p\n", lnk);
 	lnk->type      = SP_LINKTYPE_INVALID;
 	lnk->data.data = NULL;
 	lnk->refs      = 1;
@@ -183,6 +184,8 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_track (sp_track *track, int offset) 
 	if((link = (sp_link *)malloc(sizeof(sp_link))) == NULL)
 		return NULL;
 	
+	DSFYDEBUG("Allocated link at %p\n", link);
+
 	link->type       = SP_LINKTYPE_TRACK;
 	link->data.track = track;
 	sp_track_add_ref(track);
@@ -201,6 +204,8 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_album (sp_album *album) {
 	if((link = (sp_link *)malloc(sizeof(sp_link))) == NULL)
 		return NULL;
 	
+	DSFYDEBUG("Allocated link at %p\n", link);
+
 	link->type       = SP_LINKTYPE_ALBUM;
 	link->data.album = album;
 	sp_album_add_ref(album);
@@ -219,6 +224,8 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_artist (sp_artist *artist) {
 	if((link = (sp_link *)malloc(sizeof(sp_link))) == NULL)
 		return NULL;
 	
+	DSFYDEBUG("Allocated link at %p\n", link);
+
 	link->type        = SP_LINKTYPE_ARTIST;
 	link->data.artist = artist;
 	sp_artist_add_ref(artist);
@@ -237,6 +244,8 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_search (sp_search *search) {
 	if((link = (sp_link *)malloc(sizeof(sp_link))) == NULL)
 		return NULL;
 	
+	DSFYDEBUG("Allocated link at %p\n", link);
+
 	link->type        = SP_LINKTYPE_SEARCH;
 	link->data.search = search;
 	sp_search_add_ref(search);
@@ -255,6 +264,8 @@ SP_LIBEXPORT(sp_link *) sp_link_create_from_playlist (sp_playlist *playlist) {
 	if((link = (sp_link *)malloc(sizeof(sp_link))) == NULL)
 		return NULL;
 	
+	DSFYDEBUG("Allocated link at %p\n", link);
+
 	link->type          = SP_LINKTYPE_PLAYLIST;
 	link->data.playlist = playlist;
 	/* FIXME: Add ref for playlist? */
@@ -387,6 +398,7 @@ SP_LIBEXPORT(void) sp_link_release (sp_link *link) {
 	if(--link->refs > 0)
 		return;
 
+	DSFYDEBUG("Deallocated link at %p\n", link);
 	free(link);
 }
 
