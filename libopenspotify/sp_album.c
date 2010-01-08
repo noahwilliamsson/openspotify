@@ -168,12 +168,13 @@ int osfy_album_load_from_album_xml(sp_session *session, sp_album *album, ezxml_t
 	strcpy(album->name, node->txt);
 	
 	
-	/* Album year */
+	/* Album year. Might be empty, i.e '<year/>' */
 	if((node = ezxml_get(album_node, "year", -1)) == NULL) {
 		DSFYDEBUG("Failed to find element 'year'\n");
 		return -1;
 	}
 	
+	DSFYDEBUG("Got album year '%s'\n", node->txt);
 	album->year = atoi(node->txt);
 	
 	
