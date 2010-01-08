@@ -148,7 +148,14 @@ int osfy_album_load_from_album_xml(sp_session *session, sp_album *album, ezxml_t
 	}
 	
 	hex_ascii_to_bytes(node->txt, id, sizeof(album->id));
-	assert(memcmp(album->id, id, sizeof(album->id)) == 0);
+	if(memcmp(album->id, id, sizeof(album->id)) != 0) {
+		/*
+		 * XXX - This used to be an assert() - safe to ignore?
+		 * A browse for album ID 'A' might return album with ID 'B'
+		 *
+		 */
+		DSFYDEBUG("Browse returned ID '%s' instead of the one we expected\n", node->txt);
+	}
 	
 	
 	/* Album name */
