@@ -73,6 +73,7 @@ SP_LIBEXPORT(int) sp_track_duration(sp_track *track) {
 
 SP_LIBEXPORT(int) sp_track_popularity(sp_track *track) {
 
+	/* XXX - This should be kept as a double and converted to int in here instead */
 	return track->popularity;
 }
 
