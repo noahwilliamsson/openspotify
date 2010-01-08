@@ -229,17 +229,18 @@ int osfy_album_load_from_album_xml(sp_session *session, sp_album *album, ezxml_t
 	
 	
 	/* Album cover */
-	if((node = ezxml_get(album_node, "cover", -1)) == NULL) {
-		DSFYDEBUG("Failed to find element 'cover'\n");
-		return -1;
-	}
-	
 	if(album->image != NULL)
 		sp_image_release(album->image);
-	
-	hex_ascii_to_bytes(node->txt, id, 20);
-	album->image = osfy_image_create(session, id);
-	sp_image_add_ref(album->image);
+
+	album->image = NULL;
+	if((node = ezxml_get(album_node, "cover", -1)) != NULL) {
+		hex_ascii_to_bytes(node->txt, id, 20);
+		album->image = osfy_image_create(session, id);
+		sp_image_add_ref(album->image);
+	}
+	else {
+		DSFYDEBUG("Failed to find element 'cover'\n");
+	}
 	
 	
 	/* Done loading */
