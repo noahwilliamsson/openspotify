@@ -245,15 +245,6 @@ int osfy_track_load_from_xml(sp_session *session, sp_track *track, ezxml_t track
 	strcpy(track->name, node->txt);
 	
 
-	/* Track duration */
-	if((node = ezxml_get(track_node, "length", -1)) == NULL) {
-		DSFYDEBUG("Failed to find element 'length'\n");
-		return -1;
-	}
-	
-	track->duration = atoi(node->txt);
-
-	
 	/* Track popularity */
 	if((node = ezxml_get(track_node, "popularity", -1)) == NULL) {
 		DSFYDEBUG("Failed to find element 'popularity'\n");
@@ -261,7 +252,7 @@ int osfy_track_load_from_xml(sp_session *session, sp_track *track, ezxml_t track
 	}
 	
 	sscanf(node->txt, "%lf", &popularity);
-	track->popularity = (int)popularity;
+	track->popularity = (int)(100 * popularity);
 
 
 	/* Country restrictions */
@@ -278,14 +269,47 @@ int osfy_track_load_from_xml(sp_session *session, sp_track *track, ezxml_t track
 	}
 	
 	
-	/* ID of file */
-	node = ezxml_get(track_node, "files", 0, "file", -1);
-	if(node && (str = ezxml_attr(node, "id")) != NULL) {
+	/*
+	 * Grab ID of file
+	 * Multiple files might be listed here, all with different bit rates
+	 * Zero 'file' elements indicates the file is not available.
+	 *
+	 * Example:
+	 * <files>
+	 *   <file id="cfe68177e9eb9526b7b441f6147d1c5a9a07ca62" format="Ogg Vorbis,160000,1,32,4"/>
+	 *   <file id="bf1314d9814795f64a995c6dc8a9b6cc12b952d6" format="Ogg Vorbis,96000,1,32,4"/>
+	 * </files>
+	 *
+	 */
+	memset(track->file_id, 0, sizeof(track->file_id));
+	for(node = ezxml_get(track_node, "files", 0, "file", -1);
+	    node;
+	    node = node->next) {
+		/* XXX - Only care about 160kbit/s files for now */
+		str = ezxml_attr(node, "format");
+		if(!strstr(str, "160000")) {
+			continue;
+		}
+
+		str = ezxml_attr(node, "id");
+		assert(str != NULL);
 		hex_ascii_to_bytes(str, id, sizeof(track->file_id));
 		memcpy(track->file_id, id, sizeof(track->file_id));
 	}
 
 	
+	/* Track duration */
+	if((node = ezxml_get(track_node, "length", -1)) != NULL) {
+		track->duration = atoi(node->txt);
+	}
+	else {
+		/* Track duration defaults to zero so no update is needed */
+
+		track->is_available = 0;
+		DSFYDEBUG("Track has no length, files are not available\n");
+	}
+
+
 	/* Add artists */
 	for(node = ezxml_get(track_node, "artist-id", -1);
 	    node;
