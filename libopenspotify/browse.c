@@ -194,10 +194,13 @@ static int browse_send_generic_request(sp_session *session, struct request *req)
 			break;
 
 		default:
+			browse_type = 0;
 			DSFYDEBUG("BUG: Can't handle <type %s>\n", REQUEST_TYPE_STR(req->type));
 			break;
 	}
 
+	/* Need to have a valid browse type */
+	assert(browse_type != 0);
 	
 	/* Buffer to hold data (gzip'd XML) retrieved */
 	assert(brctx->buf == NULL);
