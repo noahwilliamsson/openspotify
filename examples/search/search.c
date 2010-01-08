@@ -162,7 +162,7 @@ void metadata_updated(sp_session *session)
  */
 void session_ready(sp_session *session)
 {
-	g_search = sp_search_create(session, "year:2003 never", 0, 10,
+	g_search = sp_search_create(session, "year:2003 never", 0, 10, 0, 10, 0, 10,
 	                            &search_complete, NULL);
 
 	if (!g_search) {
