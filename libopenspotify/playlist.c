@@ -91,6 +91,8 @@ struct callback_ctx {
 int playlist_process(sp_session *session, struct request *req) {
 	int ret;
 	
+	ret = 0;
+
 	if(req->state == REQ_STATE_NEW)
 		req->state = REQ_STATE_RUNNING;
 	
