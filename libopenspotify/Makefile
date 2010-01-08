@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -ggdb -I../include -fPIC -DDEBUG
+CFLAGS = -Wall -ggdb -I../include -fPIC -DDEBUG -O2
 LDFLAGS = -lcrypto -lresolv -lz -ljpeg
 # Default symbol visibility in the library; we only need to export the sp_*() functions
 #CFLAGS += -fvisibility=hidden
