@@ -40,6 +40,7 @@ SP_LIBEXPORT(sp_artistbrowse *) sp_artistbrowse_create(sp_session *session, sp_a
 	if(arb == NULL)
 		return NULL;
 	
+	DSFYDEBUG("Allocated artistbrowse at %p\n", arb);
 
 	arb->artist = artist;
 	sp_artist_add_ref(artist);
@@ -418,6 +419,8 @@ SP_LIBEXPORT(void) sp_artistbrowse_release(sp_artistbrowse *arb) {
 	if(arb->num_similar_artists)
 		free(arb->similar_artists);
 
+
+	DSFYDEBUG("Deallocated artistbrowse at %p\n", arb);
 
 	free(arb);
 }
