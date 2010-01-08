@@ -15,6 +15,9 @@ DEVELOPMENT
 The latest code can be pulled from http://github.com/noahwilliamsson/openspotify
   $ git clone git://github.com/noahwilliamsson/openspotify.git
 
+Once checked out, the latest version can be pulled using:
+  $ git pull
+
 
 STATUS
 ======
@@ -67,6 +70,7 @@ libopenspotify/
 
 openspotify-simple/
 - Test code that simply logs in and out twice
+- Pretty much useless and should be removed
  
 win32/
 - Bundled openssl, zlib and jpeglib headers and libraries for Windows 
