@@ -39,7 +39,7 @@ SP_LIBEXPORT(sp_albumbrowse *) sp_albumbrowse_create(sp_session *session, sp_alb
 	if(alb == NULL)
 		return NULL;
 
-	DSFYDEBUG("alb malloced at %p\n", alb);
+	DSFYDEBUG("Allocated albumbrowse at %p\n", alb);
 	
 	alb->album = album;
 	sp_album_add_ref(alb->album);
@@ -386,4 +386,8 @@ SP_LIBEXPORT(void) sp_albumbrowse_release(sp_albumbrowse *alb) {
 
 	if(alb->artist)
 		sp_artist_release(alb->artist);
+
+	DSFYDEBUG("Deallocated albumbrowse at %p\n", alb);
+
+	free(alb);
 }
