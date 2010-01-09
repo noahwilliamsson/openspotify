@@ -112,6 +112,18 @@ static int osfy_artistbrowse_browse_callback(struct browse_callback_ctx *brctx) 
 	struct buf *xml;
 	ezxml_t root;
 	
+	for(i = 0; i < brctx->num_in_request; i++) {
+		arb = brctx->data.artistbrowses[brctx->num_browsed + i];
+
+		/* Set defaults */
+		arb->is_loaded = 0;
+		arb->error = SP_ERROR_OTHER_PERMAMENT;
+	}
+
+	/* Might happen because of a channel error */
+	if(brctx->buf == NULL)
+		return -1;
+	
 	xml = despotify_inflate(brctx->buf->ptr, brctx->buf->len);
 	{
 		FILE *fd;
@@ -134,6 +146,8 @@ static int osfy_artistbrowse_browse_callback(struct browse_callback_ctx *brctx) 
 	for(i = 0; i < brctx->num_in_request; i++) {
 		arb = brctx->data.artistbrowses[brctx->num_browsed + i];
 		osfy_artistbrowse_load_from_xml(brctx->session, arb, root);
+		arb->is_loaded = 1;
+		arb->error = SP_ERROR_OK;
 	}
 	
 	
@@ -306,9 +320,6 @@ static int osfy_artistbrowse_load_from_xml(sp_session *session, sp_artistbrowse 
 	} /* for each album */
 	
 	assert(arb->num_tracks != 0);
-	
-	arb->is_loaded = 1;
-	arb->error = SP_ERROR_OK;
 	
 	return 0;
 }
