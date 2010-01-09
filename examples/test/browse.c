@@ -39,11 +39,11 @@ static sp_search *g_search;
 static void print_artistbrowse(sp_artistbrowse *browse);
 static void SP_CALLCONV test_artistbrowse_callback(sp_artistbrowse *browse, void *userdata);
 static void SP_CALLCONV test_albumbrowse_callback(sp_albumbrowse *browse, void *userdata);
-static void test_search_callback(sp_search *result, void *userdata);
+static void SP_CALLCONV test_search_callback(sp_search *result, void *userdata);
 static void print_albumbrowse(sp_albumbrowse *browse);
 
 
-void test_username(sp_session *session, void *arg) {
+void SP_CALLCONV test_username(sp_session *session, void *arg) {
         sp_user *me;
 
 	me = sp_session_user(session);
@@ -60,7 +60,7 @@ void test_username(sp_session *session, void *arg) {
 }
 
 
-void test_link_artist(sp_session *session, void *arg) {
+void SP_CALLCONV test_link_artist(sp_session *session, void *arg) {
 	char *uri = "spotify:artist:1cB013ULmW96lglRcrWTut";
 	sp_link *link;
 	static sp_artist *artist;
@@ -86,7 +86,7 @@ void test_link_artist(sp_session *session, void *arg) {
 
 
 
-void test_artistbrowse(sp_session *session, void *arg) {
+void SP_CALLCONV test_artistbrowse(sp_session *session, void *arg) {
 	/* Carefully chosen with umlauts in track, artist and album name */
 	char *uri = "spotify:artist:3H7Ez7cwaYw4L3ELy4v3Lc";
 	sp_link *link;
@@ -117,7 +117,7 @@ void test_artistbrowse(sp_session *session, void *arg) {
 }
 
 
-void test_logout(sp_session *session, void *arg) {
+void SP_CALLCONV test_logout(sp_session *session, void *arg) {
 	sp_error error;
 	static int waiting;
 
@@ -152,7 +152,7 @@ static void SP_CALLCONV test_artistbrowse_callback(sp_artistbrowse *browse, void
 }
 
 
-void test_albumbrowse(sp_session *session, void *arg) {
+void SP_CALLCONV test_albumbrowse(sp_session *session, void *arg) {
 	/* Carefully chosen with umlauts in track, artist and album name */
 	//char *uri = "spotify:album:2iouxw5ZVeqUt59FWoxlz7";
 	char *uri = "spotify:album:7aq1X1n4Ps6e2w7WWtiUK6";
@@ -211,7 +211,7 @@ static void SP_CALLCONV test_search(sp_session *session, void *arg) {
 	DSFYDEBUG("Initiated search\n");
 }
 
-static void test_search_callback(sp_search *result, void *userdata) {
+static void SP_CALLCONV test_search_callback(sp_search *result, void *userdata) {
 	DSFYDEBUG("Search completed, tracks=%d, albums=%d, artists=%d\n", 
 		sp_search_num_tracks(result), sp_search_num_albums(result),
 		sp_search_num_artists(result));

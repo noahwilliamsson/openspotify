@@ -76,9 +76,6 @@ static void SP_CALLCONV connection_error(sp_session *session, sp_error error) {
 
 
 static void  SP_CALLCONV logged_in(sp_session *session, sp_error error) {
-	sp_user *me;
-	const char *my_name;
-
 	DSFYDEBUG("SESSION CALLBACK\n");
 	if (SP_ERROR_OK != error) {
 		fprintf(stderr, "failed to log in to Spotify: %s\n",

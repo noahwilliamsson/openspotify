@@ -15,7 +15,7 @@ void test_init(sp_session *session) {
 }
 
 
-void test_add(char *name, test_callback *callback, void *arg) {
+void test_add(char *name, test_callback callback, void *arg) {
 	test->name = realloc(test->name, sizeof(char *) * (1 + test->num_tests));
 	test->name[test->num_tests] = strdup(name);
 
@@ -35,7 +35,7 @@ void test_start(void) {
 
 
 int test_run(void) {
-	test_callback *callback;
+	test_callback callback;
 
 	if(!test->running)
 		return 0;
