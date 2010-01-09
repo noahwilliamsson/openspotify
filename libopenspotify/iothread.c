@@ -238,6 +238,19 @@ static int process_login_request(sp_session *s, struct request *req) {
 			return request_set_result(s, req, SP_ERROR_OTHER_TRANSIENT, NULL);
 	}
 
+	/*
+	 * A call to sp_session_logout() will post a REQ_TYPE_LOGOUT
+	 * It will trigger a call to process_logout_request() which in turn
+	 * will call login_release() on s->login and set it to NULL.
+	 * 
+	 * We check for this condition here and return SP_ERROR_OTHER_TRANSIENT
+	 *
+	 */
+	if(s->login == NULL) {
+		/* Fail login with SP_ERROR_OTHER_TRANSIENT */
+		return request_set_result(s, req, SP_ERROR_OTHER_TRANSIENT, NULL);
+	}
+
 	ret = login_process(s->login);
 	if(ret == 0)
 		return 0;
@@ -313,6 +326,12 @@ static int process_logout_request(sp_session *session, struct request *req) {
 
 	/* If a login is still in process, cancel it here */
         if(session->login) {
+		/*
+		 * We ought to cancel a pending login request here.
+		 * Instead we rely on process_login_request() to detect
+		 * that session->login became NULL
+		 *
+		 */
                 login_release(session->login);
                 session->login = NULL;
         }
