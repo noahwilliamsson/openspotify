@@ -16,6 +16,7 @@
 #include <resolv.h>
 #endif
 
+#include "debug.h"
 #include "dns.h"
 
 static int initialized;
