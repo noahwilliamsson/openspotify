@@ -152,16 +152,6 @@ SP_LIBEXPORT(sp_connectionstate) sp_session_connectionstate (sp_session *session
 
 SP_LIBEXPORT(sp_error) sp_session_logout (sp_session *session) {
 
-	if(session->login) {
-		login_release(session->login);
-		session->login = NULL;
-	}
-	
-	if(session->user) {
-		user_release(session->user);
-		session->user = NULL;
-	}
-
 	DSFYDEBUG("Posting REQ_TYPE_LOGOUT\n");
 	request_post(session, REQ_TYPE_LOGOUT, NULL);
 

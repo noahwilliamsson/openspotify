@@ -301,8 +301,27 @@ static int process_login_request(sp_session *s, struct request *req) {
  * High-level handling of logout requests
  * FIXME: Do we need to send some kind of "goodbye" packet first?
  *
+ * FIXME: The official library attempts to finish up things for a few
+ *        seconds before forcing a logout.
+ *        An example is when playlists are modified. They're modified 
+ *        on the local side immediately but syncing the changes to the
+ *        server might take additional time.
  */
 static int process_logout_request(sp_session *session, struct request *req) {
+
+	/* FIXME: We should probably cancel all requests in flight aswell */
+
+	/* If a login is still in process, cancel it here */
+        if(session->login) {
+                login_release(session->login);
+                session->login = NULL;
+        }
+
+	/* Get rid of our identity */
+        if(session->user) {
+                user_release(session->user);
+                session->user = NULL;
+        }
 
 	if(session->sock != -1) {
 #ifdef _WIN32
