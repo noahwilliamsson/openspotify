@@ -206,7 +206,7 @@ static void SP_CALLCONV test_search(sp_session *session, void *arg) {
 	if(waiting)
 		return;
 
-	g_search = sp_search_create(session, "knark", 0, 5, test_search_callback, NULL);
+	g_search = sp_search_create(session, "knark", 0, 5, 0, 5, 0, 5, test_search_callback, NULL);
 	waiting++;
 	DSFYDEBUG("Initiated search\n");
 }
