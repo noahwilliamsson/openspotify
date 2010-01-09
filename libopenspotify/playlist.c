@@ -201,12 +201,12 @@ static int playlistcontainer_callback(CHANNEL *ch, unsigned char *payload, unsig
 		break;
 
 	case CHANNEL_ERROR:
+		DSFYDEBUG("Error on channel '%s', will retry request in %dms\n",
+			ch->name, callback_ctx->req->next_timeout - get_millisecs());
+
 		buf_free(callback_ctx->session->playlistcontainer->buf);
 		callback_ctx->session->playlistcontainer->buf = NULL;
 		free(callback_ctx);
-
-		DSFYDEBUG("Error on channel '%s', will retry request in %dms\n",
-			ch->name, callback_ctx->req->next_timeout - get_millisecs());
 		break;
 
 	case CHANNEL_END:
