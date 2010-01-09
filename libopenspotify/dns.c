@@ -25,10 +25,14 @@ struct dns_srv_records *dns_get_service_list(char *hostname) {
 	struct dns_srv_records *root = NULL, *entry;
 	
 #ifdef _WIN32
+	DNS_STATUS ret;
 	PDNS_RECORD pRoot = NULL, p;
 
-	if(DnsQuery_A(hostname, DNS_TYPE_SRV, DNS_QUERY_STANDARD, NULL, &pRoot, NULL) != 0)
+	ret = DnsQuery_A(hostname, DNS_TYPE_SRV, DNS_QUERY_BYPASS_CACHE, NULL, &pRoot, NULL);
+	if(ret != 0) {
+		DSFYDEBUG("DnsQuery() failed status %d\n", ret);
 		return NULL;
+	}
 
 	for(p = pRoot; p != NULL; p = p->pNext) {
 		if(p->wType != DNS_TYPE_SRV)
