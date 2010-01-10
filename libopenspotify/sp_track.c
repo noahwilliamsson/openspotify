@@ -271,7 +271,7 @@ int osfy_track_load_from_xml(sp_session *session, sp_track *track, ezxml_t track
 	}
 
 	node = ezxml_get(track_node, "restrictions", 0, "restriction", -1);
-	if(node && (str = ezxml_attr(node, "forbidden")) != NULL) {
+	if(node && (str = ezxml_attr(node, "allowed")) != NULL) {
 		track->allowed_countries = realloc(track->allowed_countries, strlen(str) + 1);
 		strcpy(track->allowed_countries, str);
 	}
