@@ -141,7 +141,7 @@ sp_track *osfy_track_add(sp_session *session, unsigned char id[16]) {
 	track->artists = NULL;
 
 	/* FIXME: */
-	track->is_available = 1;
+	track->is_available = 0;
 	track->restricted_countries = NULL;
 	track->allowed_countries = NULL;
 
@@ -151,7 +151,7 @@ sp_track *osfy_track_add(sp_session *session, unsigned char id[16]) {
 	track->popularity = 0;
 
 	track->is_loaded = 0;
-	track->error = SP_ERROR_OK;
+	track->error = SP_ERROR_RESOURCE_NOT_LOADED;
 
 	track->ref_count = 0;
 
@@ -202,6 +202,9 @@ int osfy_track_load_from_xml(sp_session *session, sp_track *track, ezxml_t track
 	/* Track UUID */
 	if((node = ezxml_get(track_node, "id", -1)) == NULL) {
 		DSFYDEBUG("Failed to find element 'id'\n");
+		/* This might happen when a track that doesn't exist is browsed */
+
+		/* FIXME: Shouldn't we set track->error to SP_ERROR_OTHER_PERMANENT ? */
 		return -1;
 	}
 	
@@ -309,8 +312,6 @@ int osfy_track_load_from_xml(sp_session *session, sp_track *track, ezxml_t track
 	}
 	else {
 		/* Track duration defaults to zero so no update is needed */
-
-		track->is_available = 0;
 		DSFYDEBUG("Track has no length, files are not available\n");
 	}
 
@@ -375,7 +376,19 @@ int osfy_track_load_from_xml(sp_session *session, sp_track *track, ezxml_t track
 	}
 	
 	
+	/*
+	 * FIXME: Determine if the track is available or not.
+	 * It might not be available due to being forbidden in the user's
+	 * country or because it's not explicity allowed or because the
+	 * track have no files associated.
+	 *
+	 */
+	if(track->duration > 0) {
+		track->is_available = 1;
+	}
+
 	track->is_loaded = 1;
+	track->error = SP_ERROR_OK;
 
 	return 0;
 }
@@ -461,8 +474,11 @@ static int osfy_track_browse_callback(struct browse_callback_ctx *brctx) {
 	tracks = brctx->data.tracks;
 	for(i = 0; i < brctx->num_in_request; i++) {
 		node = ezxml_get(root, "tracks", 0, "track", -1);
-		osfy_track_load_from_xml(brctx->session, tracks[brctx->num_browsed + i], node);
-		assert(sp_track_is_loaded(tracks[brctx->num_browsed + i]));
+		if(osfy_track_load_from_xml(brctx->session, tracks[brctx->num_browsed + i], node)) {
+			DSFYDEBUG("Failed to load track %d of %d from XML, error is %s\n", 
+				brctx->num_browsed + i + 1, brctx->num_in_request,
+				tracks[brctx->num_browsed + i]->error);
+		}
 	}
 	
 	
