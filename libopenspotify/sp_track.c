@@ -475,7 +475,7 @@ static int osfy_track_browse_callback(struct browse_callback_ctx *brctx) {
 	for(i = 0; i < brctx->num_in_request; i++) {
 		node = ezxml_get(root, "tracks", 0, "track", -1);
 		if(osfy_track_load_from_xml(brctx->session, tracks[brctx->num_browsed + i], node)) {
-			DSFYDEBUG("Failed to load track %d of %d from XML, error is %s\n", 
+			DSFYDEBUG("Failed to load track %d of %d from XML, error is %d\n", 
 				brctx->num_browsed + i + 1, brctx->num_in_request,
 				tracks[brctx->num_browsed + i]->error);
 		}
