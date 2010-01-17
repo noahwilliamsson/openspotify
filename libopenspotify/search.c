@@ -75,7 +75,7 @@ static int search_callback(CHANNEL *ch, unsigned char *payload, unsigned short l
 				search_ctx->search->is_loaded = 1;
 			}
 			else
-				search_ctx->search->error = SP_ERROR_OTHER_PERMAMENT;
+				search_ctx->search->error = SP_ERROR_OTHER_PERMANENT;
 
 			request_set_result(search_ctx->session, search_ctx->req, search_ctx->search->error, search_ctx->search);
 

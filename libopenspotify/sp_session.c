@@ -208,6 +208,13 @@ SP_LIBEXPORT(void) sp_session_process_events(sp_session *session, int *next_time
 			session->callbacks->message_to_user(session, request->output);
 			break;
 				
+		case REQ_TYPE_PC_LOAD:
+			pc = session->playlistcontainer;
+			for(i = 0; i < pc->num_callbacks; i++)
+				if(pc->callbacks[i]->container_loaded)
+					pc->callbacks[i]->container_loaded(pc, pc->userdata[i]);
+			break;
+
 		case REQ_TYPE_PC_PLAYLIST_ADD:
 			value = *(int *)request->output; /* position */
 			pc = session->playlistcontainer;
@@ -232,7 +239,7 @@ SP_LIBEXPORT(void) sp_session_process_events(sp_session *session, int *next_time
 			playlist = (sp_playlist *)request->output;
 			for(i = 0; i < playlist->num_callbacks; i++)
 				if(playlist->callbacks[i]->tracks_added)
-					playlist->callbacks[i]->tracks_added(playlist, (const sp_track **)playlist->tracks, playlist->num_tracks, 0, playlist->userdata[i]);
+					playlist->callbacks[i]->tracks_added(playlist, (sp_track *const *)playlist->tracks, playlist->num_tracks, 0, playlist->userdata[i]);
 			
 			break;
 				

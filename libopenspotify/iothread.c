@@ -293,7 +293,7 @@ static int process_login_request(sp_session *s, struct request *req) {
 	case SP_LOGIN_ERROR_USER_NEED_TO_COMPLETE_DETAILS:
 	case SP_LOGIN_ERROR_USER_COUNTRY_MISMATCH:
 	case SP_LOGIN_ERROR_OTHER_PERMANENT:
-		error = SP_ERROR_OTHER_PERMAMENT;
+		error = SP_ERROR_OTHER_PERMANENT;
 		break;
 
 	case SP_LOGIN_ERROR_SOCKET_ERROR:

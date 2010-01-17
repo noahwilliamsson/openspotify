@@ -117,7 +117,7 @@ static int osfy_artistbrowse_browse_callback(struct browse_callback_ctx *brctx) 
 
 		/* Set defaults */
 		arb->is_loaded = 0;
-		arb->error = SP_ERROR_OTHER_PERMAMENT;
+		arb->error = SP_ERROR_OTHER_PERMANENT;
 	}
 
 	/* Might happen because of a channel error */

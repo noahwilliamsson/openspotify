@@ -23,34 +23,17 @@ A static build (/MD) of Zlib 1.2.3 is bundled in win32/{lib,include}
 http://www.winimage.com/zLibDll/
 It was built using the static release and debug configurations.
 
-A static build (/MD) of jpeg 7 is bundled in win32/{lib,include}
-http://ijg.org/
-It was built using the release configuration and a modified (/MDd)
-debug configuration based on the release configuration
-
 
 UNIX
 ====
-Requires openssl, zlib and libjpeg development headers and libraries
+Requires openssl and zlib development headers and libraries.
+On Mac OS X all dependencies comes by default.
 
 On Ubuntu Linux the dependencies can be installed with this command:
-$ sudo apt-get install libssl-dev zlib1g-dev libjpeg62-dev
+$ sudo apt-get install libssl-dev zlib1g-dev
 
 The library can then be build using the following command:
 $ cd libopenspotify && make clean all
 
 If you want to test openspotify-simple with the official library:
 $ cd openspotify-simple && make libspotify=1 clean all
-
-
-MAC OS X
-========
-On Mac OS X all dependencies but libjpeg comes by default.
-You can download it from here: http://www.ijg.org/
-
-Here's an example of how it can be downloaded and installed.
-$ cd /tmp
-$ curl http://www.ijg.org/files/jpegsrc.v7.tar.gz | tar zxf -
-$ cd jpeg-7
-$ ./configure --prefix=/usr && make -j4 && sudo make install
-

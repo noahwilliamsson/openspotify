@@ -119,14 +119,8 @@ struct sp_artist {
 struct sp_image {
 	unsigned char id[20];
 
-	int width;
-	int height;
-
 	/* compressed JPG */
 	struct buf *data;
-
-	/* raw format, default NULL, set after sp_image_lock_pixels() */
-	struct buf *raw;
 
 	sp_imageformat format;
 

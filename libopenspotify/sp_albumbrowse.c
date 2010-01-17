@@ -180,7 +180,7 @@ static int osfy_albumbrowse_load_from_xml(sp_session *session, sp_albumbrowse *a
 	/* Load artist */
 	if((node = ezxml_get(root, "artist-id", -1)) == NULL) {
 		DSFYDEBUG("Failed to find element 'artist-id'\n");
-		alb->error = SP_ERROR_OTHER_PERMAMENT;
+		alb->error = SP_ERROR_OTHER_PERMANENT;
 		return -1;
 	}
 	

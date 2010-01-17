@@ -49,7 +49,7 @@ SP_LIBEXPORT(const char *) sp_error_message(sp_error error) {
 		msg = "Client is too old, library will need to be updated.";
 		break;
 
-	case SP_ERROR_OTHER_PERMAMENT:
+	case SP_ERROR_OTHER_PERMANENT:
 		msg = "Some other error occured, and it is permanent (e.g. trying to relogin will not help).";
 		break;
 

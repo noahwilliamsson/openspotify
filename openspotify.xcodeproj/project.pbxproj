@@ -988,7 +988,6 @@
 					"-DDEBUG",
 				);
 				OTHER_LDFLAGS = (
-					"-ljpeg",
 					"-lcrypto",
 					"-lresolv",
 					"-lz",
@@ -1022,7 +1021,6 @@
 					"-fPIC",
 				);
 				OTHER_LDFLAGS = (
-					"-ljpeg",
 					"-lcrypto",
 					"-lresolv",
 					"-lz",

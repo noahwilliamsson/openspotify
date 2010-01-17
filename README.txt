@@ -3,8 +3,8 @@ ABOUT
 An attempt to write an ABI-compatible libspotify clone with
 technology from the despotify project.
 
-Most API calls in libspotify 0.0.2 are implemented. Some have stubs.
-See STATUS for more information.
+Most API calls in libspotify 0.0.3 are implemented. Some have stubs.
+See the STATUS topic below for more information.
 
 Questions?
 Post them to noah.williamsson at gmail.com
@@ -61,7 +61,7 @@ examples/
   to link against libopenspotify.
 
 include/
-- Only contains <spotify/api.h> from libspotify 0.0.2
+- Only contains <spotify/api.h> from libspotify 0.0.3
 
 libopenspotify/
 - The libspotify clone, built as a shared library on Unix
@@ -73,4 +73,4 @@ openspotify-simple/
 - Pretty much useless and should be removed
  
 win32/
-- Bundled openssl, zlib and jpeglib headers and libraries for Windows 
+- Bundled openssl and zlib headers and libraries for Windows 

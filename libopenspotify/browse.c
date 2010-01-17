@@ -81,7 +81,7 @@ int browse_process(sp_session *session, struct request *req) {
 
 		default:
 			DSFYDEBUG("BUG: <type %s> is not yet implemented\n", REQUEST_TYPE_STR(req->type));
-			ret = request_set_result(session, req, SP_ERROR_OTHER_PERMAMENT, NULL);
+			ret = request_set_result(session, req, SP_ERROR_OTHER_PERMANENT, NULL);
 			break;
 	}
 	
