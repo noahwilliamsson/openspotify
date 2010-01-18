@@ -88,6 +88,9 @@ struct sp_artistbrowse {
 	int num_similar_artists;
 	sp_artist **similar_artists;
 
+	int num_albums;;
+	sp_album **albums;
+
 	char *biography;
 
 	artistbrowse_complete_cb *callback;

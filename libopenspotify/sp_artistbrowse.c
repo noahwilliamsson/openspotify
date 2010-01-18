@@ -55,6 +55,9 @@ SP_LIBEXPORT(sp_artistbrowse *) sp_artistbrowse_create(sp_session *session, sp_a
 	arb->num_similar_artists = 0;
 	arb->similar_artists = NULL;
 
+	arb->num_albums = 0;
+	arb->albums = NULL;
+
 	arb->biography = NULL;
 
 	arb->callback = callback;
@@ -255,6 +258,13 @@ static int osfy_artistbrowse_load_from_xml(sp_session *session, sp_artistbrowse 
 		assert(sp_album_is_loaded(album));
 		
 		
+		/* Add album to artistbrowse's list of albums */
+		arb->albums = realloc(arb->albums, sizeof(sp_album *) * (1 + arb->num_albums));
+		arb->albums[arb->num_albums] = album;
+		sp_album_add_ref(arb->albums[arb->num_albums]);
+		arb->num_albums++;
+
+
 		/* Loop over each disc in the album and add tracks */
 		for(loop_node = ezxml_get(album_node, "discs", 0, "disc", -1);
 		    loop_node;
@@ -370,6 +380,7 @@ SP_LIBEXPORT(sp_track *) sp_artistbrowse_track(sp_artistbrowse *arb, int index) 
 	return arb->tracks[index];
 }
 
+
 SP_LIBEXPORT(int) sp_artistbrowse_num_similar_artists(sp_artistbrowse *arb) {
 
 	return arb->num_similar_artists;
@@ -381,6 +392,20 @@ SP_LIBEXPORT(sp_artist *) sp_artistbrowse_similar_artist(sp_artistbrowse *arb, i
 		return NULL;
 
 	return arb->similar_artists[index];
+}
+
+
+SP_LIBEXPORT(int) sp_artistbrowse_num_albums(sp_artistbrowse *arb) {
+
+	return arb->num_albums;
+}
+
+
+SP_LIBEXPORT(sp_album *) sp_artistbrowse_album(sp_artistbrowse *arb, int index) {
+	if(index < 0 || index >= arb->num_albums)
+		return NULL;
+
+	return arb->albums[index];
 }
 
 
@@ -432,6 +457,13 @@ SP_LIBEXPORT(void) sp_artistbrowse_release(sp_artistbrowse *arb) {
 	
 	if(arb->num_similar_artists)
 		free(arb->similar_artists);
+
+
+	for(i = 0; i < arb->num_albums; i++)
+		sp_album_release(arb->albums[i]);
+	
+	if(arb->num_albums)
+		free(arb->albums);
 
 
 	DSFYDEBUG("Deallocated artistbrowse at %p\n", arb);
