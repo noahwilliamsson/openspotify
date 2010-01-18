@@ -238,6 +238,32 @@ struct sp_search {
 };
 
 
+/* sp_toplistbrowse.c */
+struct sp_toplistbrowse {
+	toplistbrowse_complete_cb *callback;
+	void *userdata;
+	
+	sp_toplisttype type;
+	sp_toplistregion region;
+
+	int num_tracks;
+	sp_track **tracks;
+	
+	int num_artists;
+	sp_artist **artists;
+	
+	int num_albums;
+	sp_album **albums;
+	
+	int is_loaded;
+	sp_error error;
+	
+	int ref_count;
+	
+	struct hashtable *hashtable;
+};
+
+
 /* sp_track.c */
 struct sp_track {
 	unsigned char id[16];
@@ -322,9 +348,10 @@ struct sp_session {
 	/* For keeping track of playlists and related states */
 	sp_playlistcontainer *playlistcontainer;
 
-	/* Album/artist/track memory memory management */
+	/* Album/artist/track/.. memory memory management */
 	struct hashtable *hashtable_albumbrowses;
 	struct hashtable *hashtable_artistbrowses;
+	struct hashtable *hashtable_toplistbrowses;
 	struct hashtable *hashtable_albums;
 	struct hashtable *hashtable_artists;
 	struct hashtable *hashtable_images;

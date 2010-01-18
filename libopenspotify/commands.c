@@ -172,6 +172,85 @@ int cmd_search (sp_session * session, char *searchtext, unsigned int offset,
 	return ret;
 }
 
+
+/*
+ * Browse toplists
+ * The response comes as compressed XML
+ *
+ */
+int cmd_toplistbrowse (sp_session *session,
+			sp_toplisttype type, sp_toplistregion region,
+			channel_callback callback, void *private)
+{
+	CHANNEL *ch;
+	int ret;
+	char buf[100];
+	struct buf *b;
+
+	b = buf_new();
+
+	snprintf (buf, sizeof (buf), "Toplistbrowse-type-%d-region-%d", type, region);
+	ch = channel_register (session, buf, callback, private);
+
+	DSFYDEBUG ("allocated channel %d, retrieving toplists for type %d, region %d\n",
+		   ch->channel_id, type, region);
+
+
+	buf_append_u16(b, ch->channel_id);
+	buf_append_u16(b, 0);	/* Unknown */
+	buf_append_u16(b, 0);	/* Unknown */
+
+
+	switch(type) {
+	case SP_TOPLIST_TYPE_ARTISTS:
+		buf_append_u8(b, 4);
+		buf_append_u16(b, 6);
+		buf_append_data(b, "type", 4);
+		buf_append_data(b, "artist", 6);
+		break;
+	case SP_TOPLIST_TYPE_ALBUMS:
+		buf_append_u8(b, 4);
+		buf_append_u16(b, 5);
+		buf_append_data(b, "type", 4);
+		buf_append_data(b, "album", 5);
+		break;
+	case SP_TOPLIST_TYPE_TRACKS:
+		buf_append_u8(b, 4);
+		buf_append_u16(b, 5);
+		buf_append_data(b, "type", 4);
+		buf_append_data(b, "track", 5);
+		break;
+	}
+
+
+	switch(region) {
+	case SP_TOPLIST_REGION_EVERYWHERE:
+		/* No need to send anything */
+		break;
+	case SP_TOPLIST_REGION_MINE:
+		buf_append_u8(b, 8);
+		buf_append_u16(b, strlen(session->username));
+		buf_append_data(b, "username", 8);
+		buf_append_data(b, session->username, strlen(session->username));
+		break;
+	default:
+		buf_append_u8(b, 6);
+		buf_append_u16(b, 2);
+		buf_append_data(b, "region", 6);
+		buf_append_u16(b, region); /* FIXME: Make sure this is correct */
+		break;
+	}
+
+
+	ret = packet_write (session, CMD_TOPLISTBROWSE, b->ptr, b->len);
+	DSFYDEBUG ("packet_write() returned %d\n", ret)
+
+	buf_free(b);
+	
+	return ret;
+}
+
+
 /*
  * Notify server we're going to play
  *

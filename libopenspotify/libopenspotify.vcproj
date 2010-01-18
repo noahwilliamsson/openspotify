@@ -417,11 +417,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\sp_toplistbrowse.c"
+				>
+			</File>
+			<File
 				RelativePath=".\sp_track.c"
 				>
 			</File>
 			<File
 				RelativePath=".\sp_user.c"
+				>
+			</File>
+			<File
+				RelativePath=".\toplistbrowse.c"
 				>
 			</File>
 			<File
@@ -528,6 +536,10 @@
 			</File>
 			<File
 				RelativePath=".\sp_opaque.h"
+				>
+			</File>
+			<File
+				RelativePath=".\toplistbrowse.h"
 				>
 			</File>
 			<File

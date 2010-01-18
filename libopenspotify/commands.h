@@ -34,6 +34,7 @@
 #define CMD_SEARCH		0x31
 #define CMD_GETPLAYLIST		0x35
 #define CMD_CHANGEPLAYLIST	0x36
+#define CMD_TOPLISTBROWSE	0x38
 
 /* Session management */
 #define CMD_NOTIFY	0x42
@@ -62,6 +63,10 @@ int cmd_aeskey (sp_session *, unsigned char *, unsigned char *, channel_callback
 		void *);
 int cmd_search (sp_session *, char *, unsigned int, unsigned int, channel_callback,
 		void *);
+
+int cmd_toplistbrowse (sp_session * session,
+			sp_toplisttype type, sp_toplistregion region,
+			channel_callback callback, void *private);
 int cmd_requestad (sp_session *, unsigned char);
 int cmd_request_image (sp_session *, unsigned char *, channel_callback, void *);
 int cmd_action (sp_session *, unsigned char *, unsigned char *);
