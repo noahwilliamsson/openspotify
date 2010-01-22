@@ -15,6 +15,7 @@
 #include "iothread.h"
 #include "link.h"
 #include "login.h"
+#include "player.h"
 #include "playlist.h"
 #include "request.h"
 #include "sp_opaque.h"
@@ -110,6 +111,9 @@ SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_sess
 	if(pthread_create(&s->thread_io, NULL, iothread, s))
 		return SP_ERROR_OTHER_TRANSIENT;
 #endif
+
+	/* Player thread */
+	s->player = player_init(s);
 
 	/* Helper function for sp_link_create_from_string() */
 	libopenspotify_link_init(s);
@@ -303,29 +307,59 @@ SP_LIBEXPORT(void) sp_session_process_events(sp_session *session, int *next_time
 
 
 SP_LIBEXPORT(sp_error) sp_session_player_load(sp_session *session, sp_track *track) {
-	DSFYDEBUG("FIXME: Not yet implemented\n");
+	void **container;
+
+	if(session == NULL || track == NULL) {
+		return SP_ERROR_INVALID_INDATA;
+	}
+	else if(!sp_track_is_loaded(track)) {
+		return SP_ERROR_RESOURCE_NOT_LOADED;
+	}
+	else if(!sp_track_is_available(track)) {
+		return SP_ERROR_TRACK_NOT_PLAYABLE;
+	}
+
+
+	/* FIXME: ... */
+	assert(session->player->track == NULL);
+
+
+	/* The track will released in player.c when PLAYER_UNLOAD is called */
+	container = malloc(sizeof(sp_track *));
+	*container = track;
+	sp_track_add_ref(track);
+	player_push(session, PLAYER_LOAD, container, sizeof(sp_track *));
+	
 
 	return SP_ERROR_OK;
 }
 
 
 SP_LIBEXPORT(sp_error) sp_session_player_seek(sp_session *session, int offset) {
-	DSFYDEBUG("FIXME: Not yet implemented\n");
+	/* FIXME: We should not dereference session->player->track as it could be racy wrt PLAYER_LOAD */
+	if(session->player->track == NULL || offset < 0 || offset > session->player->track->duration) {
+		return SP_ERROR_INVALID_INDATA;
+	}
+
+	player_push(session, PLAYER_SEEK, NULL, offset);
 
 	return SP_ERROR_OK;
 }
 
 
 SP_LIBEXPORT(sp_error) sp_session_player_play(sp_session *session, bool play) {
-	DSFYDEBUG("FIXME: Not yet implemented\n");
+	player_push(session, play? PLAYER_PLAY: PLAYER_PAUSE, NULL, 0);
 
 	return SP_ERROR_OK;
 }
 
 
 SP_LIBEXPORT(void) sp_session_player_unload(sp_session *session) {
-	DSFYDEBUG("FIXME: Not yet implemented\n");
+	if(session == NULL) {
+		return;
+	}
 
+	player_push(session, PLAYER_UNLOAD, NULL, 0);
 }
 
 
@@ -347,6 +381,10 @@ SP_LIBEXPORT(sp_error) sp_session_release (sp_session *session) {
 	DSFYDEBUG("Unregistering any active channels\n");
 	channel_fail_and_unregister_all(session);
 
+	/* Kill player thread */
+	player_free(session->player);
+	session->player = NULL;
+
 	/* Kill networking thread */
 	DSFYDEBUG("Terminating network thread\n");
 #ifdef _WIN32
@@ -355,6 +393,7 @@ SP_LIBEXPORT(sp_error) sp_session_release (sp_session *session) {
 	CloseHandle(session->idle_wakeup);
 	CloseHandle(session->request_mutex);
 #else
+
 	pthread_cancel(session->thread_io);
 	pthread_join(session->thread_io, NULL);
 	session->thread_io = (pthread_t)0;

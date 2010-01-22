@@ -24,7 +24,7 @@ STATUS
 Modules (from the below link) that are implemented so far are:
 http://developer.spotify.com/en/libspotify/docs/modules.html
 * Error Handling	- Completed, but likely a bit buggy
-* Session handling 	- All but sp_session_player_*() API calls and music delivery (WIP as of October)
+* Session handling 	- Completed
 * Links (Spotify URIs)	- All but spotify:user: (playlist) URIs
 * Tracks subsystem	- Completed
 * Album subsystem	- Completed

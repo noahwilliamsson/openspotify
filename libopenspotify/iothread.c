@@ -25,6 +25,7 @@
 #include "iothread.h"
 #include "login.h"
 #include "packet.h"
+#include "player.h"
 #include "playlist.h"
 #include "request.h"
 #include "search.h"
@@ -210,6 +211,11 @@ static int process_request(sp_session *session, struct request *req) {
 	case REQ_TYPE_BROWSE_PLAYLIST_TRACKS:
 	case REQ_TYPE_BROWSE_TRACK:
 		return browse_process(session, req);
+		break;
+
+	case REQ_TYPE_PLAYER_KEY:
+	case REQ_TYPE_PLAYER_SUBSTREAM:
+		return player_process_request(session, req);
 		break;
 
 	case REQ_TYPE_CACHE_PERIODIC:

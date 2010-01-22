@@ -26,14 +26,16 @@ It was built using the static release and debug configurations.
 
 UNIX
 ====
-Requires openssl and zlib development headers and libraries.
-On Mac OS X all dependencies comes by default.
+Requires openssl, zlib and libvorbisfile development headers and libraries.
+On Mac OS X all dependencies but libvorbisfile comes by default.
 
 On Ubuntu Linux the dependencies can be installed with this command:
-$ sudo apt-get install libssl-dev zlib1g-dev
+$ sudo apt-get install libssl-dev libvorbisfile3 zlib1g-dev
 
 The library can then be build using the following command:
 $ cd libopenspotify && make clean all
 
-If you want to test openspotify-simple with the official library:
-$ cd openspotify-simple && make libspotify=1 clean all
+
+The examples under examples/ can be built linked against the 
+official Spotify by specifying 'libspotify=1' 
+$ cd examples/jukebox/ && make libspotify=1 clean all

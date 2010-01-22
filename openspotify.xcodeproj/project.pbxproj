@@ -72,6 +72,12 @@
 		4F8367021105069E007480FF /* sp_toplistbrowse.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F8366FF1105069E007480FF /* sp_toplistbrowse.c */; };
 		4F8367031105069E007480FF /* toplistbrowse.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F8367001105069E007480FF /* toplistbrowse.c */; };
 		4F8367041105069E007480FF /* toplistbrowse.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F8367011105069E007480FF /* toplistbrowse.h */; };
+		4FACED3E1109358E00444AC2 /* aes.c in Sources */ = {isa = PBXBuildFile; fileRef = 4FACED381109358E00444AC2 /* aes.c */; };
+		4FACED3F1109358E00444AC2 /* aes.h in Headers */ = {isa = PBXBuildFile; fileRef = 4FACED391109358E00444AC2 /* aes.h */; };
+		4FACED401109358E00444AC2 /* player.c in Sources */ = {isa = PBXBuildFile; fileRef = 4FACED3A1109358E00444AC2 /* player.c */; };
+		4FACED411109358E00444AC2 /* player.h in Headers */ = {isa = PBXBuildFile; fileRef = 4FACED3B1109358E00444AC2 /* player.h */; };
+		4FACED421109358E00444AC2 /* rbuf.c in Sources */ = {isa = PBXBuildFile; fileRef = 4FACED3C1109358E00444AC2 /* rbuf.c */; };
+		4FACED431109358E00444AC2 /* rbuf.h in Headers */ = {isa = PBXBuildFile; fileRef = 4FACED3D1109358E00444AC2 /* rbuf.h */; };
 		4FD21CDE1031146400A0FE4E /* image.h in Headers */ = {isa = PBXBuildFile; fileRef = 4FD21CDD1031146400A0FE4E /* image.h */; };
 		4FD526ED1035354200083306 /* libopenspotify.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F5328E8103092D2004139C9 /* libopenspotify.dylib */; };
 		4FD526F81035355700083306 /* appkey.c in Sources */ = {isa = PBXBuildFile; fileRef = 4FD526F01035355700083306 /* appkey.c */; };
@@ -224,6 +230,12 @@
 		4F8366FF1105069E007480FF /* sp_toplistbrowse.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sp_toplistbrowse.c; sourceTree = "<group>"; };
 		4F8367001105069E007480FF /* toplistbrowse.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = toplistbrowse.c; sourceTree = "<group>"; };
 		4F8367011105069E007480FF /* toplistbrowse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = toplistbrowse.h; sourceTree = "<group>"; };
+		4FACED381109358E00444AC2 /* aes.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = aes.c; sourceTree = "<group>"; };
+		4FACED391109358E00444AC2 /* aes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aes.h; sourceTree = "<group>"; };
+		4FACED3A1109358E00444AC2 /* player.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = player.c; sourceTree = "<group>"; };
+		4FACED3B1109358E00444AC2 /* player.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = player.h; sourceTree = "<group>"; };
+		4FACED3C1109358E00444AC2 /* rbuf.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rbuf.c; sourceTree = "<group>"; };
+		4FACED3D1109358E00444AC2 /* rbuf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rbuf.h; sourceTree = "<group>"; };
 		4FD21CDD1031146400A0FE4E /* image.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = image.h; sourceTree = "<group>"; };
 		4FD526E71035353900083306 /* example-jukebox */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "example-jukebox"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FD526F01035355700083306 /* appkey.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = appkey.c; sourceTree = "<group>"; };
@@ -355,6 +367,12 @@
 		4F53286C103092D2004139C9 /* libopenspotify */ = {
 			isa = PBXGroup;
 			children = (
+				4FACED381109358E00444AC2 /* aes.c */,
+				4FACED391109358E00444AC2 /* aes.h */,
+				4FACED3A1109358E00444AC2 /* player.c */,
+				4FACED3B1109358E00444AC2 /* player.h */,
+				4FACED3C1109358E00444AC2 /* rbuf.c */,
+				4FACED3D1109358E00444AC2 /* rbuf.h */,
 				4F53286E103092D2004139C9 /* album.h */,
 				4F53286F103092D2004139C9 /* artist.h */,
 				4F532870103092D2004139C9 /* browse.c */,
@@ -566,6 +584,9 @@
 				4FD21CDE1031146400A0FE4E /* image.h in Headers */,
 				4FE84B191037FE5400840CBC /* search.h in Headers */,
 				4F8367041105069E007480FF /* toplistbrowse.h in Headers */,
+				4FACED3F1109358E00444AC2 /* aes.h in Headers */,
+				4FACED411109358E00444AC2 /* player.h in Headers */,
+				4FACED431109358E00444AC2 /* rbuf.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -797,6 +818,9 @@
 				4FE84B181037FE5400840CBC /* search.c in Sources */,
 				4F8367021105069E007480FF /* sp_toplistbrowse.c in Sources */,
 				4F8367031105069E007480FF /* toplistbrowse.c in Sources */,
+				4FACED3E1109358E00444AC2 /* aes.c in Sources */,
+				4FACED401109358E00444AC2 /* player.c in Sources */,
+				4FACED421109358E00444AC2 /* rbuf.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1000,6 +1024,7 @@
 					"-DDEBUG",
 				);
 				OTHER_LDFLAGS = (
+					"-lvorbisfile",
 					"-lcrypto",
 					"-lresolv",
 					"-lz",
@@ -1033,6 +1058,7 @@
 					"-fPIC",
 				);
 				OTHER_LDFLAGS = (
+					"-lvorbisfile",
 					"-lcrypto",
 					"-lresolv",
 					"-lz",

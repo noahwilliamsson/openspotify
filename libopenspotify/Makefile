@@ -1,11 +1,11 @@
 CC = gcc
 CFLAGS = -Wall -ggdb -I../include -fPIC -DDEBUG -O2
-LDFLAGS = -lcrypto -lresolv -lz
+LDFLAGS = -lcrypto -lresolv -lz -lvorbisfile
 # Default symbol visibility in the library; we only need to export the sp_*() functions
 #CFLAGS += -fvisibility=hidden
 #LDFLAGS += -Wl,-x
 
-CORE_OBJS = browse.o buf.o cache.o channel.o commands.o dns.o ezxml.o handlers.o hashtable.o hmac.o link.o login.o iothread.o packet.o playlist.o request.o search.o sha1.o shn.o toplistbrowse.o user.o util.o
+CORE_OBJS = aes.o browse.o buf.o cache.o channel.o commands.o dns.o ezxml.o handlers.o hashtable.o hmac.o link.o login.o iothread.o packet.o player.o playlist.o rbuf.o request.o search.o sha1.o shn.o toplistbrowse.o user.o util.o
 LIB_OBJS = sp_album.o sp_artist.o sp_albumbrowse.o sp_artistbrowse.o sp_error.o sp_image.o sp_link.o sp_playlist.o sp_search.o sp_session.o sp_toplistbrowse.o sp_track.o sp_user.o
 
 # Linux

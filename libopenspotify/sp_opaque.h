@@ -27,6 +27,7 @@
 #include "channel.h"
 #include "hashtable.h"
 #include "login.h"
+#include "player.h"
 #include "shn.h"
 
 
@@ -358,6 +359,9 @@ struct sp_session {
 	struct hashtable *hashtable_searches;
 	struct hashtable *hashtable_tracks;
 	struct hashtable *hashtable_users;
+
+	/* Player */
+	struct player *player;
 
 
 #ifdef _WIN32

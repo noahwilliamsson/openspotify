@@ -153,6 +153,9 @@ typedef enum {
 	 */
 	REQ_TYPE_ARTISTBROWSE,
 
+	REQ_TYPE_PLAYER_KEY,
+	REQ_TYPE_PLAYER_SUBSTREAM,
+
 	/*
 	 * An always running request that is periodically run by the
 	 * iothread to save stuff to the cache and to do GC.
@@ -194,6 +197,8 @@ struct request {
 				type == REQ_TYPE_ALBUMBROWSE? "ALBUMBROWSE": \
 				type == REQ_TYPE_ARTISTBROWSE? "ARTISTBROWSE": \
 				type == REQ_TYPE_BROWSE_TRACK? "BROWSE_TRACK": \
+				type == REQ_TYPE_PLAYER_KEY? "PLAYER_KEY": \
+				type == REQ_TYPE_PLAYER_SUBSTREAM? "PLAYER_SUBSTREAM": \
 				type == REQ_TYPE_CACHE_PERIODIC? "CACHE_PERIODIC": \
 				"UNKNOWN")
 
