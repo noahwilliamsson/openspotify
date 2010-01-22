@@ -239,6 +239,24 @@ SP_LIBEXPORT(void) sp_session_process_events(sp_session *session, int *next_time
 					playlist->callbacks[i]->playlist_renamed(playlist, playlist->userdata[i]);
 			
 			break;
+
+		case REQ_TYPE_PLAYLIST_STATE_CHANGED:
+			pc = session->playlistcontainer;
+			playlist = NULL;
+			for(i = 0; i < pc->num_playlists; i++) {
+				if(memcmp(pc->playlists[i]->id, request->output, 17))
+					continue;
+				playlist = pc->playlists[i];
+				break;
+			}
+
+			if(!playlist)
+				break;
+
+			for(i = 0; i < playlist->num_callbacks; i++)
+				if(playlist->callbacks[i]->playlist_state_changed)
+					playlist->callbacks[i]->playlist_state_changed(playlist, playlist->userdata[i]);
+			break;
 				
 		case REQ_TYPE_PLAYLIST_LOAD:
 			pc = session->playlistcontainer;

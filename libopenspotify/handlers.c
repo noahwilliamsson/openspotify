@@ -129,6 +129,20 @@ static int handle_prodinfo (sp_session * session, unsigned char *payload, int le
 }
 
 
+static int handle_playlist_state_changed (sp_session * session, unsigned char *payload, int len) {
+	void *container;
+
+	assert(len == 17);
+
+	container = malloc(len);
+	if(container == NULL)
+		return -1;
+
+	memcpy(container, payload, len);
+	return request_post_result(session, REQ_TYPE_PLAYLIST_STATE_CHANGED, SP_ERROR_OK, container);
+}
+
+
 static int handle_notify (sp_session * session, unsigned char *payload, int len) {
 	unsigned char *ptr;
 	unsigned short notify_len;
@@ -194,6 +208,10 @@ int handle_packet (sp_session * session,
 	case CMD_P2P_INITBLK:
 		DSFYDEBUG ("Server said 0x21 (P2P initalization block)\n")
 			break;
+
+	case CMD_PLAYLISTCHANGED:
+		error = handle_playlist_state_changed(session, payload, len);
+		break;
 
 	case CMD_NOTIFY:
 		/* HTML-notification, shown in a yellow bar in the official client */

@@ -33,6 +33,7 @@
 /* Search and meta data */
 #define CMD_BROWSE		0x30
 #define CMD_SEARCH		0x31
+#define CMD_PLAYLISTCHANGED	0x34
 #define CMD_GETPLAYLIST		0x35
 #define CMD_CHANGEPLAYLIST	0x36
 #define CMD_TOPLISTBROWSE	0x38

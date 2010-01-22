@@ -164,6 +164,7 @@ static void request_notify_main_thread(sp_session *session, struct request *requ
 	case REQ_TYPE_PC_PLAYLIST_REMOVE:
 	case REQ_TYPE_PC_PLAYLIST_MOVE:
 	case REQ_TYPE_PLAYLIST_RENAME:
+	case REQ_TYPE_PLAYLIST_STATE_CHANGED:
 	case REQ_TYPE_PC_LOAD:
 	case REQ_TYPE_ALBUMBROWSE:
 	case REQ_TYPE_ARTISTBROWSE:

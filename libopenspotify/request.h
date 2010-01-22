@@ -91,6 +91,9 @@ typedef enum {
 	/* Sent to the main thread to notify the name of the playlist was set/updated */
 	REQ_TYPE_PLAYLIST_RENAME,
 
+	/* Sent when a playlist has been changed */
+	REQ_TYPE_PLAYLIST_STATE_CHANGED,
+
 	/*
 	 * Posted by playlist loading functions to cause browse_process() to send
 	 * track browsing requests for tracks contained in a playlist.
@@ -186,6 +189,7 @@ struct request {
 				type == REQ_TYPE_PC_PLAYLIST_MOVE? "PC_PLAYLIST_MOVE": \
 				type == REQ_TYPE_PLAYLIST_LOAD? "PLAYLIST_LOAD": \
 				type == REQ_TYPE_PLAYLIST_RENAME? "PLAYLIST_RENAME": \
+				type == REQ_TYPE_PLAYLIST_STATE_CHANGED? "PLAYLIST_STATE_CHANGED": \
 				type == REQ_TYPE_BROWSE_ALBUM? "BROWSE_ALBUM": \
 				type == REQ_TYPE_BROWSE_ARTIST? "BROWSE_ARTIST": \
 				type == REQ_TYPE_BROWSE_PLAYLIST_TRACKS? "BROWSE_PLAYLIST_TRACKS": \
