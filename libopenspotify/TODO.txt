@@ -2,8 +2,8 @@ TODO list
 =========
 * Initialize PRNG
 * Session
-  -- Implement music decryption, decoding and the music delivery callback
-  -- Implement the sp_session_player_*() API calls
+  -- Implement support for play tokens. We should send such notifications and
+     stop the player if we receive them ourselves.
   -- Adhere to paths configured in sp_session_init()
   -- Caching of data
 * Playlists
@@ -12,7 +12,8 @@ TODO list
      the playlist not loaded, and after 30 seconds the remove callback will 
      be called (libspotify 0.0.2)
 * Links
-  -- libspotify doesn't pull metadata on sp_link_create_from_string() so we shouldn't either
+  -- libspotify doesn't pull metadata on sp_link_create_from_string() for
+     anything but tracks so we shouldn't either
 * General
   -- Verify more functionality against libspotify
   -- Split up request processing in io requests and main thread notifications
@@ -24,4 +25,7 @@ KNOWN ISSUES
 ============
 1. Apparently there's a race between posting of requests and
    sleeping while waiting for new.. seen on Mac OS X
-2. The Win32 event/mutex stuff in iothread.c vs request.c is broken
+2. The Windows event/mutex stuff in iothread.c vs request.c is broken
+3. The Windows build is currently broken after commit 8fcf56ad03bd8b5884ef41a7642b4f0c56515cfb
+   The use of pthread in player.c needs to be ported to Windows APIs, VS project files needs
+   to be updated and libvorbisfile needs to be built and possibly distributed with openspotify
