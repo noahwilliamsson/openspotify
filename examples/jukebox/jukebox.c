@@ -372,8 +372,10 @@ static int music_delivery(sp_session *sess, const sp_audioformat *format,
 	audio_fifo_data_t *afd;
 	size_t s;
 
+	DSFYDEBUG("SESSION CALLBACK: Got MUSIC-DELIVERY\n");
 	if (num_frames == 0) {
 		pthread_mutex_lock(&g_notify_mutex);
+		DSFYDEBUG("MUSIC: Got zero frames?!\n");
 		g_playback_done = 1;
 		pthread_cond_signal(&g_notify_cond);
 		pthread_mutex_unlock(&g_notify_mutex);
@@ -407,6 +409,15 @@ static int music_delivery(sp_session *sess, const sp_audioformat *format,
 	pthread_mutex_unlock(&af->mutex);
 
 	return num_frames;
+}
+
+
+static void end_of_track(sp_session *sess) {
+	DSFYDEBUG("SESSION CALLBACK: Got END-OF-TRACK\n");
+		pthread_mutex_lock(&g_notify_mutex);
+		g_playback_done = 1;
+		pthread_cond_signal(&g_notify_cond);
+		pthread_mutex_unlock(&g_notify_mutex);
 }
 
 /**
@@ -449,7 +460,8 @@ static sp_session_callbacks session_callbacks = {
 	.music_delivery = &music_delivery,
 	.metadata_updated = &metadata_updated,
 	.play_token_lost = &play_token_lost,
-	.log_message = NULL
+	.log_message = NULL,
+	.end_of_track = &end_of_track
 };
 
 /**
