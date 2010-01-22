@@ -395,7 +395,7 @@ int cmd_getsubstreams (sp_session * session, unsigned char *file_id,
 		("Sending GetSubstreams(file_id=%s, offset=%u [%u bytes], length=%u [%u bytes])\n",
 		 buf, offset, offset << 2, length, length << 2);
 
-	ret = packet_write (session, 0x08, b->ptr, b->len);
+	ret = packet_write (session, CMD_GETSUBSTREAM, b->ptr, b->len);
 	buf_free(b);
 
 	if (ret != 0) {

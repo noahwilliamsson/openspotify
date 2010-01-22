@@ -12,6 +12,7 @@
 /* Core functionality */
 #define CMD_SECRETBLK	0x02
 #define CMD_PING	0x04
+#define CMD_GETSUBSTREAM	0x08
 #define CMD_CHANNELDATA	0x09
 #define CMD_CHANNELERR	0x0a
 #define CMD_CHANNELABRT	0x0b
