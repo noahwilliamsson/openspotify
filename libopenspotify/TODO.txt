@@ -6,6 +6,10 @@ TODO list
      stop the player if we receive them ourselves.
   -- Adhere to paths configured in sp_session_init()
   -- Caching of data
+* Tracks
+  -- Implement support for country restrictions
+  -- Implement support for multiple bitrates and files. We should probably 
+     select the one with the lowest bitrate (i.e, 96kbit/s)
 * Playlists
   -- Add support for creating/adding/modifying/removing tracks and playlists
   -- Adding an invalid playlist URI will trigger the add callback, will mark
