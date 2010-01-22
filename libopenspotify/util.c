@@ -52,7 +52,7 @@ char *hex_bytes_to_ascii (const unsigned char *bytes, char *ascii, int len)
 
 void hexdump8x32 (char *prefix, void *data, int len)
 {
-	fhexdump8x32 (stdout, prefix, data, len);
+	fhexdump8x32 (stderr, prefix, data, len);
 }
 
 void fhexdump8x32 (FILE * file, char *prefix, void *data, int len)
