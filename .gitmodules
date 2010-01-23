@@ -1,0 +1,3 @@
+[submodule "bindings/libspotify-sharp"]
+	path = bindings/libspotify-sharp
+	url = git://github.com/jonasl/libspotify-sharp.git
