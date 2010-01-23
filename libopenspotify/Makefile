@@ -1,9 +1,19 @@
+# Destination prefix, defaults to /usr
+# Use 'make prefix=/usr/local' if you prefer to
+# have files intalled under /usr/local
+prefix ?= /usr
+
 CC = gcc
-CFLAGS = -Wall -ggdb -I../include -fPIC -DDEBUG -O2
+CFLAGS = -Wall -ggdb -I../include -fPIC -O2
 LDFLAGS = -lcrypto -lresolv -lz -lvorbisfile
+
 # Default symbol visibility in the library; we only need to export the sp_*() functions
 #CFLAGS += -fvisibility=hidden
 #LDFLAGS += -Wl,-x
+
+ifneq ($(nodebug), 1)
+	CFLAGS += -DDEBUG
+endif
 
 CORE_OBJS = aes.o browse.o buf.o cache.o channel.o commands.o dns.o ezxml.o handlers.o hashtable.o hmac.o link.o login.o iothread.o packet.o player.o playlist.o rbuf.o request.o search.o sha1.o shn.o toplistbrowse.o user.o util.o
 LIB_OBJS = sp_album.o sp_artist.o sp_albumbrowse.o sp_artistbrowse.o sp_error.o sp_image.o sp_link.o sp_playlist.o sp_search.o sp_session.o sp_toplistbrowse.o sp_track.o sp_user.o
@@ -25,9 +35,12 @@ all: $(CORE_OBJS) $(LIB_OBJS)
 	gcc -o $(LIB_NAME) $(SHLIB_FLAGS) $(LDFLAGS) $(CORE_OBJS) $(LIB_OBJS)
 
 install: all
-	install -g 0 -o 0 -m 0755 $(LIB_NAME) /usr/lib
-	install -g 0 -o 0 -m 0755 -d /usr/include/spotify
-	install -g 0 -o 0 -m 0644 ../include/spotify/api.h /usr/include/spotify/api.h
+	install -m 0755 -d $(DESTDIR)$(prefix)/share/doc/libopenspotify
+	install -m 0644 TODO.txt ../README.txt ../LICENSE.txt $(DESTDIR)$(prefix)/share/doc/libopenspotify
+	install -m 0755 -d $(DESTDIR)$(prefix)/lib
+	install -m 0755 $(LIB_NAME) $(DESTDIR)$(prefix)/lib
+	install -m 0755 -d $(DESTDIR)$(prefix)/include/spotify
+	install -m 0644 ../include/spotify/api.h $(DESTDIR)$(prefix)/include/spotify/api.h
 
 clean:
 	rm -f $(CORE_OBJS) $(LIB_OBJS) $(LIB_NAME)
