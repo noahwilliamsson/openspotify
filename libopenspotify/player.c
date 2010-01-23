@@ -21,6 +21,7 @@
 #include "util.h"
 
 
+#ifdef DEBUG
 #undef DSFYDEBUG
 static struct timeval _tv0;
 #define DSFYDEBUG(...) {                                                \
@@ -41,7 +42,7 @@ static struct timeval _tv0;
                         __func__);                                      \
         fprintf(stderr, __VA_ARGS__);                                   \
 }
-
+#endif
 
 
 struct player_substream_ctx {
