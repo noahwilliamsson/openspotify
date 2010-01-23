@@ -182,22 +182,23 @@ static void *player_main(void *arg) {
 			num_bytes = ov_read(player->vf, pcm, sizeof(pcm), 0 /* little-endian */, 2 /* 16-bit */, 1, NULL);
 			if(num_bytes == OV_HOLE) {
 				DSFYDEBUG("ov_read() failed with OV_HOLE, setting EOF\n");
-				player->is_eof = 1;
+				player_push(session, PLAYER_EOF, NULL, 0);
 				break;
 			}
 			else if(num_bytes == OV_EBADLINK) {
 				DSFYDEBUG("ov_read() failed with OV_EBADLINK, setting EOF\n");
-				player->is_eof = 1;
+				player_push(session, PLAYER_EOF, NULL, 0);
 				break;
 			}
 			else if(num_bytes == OV_EINVAL) {
 				DSFYDEBUG("ov_read() failed with OV_EINVAL, setting EOF\n");
-				player->is_eof = 1;
+				player_push(session, PLAYER_EOF, NULL, 0);
 				break;
 			}
 			else if(num_bytes == 0) {
 				DSFYDEBUG("ov_read() returned EOF, have %zu bytes ogg, %d bytes PCM, is_eof:%d\n",
 						rbuf_length(player->ogg), player->pcm->len, player->is_eof);
+				player_push(session, PLAYER_EOF, NULL, 0);
 				break;
 			}
 
