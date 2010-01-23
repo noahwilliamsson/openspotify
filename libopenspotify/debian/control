@@ -1,0 +1,20 @@
+Source: libopenspotify
+Priority: extra
+Maintainer: unknown <robinnilsson@gmail.com>
+Build-Depends: debhelper (>= 5)
+Standards-Version: 3.7.2
+Section: libs
+
+Package: libopenspotify-dev
+Section: libdevel
+Architecture: any
+Depends: libssl-dev, libvorbisfile3, zlib1g-dev, libopenspotify (= ${Source-Version})
+Description: libopenspotify development header and library
+ An opensource, API-compliant re-implemention of libspotify 0.0.3
+
+Package: libopenspotify
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: libopenspotify shared library
+ An opensource, API-compliant re-implemention of libspotify 0.0.3
