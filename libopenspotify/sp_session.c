@@ -113,7 +113,8 @@ SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_sess
 #endif
 
 	/* Player thread */
-	s->player = player_init(s);
+	if(player_init(s))
+		return SP_ERROR_OTHER_TRANSIENT;
 
 	/* Helper function for sp_link_create_from_string() */
 	libopenspotify_link_init(s);
@@ -400,8 +401,7 @@ SP_LIBEXPORT(sp_error) sp_session_release (sp_session *session) {
 	channel_fail_and_unregister_all(session);
 
 	/* Kill player thread */
-	player_free(session->player);
-	session->player = NULL;
+	player_free(session);
 
 	/* Kill networking thread */
 	DSFYDEBUG("Terminating network thread\n");

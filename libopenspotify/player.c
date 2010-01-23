@@ -70,41 +70,42 @@ static int player_substream_callback(CHANNEL *ch, unsigned char *buf, unsigned s
  * This function is called from the main thread
  *
  */
-struct player *player_init(sp_session *session) {
-	struct player *player;
+int player_init(sp_session *session) {
 
-	player = malloc(sizeof(struct player));
+	session->player = malloc(sizeof(struct player));
+	if(session->player == NULL)
+		return -1;
 
-	pthread_mutex_init(&player->mutex, NULL);
-	pthread_cond_init(&player->cond, NULL);
-	player->item_posted = 0;
+	pthread_mutex_init(&session->player->mutex, NULL);
+	pthread_cond_init(&session->player->cond, NULL);
+	session->player->item_posted = 0;
 
-	player->items = NULL;
+	session->player->items = NULL;
 
-	player->key = NULL;
-	player->track = NULL;
+	session->player->key = NULL;
+	session->player->track = NULL;
 
-	player->ogg = rbuf_new();
-	player->stream_length = 0;
-	player->pcm = buf_new();
-	player->pcm_next_timeout_ms = 0;
+	session->player->ogg = rbuf_new();
+	session->player->stream_length = 0;
+	session->player->pcm = buf_new();
+	session->player->pcm_next_timeout_ms = 0;
 
-	player->is_loaded = 0;
-	player->is_playing = 0;
-	player->is_paused = 0;
-	player->is_eof = 0;
-	player->is_downloading = 0; /* FIXME: Debug */
+	session->player->is_loaded = 0;
+	session->player->is_playing = 0;
+	session->player->is_paused = 0;
+	session->player->is_eof = 0;
+	session->player->is_downloading = 0;
 
-	player->vf = NULL;
-	player->callbacks.read_func = player_ov_read;
-	player->callbacks.seek_func = player_ov_seek;
-	player->callbacks.close_func = NULL;
-	player->callbacks.tell_func = player_ov_tell;
+	session->player->vf = NULL;
+	session->player->callbacks.read_func = player_ov_read;
+	session->player->callbacks.seek_func = player_ov_seek;
+	session->player->callbacks.close_func = NULL;
+	session->player->callbacks.tell_func = player_ov_tell;
 
 
-	pthread_create(&player->thread, NULL, player_main, session);
+	pthread_create(&session->player->thread, NULL, player_main, session);
 
-	return player;
+	return 0;
 }
 
 
@@ -112,30 +113,31 @@ struct player *player_init(sp_session *session) {
  * Release all resources held by the player
  *
  */
-void player_free(struct player *player) {
-	pthread_cancel(player->thread);
-	pthread_join(player->thread, NULL);
+void player_free(sp_session *session) {
+	pthread_cancel(session->player->thread);
+	pthread_join(session->player->thread, NULL);
 
-	pthread_cond_destroy(&player->cond);
-	pthread_mutex_destroy(&player->mutex);
+	pthread_cond_destroy(&session->player->cond);
+	pthread_mutex_destroy(&session->player->mutex);
 
 	DSFYDEBUG("Releasing player resources\n");
-	if(player->vf) {
-		ov_clear(player->vf);
-		free(player->vf);
+	if(session->player->vf) {
+		ov_clear(session->player->vf);
+		free(session->player->vf);
 	}
 
-	if(player->track)
-		sp_track_release(player->track);
+	if(session->player->track)
+		sp_track_release(session->player->track);
 
-	if(player->key)
-		free(player->key);
+	if(session->player->key)
+		free(session->player->key);
 
-	buf_free(player->pcm);
-	rbuf_free(player->ogg);
+	buf_free(session->player->pcm);
+	rbuf_free(session->player->ogg);
 
 
-	free(player);
+	free(session->player);
+	session->player = NULL;
 }
 
 

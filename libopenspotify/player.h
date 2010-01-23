@@ -88,8 +88,8 @@ struct player {
 };
 
 
-struct player *player_init(sp_session *session);
-void player_free(struct player *player);
+int player_init(sp_session *session);
+void player_free(sp_session *session);
 int player_push(sp_session *session, enum player_item_type type, void *data, size_t len);
 int player_process_request(sp_session *session, struct request *req);
 #endif
