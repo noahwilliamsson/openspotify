@@ -75,3 +75,9 @@ openspotify-simple/
  
 win32/
 - Bundled openssl and zlib headers and libraries for Windows 
+
+
+ACKNOWLEDGEMENTS
+================
+This product includes software developed by the OpenSSL Project
+for use in the OpenSSL Toolkit. (http://www.OpenSSL.org/)
