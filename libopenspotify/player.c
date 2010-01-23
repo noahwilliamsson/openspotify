@@ -587,8 +587,28 @@ static size_t player_ov_read(void *dest, size_t size, size_t nmemb, void *privat
 			player->is_downloading);
 
 
+	previous_bytes = 0;
+	if(rbuf_tell(player->ogg) % 4096 != 0) {
+		/*
+		 * We're off a 4096 byte boundary.
+		 * Position the reader at the start of this block
+		 *
+		 */
+		previous_bytes = rbuf_tell(player->ogg);
+		previous_bytes &= 4095;
+		DSFYDEBUG("OV_READ: Off-boundary at position %zu, seeking back %zu bytes\n", rbuf_tell(player->ogg), previous_bytes);
+		rbuf_seek_reader(player->ogg, rbuf_tell(player->ogg) - previous_bytes, SEEK_SET);
+	}
+
+
+	bytes_to_consume = size * nmemb;
+	if(player->stream_length && rbuf_tell(player->ogg) + bytes_to_consume > player->stream_length) {
+		bytes_to_consume = player->stream_length - rbuf_tell(player->ogg);
+	}
+
+
 	did_download = 0;
-	while(!player->is_eof && rbuf_length(player->ogg) < size*nmemb / 2) {
+	while(!player->is_eof && rbuf_length(player->ogg) < bytes_to_consume / 2) {
 		if(!did_download && !player->is_downloading) {
 
 			/* Prevent downloading more than one chunk per ov_read() */
@@ -605,7 +625,7 @@ static size_t player_ov_read(void *dest, size_t size, size_t nmemb, void *privat
 			psc->track = player->track;
 			sp_track_add_ref(psc->track);
 			psc->offset = request_offset;
-			psc->length = (size*nmemb - rbuf_length(player->ogg) + 4095) & ~4095;
+			psc->length = (bytes_to_consume - rbuf_length(player->ogg) + 4095) & ~4095;
 
 
 			DSFYDEBUG("OV_READ: INSIDE: Requesting %d bytes from pos %d (reader at %zu, have %zu bytes)\n",
@@ -647,23 +667,6 @@ static size_t player_ov_read(void *dest, size_t size, size_t nmemb, void *privat
 		do_spotify_header = 1;
 	}
 
-
-	previous_bytes = 0;
-	if(rbuf_tell(player->ogg) % 1024 != 0) {
-		/*
-		 * We're off a 1024 byte boundary.
-		 * Position the reader at the start of this block
-		 *
-		 */
-		previous_bytes = rbuf_tell(player->ogg);
-		previous_bytes &= 1023;
-		DSFYDEBUG("OV_READ: Off-boundary at position %zu, seeking back %zu bytes\n", rbuf_tell(player->ogg), previous_bytes);
-		rbuf_seek_reader(player->ogg, rbuf_tell(player->ogg) - previous_bytes, SEEK_SET);
-
-		assert(rbuf_tell(player->ogg) % 1024 == 0);
-
-		/* FIXME: Also seek IV */
-	}
 
 	bytes_to_consume = rbuf_length(player->ogg);
 	if(bytes_to_consume > size * nmemb)
