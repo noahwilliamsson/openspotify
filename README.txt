@@ -87,3 +87,7 @@ ACKNOWLEDGEMENTS
 ================
 This product includes software developed by the OpenSSL Project
 for use in the OpenSSL Toolkit. (http://www.OpenSSL.org/)
+
+This product uses a SPOTIFY API but is not endorsed, certified or
+otherwise approved in any way by Spotify.
+Spotify is the registered trade mark of the Spotify Group.
