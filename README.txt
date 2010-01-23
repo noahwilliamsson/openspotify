@@ -57,12 +57,18 @@ BUGS
 
 DIRECTORIES
 ===========
+bindings/
+- libspotify-sharp/ contains bindings for C#
+  It's git submodule and needs to be checked out seperately:
+  $ git submodule init
+  $ git submodule update
+
 examples/
 - Examples from libspotify-0.0.1.tar.gz with makefiles modified 
   to link against libopenspotify.
 
 include/
-- Only contains <spotify/api.h> from libspotify 0.0.3
+- The API header file spotify/api.h
 
 libopenspotify/
 - The libspotify clone, built as a shared library on Unix
