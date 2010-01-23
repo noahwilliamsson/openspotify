@@ -1,6 +1,11 @@
 #ifndef LIBOPENSPOTIFY_API_H
 #define LIBOPENSPOTIFY_API_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 /*
  * For documentation, see Spotify's developer site
  * http://developer.spotify.com/en/libspotify/docs/
@@ -25,7 +30,9 @@
 #endif
 
 
-#define bool unsigned char
+#ifndef __bool_true_false_are_defined
+typedef unsigned char bool
+#endif
 #define byte unsigned char
 
 
@@ -335,5 +342,9 @@ SP_LIBEXPORT(int) sp_toplistbrowse_num_tracks(sp_toplistbrowse *tlb);
 SP_LIBEXPORT(sp_track *) sp_toplistbrowse_track(sp_toplistbrowse *tlb, int index);
 SP_LIBEXPORT(void) sp_toplistbrowse_add_ref(sp_toplistbrowse *tlb);
 SP_LIBEXPORT(void) sp_toplistbrowse_release(sp_toplistbrowse *tlb);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
