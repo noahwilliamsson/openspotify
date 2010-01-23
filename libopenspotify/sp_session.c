@@ -339,8 +339,8 @@ SP_LIBEXPORT(sp_error) sp_session_player_load(sp_session *session, sp_track *tra
 	}
 
 
-	/* FIXME: ... */
-	assert(session->player->track == NULL);
+	/* Unload any previously loaded track */
+	player_push(session, PLAYER_UNLOAD, NULL, 0);
 
 
 	/* The track will released in player.c when PLAYER_UNLOAD is called */
