@@ -24,5 +24,10 @@ endif
 all: $(CORE_OBJS) $(LIB_OBJS)
 	gcc -o $(LIB_NAME) $(SHLIB_FLAGS) $(LDFLAGS) $(CORE_OBJS) $(LIB_OBJS)
 
+install: all
+	install -g 0 -o 0 -m 0755 $(LIB_NAME) /usr/lib
+	install -g 0 -o 0 -m 0755 -d /usr/include/spotify
+	install -g 0 -o 0 -m 0644 ../include/spotify/api.h /usr/include/spotify/api.h
+
 clean:
 	rm -f $(CORE_OBJS) $(LIB_OBJS) $(LIB_NAME)
