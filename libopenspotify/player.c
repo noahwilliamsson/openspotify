@@ -610,6 +610,8 @@ static size_t player_ov_read(void *dest, size_t size, size_t nmemb, void *privat
 	did_download = 0;
 	while(!player->is_eof && rbuf_length(player->ogg) < bytes_to_consume / 2) {
 		if(!did_download && !player->is_downloading) {
+			/* FIXME: ... */
+			if(((bytes_to_consume - rbuf_length(player->ogg) + 4095) & ~4095) == 0) break;
 
 			/* Prevent downloading more than one chunk per ov_read() */
 			did_download = 1;
