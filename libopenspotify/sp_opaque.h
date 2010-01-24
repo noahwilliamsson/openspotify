@@ -183,7 +183,11 @@ struct sp_playlist {
 	sp_playlist_callbacks **callbacks;
 	void **userdata;
 
+	/* For retrieving the playlist XML */
 	struct buf *buf;
+
+	/* Delegate */
+	sp_session *session;
 };
 
 
@@ -196,8 +200,11 @@ struct sp_playlistcontainer {
 	sp_playlistcontainer_callbacks **callbacks;
 	void **userdata;
 
-	/* For retrieving the container playlist */
+	/* For retrieving the container playlist XML */
 	struct buf *buf;
+
+	/* Delegate */
+	sp_session *session;
 };
 
 
