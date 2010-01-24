@@ -68,7 +68,7 @@ struct player {
 	/* AES state */
 	struct {
 		unsigned int  state[4 * (10 + 1)];
-		unsigned char IV[16];
+		unsigned char counter[16];
 		unsigned char keystream[16];
 	} aes;
 

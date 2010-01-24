@@ -61,7 +61,7 @@ static size_t player_ov_read(void *ptr, size_t size, size_t nmemb, void *private
 static int player_ov_seek(void *private, ogg_int64_t offset, int whence);
 static long player_ov_tell(void *private);
 
-static void player_seek_IV(struct player *player);
+static void player_seek_counter(struct player *player);
 static int player_aes_callback(CHANNEL *ch, unsigned char *buf, unsigned short len);
 static int player_substream_callback(CHANNEL *ch, unsigned char *buf, unsigned short len);
 
@@ -680,8 +680,8 @@ static size_t player_ov_read(void *dest, size_t size, size_t nmemb, void *privat
 	assert(bytes_to_consume >= 1024);
 
 
-	/* Update IV according to the buffer position */
-	player_seek_IV(player);
+	/* Setup counter according to the buffer position */
+	player_seek_counter(player);
 
 
 	/* Load data from the rbuf */
@@ -714,15 +714,15 @@ static size_t player_ov_read(void *dest, size_t size, size_t nmemb, void *privat
 		/* Decrypt 1024 bytes block. This will fail for the last block. */
 		for (i = 0; i < 1024 && (block * 1024 + i) < bytes_to_consume; i += 16) {
 
-			/* Produce 16 bytes of keystream from the IV */
+			/* Produce 16 bytes of keystream from the counter */
 			rijndaelEncrypt(player->aes.state, 10,
-							player->aes.IV,
+							player->aes.counter,
 							player->aes.keystream);
 
-			/* Update IV counter */
+			/* Increment counter */
 			for (j = 15; j >= 0; j--) {
-				player->aes.IV[j] += 1;
-				if (player->aes.IV[j] != 0)
+				player->aes.counter[j] += 1;
+				if (player->aes.counter[j] != 0)
 					break;
 			}
 
@@ -826,20 +826,21 @@ static int player_deliver_pcm(sp_session *session, int ms) {
 
 
 /*
- * Update the IV according to the rbuf's current position
+ * Update the counter according to the rbuf's current position
  *
  */
-static void player_seek_IV(struct player *player) {
+static void player_seek_counter(struct player *player) {
 	int i;
 	size_t pos;
 
-	memcpy(player->aes.IV, "\x72\xe0\x67\xfb\xdd\xcb\xcf\x77"
+	/* Nonce */
+	memcpy(player->aes.counter, "\x72\xe0\x67\xfb\xdd\xcb\xcf\x77"
 			"\xeb\xe8\xbc\x64\x3f\x63\x0d\x93", 16);
 
 	pos = rbuf_tell(player->ogg) >> 4;
         for(i = 15; pos; pos >>= 8) {
-                pos += player->aes.IV[i];
-                player->aes.IV[i--] = pos & 0xff;
+                pos += player->aes.counter[i];
+                player->aes.counter[i--] = pos & 0xff;
         }
 }
 
