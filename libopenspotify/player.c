@@ -771,7 +771,7 @@ static int player_deliver_pcm(sp_session *session, int ms) {
 		player->pcm_next_timeout_ms = get_millisecs() + ms;
 
 
-		num_bytes = player->vi->rate * player->vi->channels * 2 / 10;
+		num_bytes = player->vi->rate * player->vi->channels * 2 * 1030 / ms;
 		if(player->pcm->len < num_bytes)
 			num_bytes = player->pcm->len;
 
