@@ -89,27 +89,31 @@ struct callback_ctx {
 
 /* Handle playlist loading event, called by the network thread */
 int playlist_process(sp_session *session, struct request *req) {
-	int ret;
+	int now;
 	
-	ret = 0;
-
 	if(req->state == REQ_STATE_NEW)
 		req->state = REQ_STATE_RUNNING;
 	
+	now = get_millisecs();
+	if(req->next_timeout > now)
+		return 0;
+
+	/*
+	 * Prevent request from happening again.
+	 * If there's an error the channel callback will reset the timeout
+	 *
+	 */
+	req->next_timeout = INT_MAX;
 	if(req->type == REQ_TYPE_PC_LOAD) {
-		req->next_timeout = get_millisecs() + PLAYLIST_RETRY_TIMEOUT*1000;
-		
 		/* Send request (CMD_GETPLAYLIST) to load playlist container */
-		ret = playlistcontainer_send_request(session, req);
+		return playlistcontainer_send_request(session, req);
 	}
 	else if(req->type == REQ_TYPE_PLAYLIST_LOAD) {
-		req->next_timeout = get_millisecs() + PLAYLIST_RETRY_TIMEOUT*1000;
-		
 		/* Send request (CMD_GETPLAYLIST) to load playlist */
-		ret = playlist_send_request(session, req);
+		return playlist_send_request(session, req);
 	}
 	
-	return ret;
+	return -1;
 }
 
 
@@ -201,11 +205,15 @@ static int playlistcontainer_callback(CHANNEL *ch, unsigned char *payload, unsig
 		break;
 
 	case CHANNEL_ERROR:
-		DSFYDEBUG("Error on channel '%s', will retry request in %dms\n",
-			ch->name, callback_ctx->req->next_timeout - get_millisecs());
+		DSFYDEBUG("Error on channel '%s' (playlist container), will retry request in %dms\n",
+			ch->name, PLAYLIST_RETRY_TIMEOUT*1000);
+
+		/* Reset timeout so the request can be retries */
+		callback_ctx->req->next_timeout = get_millisecs() + PLAYLIST_RETRY_TIMEOUT*1000;
 
 		buf_free(callback_ctx->session->playlistcontainer->buf);
 		callback_ctx->session->playlistcontainer->buf = NULL;
+
 		free(callback_ctx);
 		break;
 
@@ -392,13 +400,17 @@ static int playlist_callback(CHANNEL *ch, unsigned char *payload, unsigned short
 		break;
 
 	case CHANNEL_ERROR:
+		DSFYDEBUG("Error on channel '%s' (playlist), will retry request in %dms\n",
+			ch->name, PLAYLIST_RETRY_TIMEOUT*1000);
+
+		/* Reset timeout so the request is retried */
+		callback_ctx->req->next_timeout = get_millisecs() + PLAYLIST_RETRY_TIMEOUT*1000;
+
 		buf_free(playlist->buf);
 		playlist->buf = NULL;
 
 		/* Don't set error on request. It will be retried. */
 		free(callback_ctx);
-
-		DSFYDEBUG("Got a channel ERROR\n");
 		break;
 
 	case CHANNEL_END:
