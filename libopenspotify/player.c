@@ -786,6 +786,8 @@ static int player_deliver_pcm(sp_session *session, int ms) {
 			num_frames = num_bytes / (player->vi->channels << 1);
 			num_frames = session->callbacks->music_delivery(session, &player->audioformat, pcmout->ptr, num_frames);
 			num_bytes = num_frames * (player->vi->channels << 1);
+
+			buf_free(pcmout);
 		}
 
 		if(num_bytes)
