@@ -6,7 +6,6 @@
 
 
 SP_LIBEXPORT(bool) sp_playlist_is_loaded (sp_playlist *playlist) {
-	DSFYDEBUG("Not yet implemented\n");
 
 	return (playlist->state == PLAYLIST_STATE_LOADED? 1: 0);
 }
