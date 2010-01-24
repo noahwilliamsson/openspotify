@@ -21,30 +21,6 @@
 #include "util.h"
 
 
-#ifdef DEBUG
-#undef DSFYDEBUG
-static struct timeval _tv0;
-#define DSFYDEBUG(...) {                                                \
-        struct timeval tv;                                      \
-        int s, us;                                                      \
-        if(_tv0.tv_sec == 0)                                            \
-                gettimeofday(&_tv0, NULL);                              \
-        gettimeofday(&tv, NULL);                                        \
-        s = tv.tv_sec; us = tv.tv_usec;                                 \
-        s -= _tv0.tv_sec; us -= _tv0.tv_usec;                           \
-        if(us < 0) {                                                    \
-                us += 1000*1000;                                        \
-                s--;                                                    \
-        }                                                               \
-        /* fprintf(stderr, "% 2d.%06d %s:%d %s() ", s, us, basename(__FILE__), __LINE__,        \
-                        __func__);      */                              \
-        fprintf(stderr, "%s:%d %s() ", basename(__FILE__), __LINE__,    \
-                        __func__);                                      \
-        fprintf(stderr, __VA_ARGS__);                                   \
-}
-#endif
-
-
 struct player_substream_ctx {
 	sp_track *track;
 	int offset;
