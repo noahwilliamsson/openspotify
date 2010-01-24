@@ -55,6 +55,7 @@ void *iothread(void *data) {
 	sp_session *s = (sp_session *)data;
 	struct request *req;
 	int ret;
+	int now;
 
 #ifdef _WIN32
 	/* Initialize Winsock */
@@ -66,11 +67,12 @@ void *iothread(void *data) {
 		request_cleanup(s);
 
 		/* No locking needed since we're in control of request_cleanup() */
+		now = get_millisecs();
 		for(req = s->requests; req; req = req->next) {
 			if(req->state != REQ_STATE_NEW && req->state != REQ_STATE_RUNNING)
 				continue;
 
-			if(req->next_timeout != 0 && req->next_timeout > get_millisecs())
+			if(req->next_timeout > now)
 				continue;
 
 			DSFYDEBUG("Processing request <type %s, state %s, input %p, timeout %d>\n",
