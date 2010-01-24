@@ -779,6 +779,7 @@ static size_t player_ov_read(void *dest, size_t size, size_t nmemb, void *privat
 static int player_deliver_pcm(sp_session *session, int ms) {
 	struct player *player = session->player;
 	ssize_t num_bytes;
+	int num_frames;
 	struct buf *pcmout;
 
 	if(!player->is_playing || player->is_paused) {
@@ -800,15 +801,19 @@ static int player_deliver_pcm(sp_session *session, int ms) {
 
 		DSFYDEBUG("PCM: Current time:%d, next invocation at %d, sending %zu byets\n",
 				get_millisecs(), player->pcm_next_timeout_ms, num_bytes);
-		pcmout = buf_consume(player->pcm, num_bytes);
 
 
 		if(session->callbacks->music_delivery) {
-			session->callbacks->music_delivery(session, &player->audioformat, pcmout->ptr, pcmout->len / (2 * player->vi->channels));
+			pcmout = buf_new();
+			buf_append_data(pcmout, player->pcm->ptr, num_bytes);
+
+			num_frames = num_bytes / (player->vi->channels << 1);
+			num_frames = session->callbacks->music_delivery(session, &player->audioformat, pcmout->ptr, num_frames);
+			num_bytes = num_frames * (player->vi->channels << 1);
 		}
 
-		/* FIXME: Deliver data to app */
-		buf_free(pcmout);
+		if(num_bytes)
+			buf_free(buf_consume(player->pcm, num_bytes));
 	}
 
 	if(player->is_eof && player->pcm->len == 0) {
