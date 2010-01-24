@@ -31,7 +31,7 @@ extern "C" {
 
 
 #ifndef __bool_true_false_are_defined
-typedef unsigned char bool
+typedef unsigned char bool;
 #endif
 #define byte unsigned char
 
