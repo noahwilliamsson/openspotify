@@ -3,7 +3,7 @@
 
 struct region {
 	size_t len;
-	void *data;
+	char data[0];
 };
 struct rbuf {
 	size_t read_offset;

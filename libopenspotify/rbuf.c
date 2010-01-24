@@ -125,7 +125,6 @@ void rbuf_write(struct rbuf *b, void *data, size_t len) {
 		if((reg = b->regions[n]) == NULL) {
 			b->regions[n] = reg = malloc(sizeof(struct region) + CHUNK_SIZE);
 			reg->len = 0;
-			reg->data = (unsigned char *)reg + sizeof(struct region);
 		}
 
 		/* Figure out where to write */
