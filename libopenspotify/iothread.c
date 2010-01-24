@@ -146,13 +146,14 @@ void *iothread(void *data) {
  *
  */
 static int process_request(sp_session *session, struct request *req) {
+	int now = get_millisecs();
 
 	if(session->connectionstate != SP_CONNECTION_STATE_LOGGED_IN
 		&& (req->type != REQ_TYPE_LOGIN && req->type != REQ_TYPE_LOGOUT)) {
 		if(req->state == REQ_STATE_NEW) {
 			DSFYDEBUG("Postponing request <type %s, state %s, input %p> 10 seconds due to not logged in\n",
 					REQUEST_TYPE_STR(req->type), REQUEST_STATE_STR(req->state), req->input);
-			req->next_timeout = get_millisecs() + 10*1000;
+			req->next_timeout = now + 10*1000;
 
 			return 0;
 		}
@@ -167,8 +168,8 @@ static int process_request(sp_session *session, struct request *req) {
 			  session->num_channels, REQUEST_TYPE_STR(req->type),
 			  REQUEST_STATE_STR(req->state), req->input);
 
-		if(req->next_timeout < get_millisecs() + 2000)
-			req->next_timeout = get_millisecs() + 2000;
+		if(req->next_timeout < now + 2000)
+			req->next_timeout = now + 2000;
 		
 		return 0;
 	}
