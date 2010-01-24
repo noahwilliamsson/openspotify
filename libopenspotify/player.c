@@ -830,24 +830,17 @@ static int player_deliver_pcm(sp_session *session, int ms) {
  *
  */
 static void player_seek_IV(struct player *player) {
-	int i, j;
-	unsigned int value;
+	int i;
 	size_t pos;
 
 	memcpy(player->aes.IV, "\x72\xe0\x67\xfb\xdd\xcb\xcf\x77"
 			"\xeb\xe8\xbc\x64\x3f\x63\x0d\x93", 16);
 
-	pos = rbuf_tell(player->ogg) / 16;
-	for(i = 15; pos; i--) {
-
-		value = player->aes.IV[i] + (pos & 0xff);
-		for (j = i; j >= 0 && value; j--) {
-			player->aes.IV[j] = value & 0xff;
-			value >>= 8;
-		}
-
-		pos >>= 8;
-	}
+	pos = rbuf_tell(player->ogg) >> 4;
+        for(i = 15; pos; pos >>= 8) {
+                pos += player->aes.IV[i];
+                player->aes.IV[i--] = pos & 0xff;
+        }
 }
 
 
