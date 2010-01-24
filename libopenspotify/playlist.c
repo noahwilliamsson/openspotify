@@ -155,7 +155,7 @@ void playlistcontainer_release(sp_session *session) {
 	int i;
 
 	for(i = 0; i < session->playlistcontainer->num_playlists; i++)
-		playlist_release(session, session->playlistcontainer->playlists[i]);
+		playlist_release(session->playlistcontainer->playlists[i]);
 	
 	if(session->playlistcontainer->num_playlists)
 		free(session->playlistcontainer->playlists);
@@ -271,7 +271,7 @@ static int playlistcontainer_parse_xml(sp_session *session) {
 		DSFYDEBUG("Playlist ID '%s'\n", idstr);
 	
 		hex_ascii_to_bytes(idstr, id, 17);
-		playlist = playlist_create(session, id);
+		playlist = playlist_create(id);
 
 		playlistcontainer_add_playlist(session, playlist);
 	}
@@ -283,7 +283,7 @@ static int playlistcontainer_parse_xml(sp_session *session) {
 }
 
 
-sp_playlist *playlist_create(sp_session *session, unsigned char id[17]) {
+sp_playlist *playlist_create(unsigned char id[17]) {
 	sp_playlist *playlist;
 
 	
@@ -314,7 +314,7 @@ sp_playlist *playlist_create(sp_session *session, unsigned char id[17]) {
 
 
 /* Release resources held by a playlist */
-void playlist_release(sp_session *session, sp_playlist *playlist) {
+void playlist_release(sp_playlist *playlist) {
 	int i;
 	
 	if(playlist->buf)
