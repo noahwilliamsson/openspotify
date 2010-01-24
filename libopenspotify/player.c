@@ -449,11 +449,11 @@ static int player_schedule(sp_session *session) {
 
 
 			ret = ov_raw_seek(player->vf, (player->vi->bitrate_nominal / 8) * (item->len / 1000.0));
-			DSFYDEBUG("SCHEDULER: SEEK returned %d\n", ret);
 			if(ret == 0) {
-				/* Seek succeeded, empty PCM output buffer */
+				/* Seek succeeded, flush PCM output buffer */
 				buf_free(buf_consume(player->pcm, player->pcm->len));
-				DSFYDEBUG("SCHEDULER: Flushed PCM-buffer\n");
+				if(player->is_playing && !player->is_paused)
+					session->callbacks->music_delivery(session, &player->audioformat, player->pcm->ptr, 0);
 			}
 
 			break;
