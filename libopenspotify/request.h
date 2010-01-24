@@ -54,14 +54,6 @@ typedef enum {
 	 */
 	REQ_TYPE_LOGOUT,
 
-	/*
-	 * Whenever a CMD_PAUSE (play token lost) packet is received this
-	 * notified the main thread about the fact so
-	 * sp_session_process_events() can run the appropriate callback
-	 *
-	 */
-	REQ_TYPE_PLAY_TOKEN_LOST,
-
 	/* To notify the main thread with a message when CMD_NOTIFY is received */
 	REQ_TYPE_NOTIFY,
 
@@ -160,6 +152,21 @@ typedef enum {
 	REQ_TYPE_PLAYER_SUBSTREAM,
 
 	/*
+	 * Used to request the play token from other players logged
+	 * into the same account
+	 *
+	 */
+	REQ_TYPE_PLAY_TOKEN_ACQUIRE,
+
+	/*
+	 * Whenever a CMD_PAUSE (play token lost) packet is received this
+	 * notified the main thread about the fact so
+	 * sp_session_process_events() can run the appropriate callback
+	 *
+	 */
+	REQ_TYPE_PLAY_TOKEN_LOST,
+
+	/*
 	 * An always running request that is periodically run by the
 	 * iothread to save stuff to the cache and to do GC.
 	 * Never returns.
@@ -182,7 +189,6 @@ struct request {
 #define REQUEST_TYPE_STR(type) (type == REQ_TYPE_LOGIN? "LOGIN": \
 				type == REQ_TYPE_LOGOUT? "LOGOUT": \
 				type == REQ_TYPE_NOTIFY? "REQ_TYPE_NOTIFY": \
-				type == REQ_TYPE_PLAY_TOKEN_LOST? "PLAY_TOKEN_LOST": \
 				type == REQ_TYPE_PC_LOAD? "PC_LOAD": \
 				type == REQ_TYPE_PC_PLAYLIST_ADD? "PC_PLAYLIST_ADD": \
 				type == REQ_TYPE_PC_PLAYLIST_REMOVE? "PC_PLAYLIST_REMOVE": \
@@ -203,6 +209,8 @@ struct request {
 				type == REQ_TYPE_BROWSE_TRACK? "BROWSE_TRACK": \
 				type == REQ_TYPE_PLAYER_KEY? "PLAYER_KEY": \
 				type == REQ_TYPE_PLAYER_SUBSTREAM? "PLAYER_SUBSTREAM": \
+				type == REQ_TYPE_PLAY_TOKEN_ACQUIRE? "PLAY_TOKEN_ACQUIRE": \
+				type == REQ_TYPE_PLAY_TOKEN_LOST? "PLAY_TOKEN_LOST": \
 				type == REQ_TYPE_CACHE_PERIODIC? "CACHE_PERIODIC": \
 				"UNKNOWN")
 

@@ -207,6 +207,13 @@ SP_LIBEXPORT(void) sp_session_process_events(sp_session *session, int *next_time
 			session->callbacks->logged_out(session);
 			break;
 
+		case REQ_TYPE_PLAY_TOKEN_LOST:
+			if(session->callbacks->play_token_lost == NULL)
+				break;
+
+			session->callbacks->play_token_lost(session);
+			break;
+
 		case REQ_TYPE_NOTIFY:
 			if(session->callbacks->message_to_user == NULL)
 				break;

@@ -218,6 +218,8 @@ static int process_request(sp_session *session, struct request *req) {
 
 	case REQ_TYPE_PLAYER_KEY:
 	case REQ_TYPE_PLAYER_SUBSTREAM:
+	case REQ_TYPE_PLAY_TOKEN_ACQUIRE:
+	case REQ_TYPE_PLAY_TOKEN_LOST:
 		return player_process_request(session, req);
 		break;
 

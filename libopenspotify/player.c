@@ -394,10 +394,14 @@ static int player_schedule(sp_session *session) {
 			player->is_paused = 0;
 			player->is_playing = 1;
 			player->pcm_next_timeout_ms = get_millisecs();
+
+			/* Acquire the playing token from other players on the same account */
+			request_post(session, REQ_TYPE_PLAY_TOKEN_ACQUIRE, NULL);
 			break;
 
 		case PLAYER_PAUSE:
-			player->is_paused = 1;
+			if(player->is_playing)
+				player->is_paused = 1;
 			break;
 
 		case PLAYER_STOP:
@@ -854,6 +858,16 @@ int player_process_request(sp_session *session, struct request *req) {
 
 		/* This will free our player_substream_ctx */
 		ret = request_set_result(session, req, ret? SP_ERROR_OTHER_PERMANENT: SP_ERROR_OK, NULL);
+		break;
+
+	case REQ_TYPE_PLAY_TOKEN_ACQUIRE:
+		ret = cmd_token_acquire(session);
+		ret += request_set_result(session, req, ret? SP_ERROR_OTHER_PERMANENT: SP_ERROR_OK, NULL);
+		break;
+
+	case REQ_TYPE_PLAY_TOKEN_LOST:
+		player_push(session, PLAYER_PAUSE, NULL, 0);
+		ret = request_set_result(session, req, SP_ERROR_OK, NULL);
 		break;
 
 	default:

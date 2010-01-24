@@ -20,7 +20,6 @@
 #define CMD_AESKEY	0x0d
 #define CMD_SHAHASH     0x10
 #define CMD_IMAGE	0x19
-#define CMD_TOKENNOTIFY	0x4f
 #define CMD_USERINFO	0x57
 
 /* Rights management */
@@ -43,9 +42,9 @@
 #define CMD_LOG		0x48
 #define CMD_PONG	0x49
 #define CMD_PONGACK	0x4a
-#define CMD_PAUSE	0x4b
+#define CMD_TOKENLOST	0x4b
 #define CMD_REQUESTAD	0x4e
-#define CMD_REQUESTPLAY	0x4f
+#define CMD_TOKENACQ	0x4f
 
 /* Internal */
 #define CMD_PRODINFO	0x50
@@ -60,7 +59,7 @@
 #define PLAYLIST_CURRENT	~0
 
 int cmd_send_cache_hash (sp_session *);
-int cmd_token_notify (sp_session *);
+int cmd_token_acquire (sp_session *);
 int cmd_aeskey (sp_session *, unsigned char *, unsigned char *, channel_callback,
 		void *);
 int cmd_search (sp_session *, char *, unsigned int, unsigned int, channel_callback,

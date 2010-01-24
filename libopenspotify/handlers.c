@@ -15,6 +15,7 @@
 #include "debug.h"
 #include "handlers.h"
 #include "packet.h"
+#include "player.h"
 #include "playlist.h"
 #include "request.h"
 #include "sp_opaque.h"
@@ -232,8 +233,8 @@ int handle_packet (sp_session * session,
 		request_post(session, REQ_TYPE_PC_LOAD, NULL);
 		break;
 
-	case CMD_PAUSE:
-		/* Play token lost */
+	case CMD_TOKENLOST:
+		request_post(session, REQ_TYPE_PLAY_TOKEN_LOST, NULL);
 		break;
 	}
 

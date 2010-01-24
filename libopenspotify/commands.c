@@ -252,17 +252,15 @@ int cmd_toplistbrowse (sp_session *session,
 
 
 /*
- * Notify server we're going to play
+ * Acquire the play token
  *
  */
-int cmd_token_notify (sp_session * session)
-{
+int cmd_token_acquire (sp_session * session) {
 	int ret;
 	
-	ret = packet_write (session, CMD_TOKENNOTIFY, NULL, 0);
+	ret = packet_write (session, CMD_TOKENACQ, NULL, 0);
 	if (ret != 0) {
-		DSFYDEBUG ("packet_write(cmd=0x4f) returned %d, aborting!\n",
-			 ret)
+		DSFYDEBUG ("packet_write(cmd=0x4f) returned %d, aborting!\n", ret)
 	}
 
 	return ret;
@@ -303,49 +301,6 @@ int cmd_aeskey (sp_session * session, unsigned char *file_id,
 	return ret;
 }
 
-/*
- * A demo wrapper for playing a track
- *
- */
-int cmd_action (sp_session * session, unsigned char *file_id,
-		unsigned char *track_id)
-{
-	int ret;
-
-	/*
-	 * Notify the server about our intention to play music, there by allowing
-	 * it to request other players on the same account to pause.
-	 *
-	 * Yet another client side restriction to annoy those who share their 
-	 * Spotify account with not yet invited friends.
-	 * And as a bonus it won't play commercials and waste bandwidth in vain.
-	 *
-	 */
-	if ((ret =
-	     packet_write (session, CMD_REQUESTPLAY, (unsigned char *) "",
-			   0)) != 0) {
-		DSFYDEBUG ("packet_write(0x4f) returned %d, aborting!\n",
-			 ret)
-			return ret;
-	}
-
-#ifdef P2P
-	/* Request a 100 byte P2P initialization block */
-	b = buffer_new();
-	buf_append_data(b, file_id, 20);
-
-	ret = packet_write (session, 0x20, b->ptr, b->len);
-	bufr_free(b);
-	if (ret != 0) {
-		DSFYDEBUG ("packet_write(cmd=0x20) returned %d, aborting!\n",
-			 ret);
-                return ret;
-	}
-#endif
-
-	/* Request the AES key for this file by sending the file ID and track ID */
-	return cmd_aeskey (session, file_id, track_id, dump_generic, NULL);
-}
 
 /*
  * Request a part of the encrypted file from the server.
