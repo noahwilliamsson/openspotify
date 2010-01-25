@@ -304,7 +304,7 @@ SP_LIBEXPORT(int) sp_link_as_string (sp_link *link, char *buffer, int buffer_siz
 			
 		case SP_LINKTYPE_PLAYLIST:
 			id_bytes_to_uri(link->data.playlist->id, uri);
-			ret = snprintf(buffer, buffer_size, "spotify:playlist:%s:%s", link->data.playlist->owner->display_name, uri);
+			ret = snprintf(buffer, buffer_size, "spotify:user:%s:playlist:%s", link->data.playlist->owner->canonical_name, uri);
 			break;
 
 		case SP_LINKTYPE_INVALID:
