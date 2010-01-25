@@ -37,7 +37,7 @@ void *rbuf_new(void) {
  *
  */
 void rbuf_free(struct rbuf* b) {
-	int n;
+	unsigned int n;
 
 	assert(b);
 	for(n = 0; n < b->n_regions; n++)
@@ -158,7 +158,7 @@ void rbuf_write(struct rbuf *b, void *data, size_t len) {
  *
  */
 size_t rbuf_read(struct rbuf *b, void *dest, size_t len) {
-	int n;
+	unsigned int n;
 	struct region *reg;
 	size_t remaining;
 	void *ptr;
