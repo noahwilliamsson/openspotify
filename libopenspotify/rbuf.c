@@ -104,7 +104,7 @@ size_t rbuf_tell(struct rbuf *b) {
 void rbuf_write(struct rbuf *b, void *data, size_t len) {
 	unsigned int n;
 	struct region *reg;
-	void *ptr;
+	char *ptr;
 	size_t remaining;
 	size_t reg_offset, nbytes;
 
@@ -161,7 +161,7 @@ size_t rbuf_read(struct rbuf *b, void *dest, size_t len) {
 	unsigned int n;
 	struct region *reg;
 	size_t remaining;
-	void *ptr;
+	char *ptr;
 	size_t reg_offset, nbytes;
 
 	ptr = dest;
