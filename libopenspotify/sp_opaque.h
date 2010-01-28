@@ -170,9 +170,16 @@ struct sp_playlist {
 	unsigned char id[17];
 
 	char name[256];
+	char *description;
+	unsigned char image_id[20];
 	sp_user *owner;
+
 	int position;
 	int shared;
+
+	int is_dirty;
+	int revision;
+	unsigned int checksum;
 
 	sp_track **tracks;
 	int num_tracks;
@@ -195,6 +202,10 @@ struct sp_playlistcontainer {
 	/* List of individual playlists */
 	int num_playlists;
 	sp_playlist **playlists;
+
+	int is_dirty;
+	int revision;
+	unsigned int checksum;
 
 	int num_callbacks;
 	sp_playlistcontainer_callbacks **callbacks;

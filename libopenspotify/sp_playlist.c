@@ -2,12 +2,13 @@
 #include <stdlib.h>
 
 #include "debug.h"
+#include "playlist.h"
 #include "sp_opaque.h"
 
 
 SP_LIBEXPORT(bool) sp_playlist_is_loaded (sp_playlist *playlist) {
 
-	return (playlist->state == PLAYLIST_STATE_LOADED? 1: 0);
+	return (playlist->state == PLAYLIST_STATE_LISTED? 1: playlist->state == PLAYLIST_STATE_LOADED? 1: 0);
 }
 
 
@@ -65,7 +66,43 @@ SP_LIBEXPORT(const char *) sp_playlist_name (sp_playlist *playlist) {
 
 
 SP_LIBEXPORT(sp_error) sp_playlist_rename (sp_playlist *playlist, const char *new_name) {
-	DSFYDEBUG("Not yet implemented\n");
+	char buf[1024];
+	sp_playlist **container;
+
+	if(!sp_playlist_is_loaded(playlist))
+		return SP_ERROR_RESOURCE_NOT_LOADED;
+	
+	if(strcmp(playlist->owner->display_name, playlist->session->username))
+		return SP_ERROR_OTHER_PERMANENT;
+
+	/* FIXME: Will fail on multiple calls */
+	if(playlist->buf != NULL) {
+		DSFYDEBUG("Rename to '%s' while playlist->buf != NULL\n", new_name);
+		return SP_ERROR_OTHER_TRANSIENT;
+	}
+
+
+	playlist->is_dirty = 1;
+	playlist_set_name(playlist->session, playlist, new_name);
+
+	/* FIXME: XML-escape with ezxml_ampencode */
+	sprintf(buf,	"<change>"
+				"<ops><name>%s</name><description>c64 music!</description></ops>"
+				"<time>%ld</time>"
+				"<user>%s</user>"
+			"</change>"
+			"<version>%010d,%010d,%010d,%d</version>",
+			new_name, time(NULL), playlist->session->username,
+			playlist->revision + 1, playlist->num_tracks, playlist->checksum, playlist->shared);
+
+
+	playlist->buf = buf_new();
+	buf_append_data(playlist->buf, buf, strlen(buf) + 1);
+
+
+	container = malloc(sizeof(sp_playlist *));
+	*container = playlist;
+	request_post(playlist->session, REQ_TYPE_PLAYLIST_CHANGE, container);
 
 	return SP_ERROR_OK;
 }

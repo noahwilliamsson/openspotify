@@ -188,6 +188,7 @@ static int process_request(sp_session *session, struct request *req) {
 	
 	case REQ_TYPE_PC_LOAD:
 	case REQ_TYPE_PLAYLIST_LOAD:
+	case REQ_TYPE_PLAYLIST_CHANGE:
 		return playlist_process(session, req);
 		break;
 	

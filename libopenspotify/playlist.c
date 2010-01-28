@@ -73,6 +73,7 @@ static int playlistcontainer_parse_xml(sp_session *session);
 static void playlistcontainer_request_playlists(sp_session *session);
 
 static int playlist_send_request(sp_session *session, struct request *req);
+static int playlist_send_change(sp_session *session, struct request *req);
 static int playlist_callback(CHANNEL *ch, unsigned char *payload, unsigned short len);
 static int playlist_parse_xml(sp_session *session, sp_playlist *playlist);
 
@@ -112,6 +113,10 @@ int playlist_process(sp_session *session, struct request *req) {
 		/* Send request (CMD_GETPLAYLIST) to load playlist */
 		return playlist_send_request(session, req);
 	}
+	else if(req->type == REQ_TYPE_PLAYLIST_CHANGE) {
+		/* Send request (CMD_CHANGEPLAYLIST) to load playlist */
+		return playlist_send_change(session, req);
+	}
 	
 	return -1;
 }
@@ -123,6 +128,10 @@ void playlistcontainer_create(sp_session *session) {
 	session->playlistcontainer = malloc(sizeof(sp_playlistcontainer));
 	if(session->playlistcontainer == NULL)
 		return;
+
+	session->playlistcontainer->is_dirty = 0;
+	session->playlistcontainer->revision = 0;
+	session->playlistcontainer->checksum = 0;
 
 	session->playlistcontainer->buf = NULL;
 	
@@ -278,6 +287,14 @@ static int playlistcontainer_parse_xml(sp_session *session) {
 		playlistcontainer_add_playlist(session, playlist);
 	}
 
+	node = ezxml_get(root, "next-change", 0, "version", -1);
+	if(node) {
+		int num_items;
+
+		sscanf(node->txt, "%010d,%010d,%010d,0", 
+			&session->playlistcontainer->revision, &num_items,
+			&session->playlistcontainer->checksum);
+	}
 
 	ezxml_free(root);
 
@@ -296,9 +313,16 @@ sp_playlist *playlist_create(sp_session *session, unsigned char id[17]) {
 	memcpy(playlist->id, id, sizeof(playlist->id));
 
 	memset(playlist->name, 0, sizeof(playlist->name));
+	playlist->description = NULL;
+	memset(playlist->image_id, 0, sizeof(playlist->image_id));
 	playlist->owner = NULL;
+
 	playlist->position = 0;
 	playlist->shared = 0;
+
+	playlist->is_dirty = 0;
+	playlist->revision = 0;
+	playlist->checksum = 0;
 
 	playlist->num_tracks = 0;
 	playlist->tracks = NULL;
@@ -341,10 +365,11 @@ void playlist_release(sp_session *session, sp_playlist *playlist) {
 
 
 /* Set name of playlist and notify main thread */
-void playlist_set_name(sp_session *session, sp_playlist *playlist, char *name) {
+void playlist_set_name(sp_session *session, sp_playlist *playlist, const char *name) {
 	strncpy(playlist->name, name, sizeof(playlist->name) - 1);
 	playlist->name[sizeof(playlist->name) - 1] = 0;
 	
+	DSFYDEBUG("Setting name of playlist to '%s', sending REQ_TYPE_PLAYLIST_RENAME request to main thread..\n", name);
 	request_post_result(session, REQ_TYPE_PLAYLIST_RENAME, SP_ERROR_OK, playlist);
 }
 
@@ -388,6 +413,36 @@ static int playlist_send_request(sp_session *session, struct request *req) {
 			playlist_callback, callback_ctx);
 
 	DSFYDEBUG("Sent request for playlist with ID '%s' at time %d\n", idstr, get_millisecs());
+	return ret;
+}
+
+
+/* Request changes to be made on a playlist */
+static int playlist_send_change(sp_session *session, struct request *req) {
+	int ret;
+	char idstr[35];
+	struct callback_ctx *callback_ctx;
+	sp_playlist *playlist = *(sp_playlist **)req->input;
+        static const char* decl_and_root =
+                "<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n<playlist>\n";
+
+	callback_ctx = malloc(sizeof(struct callback_ctx));
+	callback_ctx->session = session;
+	callback_ctx->req = req;
+
+
+	ret =  cmd_changeplaylist(session, playlist->id, (char *)playlist->buf->ptr,
+				playlist->revision, playlist->num_tracks,
+				playlist->checksum, playlist->shared,
+				playlist_callback, callback_ctx);
+
+	hex_bytes_to_ascii((unsigned char *)playlist->id, idstr, 17);
+	DSFYDEBUG("Sent change for playlist with ID '%s' at time %d\n%s\n", idstr, get_millisecs(), playlist->buf->ptr);
+	buf_free(playlist->buf);
+        playlist->buf = buf_new();
+        buf_append_data(playlist->buf, (char*)decl_and_root, strlen(decl_and_root));
+
+	
 	return ret;
 }
 
@@ -488,17 +543,18 @@ static int playlist_parse_xml(sp_session *session, sp_playlist *playlist) {
 
 	/* Loop over each track in the playlist and add it */
 	node = ezxml_get(root, "next-change", 0, "change", 0, "ops", 0, "add", 0, "items", -1);
-	id_list = node->txt;
-	
-	for(idstr = strtok(id_list, ",\n"); idstr; idstr = strtok(NULL, ",\n")) {
-		hex_ascii_to_bytes(idstr, track_id, sizeof(track_id));
-		track = osfy_track_add(session, track_id);
+	if(node) {
+		id_list = node->txt;
+		for(idstr = strtok(id_list, ",\n"); idstr; idstr = strtok(NULL, ",\n")) {
+			hex_ascii_to_bytes(idstr, track_id, sizeof(track_id));
+			track = osfy_track_add(session, track_id);
 
-		playlist->tracks = (sp_track **)realloc(playlist->tracks, (playlist->num_tracks + 1) * sizeof(sp_track *));
-		playlist->tracks[playlist->num_tracks] = track;
-		playlist->num_tracks++;
+			playlist->tracks = (sp_track **)realloc(playlist->tracks, (playlist->num_tracks + 1) * sizeof(sp_track *));
+			playlist->tracks[playlist->num_tracks] = track;
+			playlist->num_tracks++;
 
-		sp_track_add_ref(track);
+			sp_track_add_ref(track);
+		}
 	}
 	
 	node = ezxml_get(root, "next-change", 0, "change", 0, "user", -1);
@@ -509,6 +565,29 @@ static int playlist_parse_xml(sp_session *session, sp_playlist *playlist) {
 			user_lookup(session, playlist->owner);
 		}
 	}
+
+	node = ezxml_get(root, "next-change", 0, "version", -1);
+	if(!node)
+		node = ezxml_get(root, 0, "confirm", 0, "version", -1);
+
+	if(node) {
+		int revision, num_items, checksum, shared;
+
+		sscanf(node->txt, "%010d,%010d,%010d,%d", 
+			&revision, &num_items, &checksum, &shared);
+
+		/* FIXME: Notify properly */
+		if(playlist->revision == 0) {
+			playlist->revision = revision;
+			playlist->checksum = checksum;
+			playlist->shared = shared;
+		}
+		else {
+			/* Need to merge */
+		}
+		DSFYDEBUG("Change confirmed, now have rev %d\n", playlist->revision);
+	}
+
 
 	ezxml_free(root);
 

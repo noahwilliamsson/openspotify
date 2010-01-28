@@ -71,6 +71,7 @@ typedef enum {
 	/* FIXME: Not yet supported */
 	REQ_TYPE_PC_PLAYLIST_REMOVE,
 	REQ_TYPE_PC_PLAYLIST_MOVE,
+	REQ_TYPE_PC_PLAYLIST_CHANGE,
 
 	/*
 	 * When the playlist container is loaded, a REQ_TYPE_PLAYLIST_LOAD is posted to
@@ -82,6 +83,9 @@ typedef enum {
 
 	/* Sent to the main thread to notify the name of the playlist was set/updated */
 	REQ_TYPE_PLAYLIST_RENAME,
+
+	/* Sent from the main thread to the iothread to synchronize playlist changes */
+	REQ_TYPE_PLAYLIST_CHANGE,
 
 	/* Sent when a playlist has been changed */
 	REQ_TYPE_PLAYLIST_STATE_CHANGED,
@@ -193,8 +197,10 @@ struct request {
 				type == REQ_TYPE_PC_PLAYLIST_ADD? "PC_PLAYLIST_ADD": \
 				type == REQ_TYPE_PC_PLAYLIST_REMOVE? "PC_PLAYLIST_REMOVE": \
 				type == REQ_TYPE_PC_PLAYLIST_MOVE? "PC_PLAYLIST_MOVE": \
+				type == REQ_TYPE_PC_PLAYLIST_CHANGE? "PC_PLAYLIST_CHANGE": \
 				type == REQ_TYPE_PLAYLIST_LOAD? "PLAYLIST_LOAD": \
 				type == REQ_TYPE_PLAYLIST_RENAME? "PLAYLIST_RENAME": \
+				type == REQ_TYPE_PLAYLIST_CHANGE? "PLAYLIST_CHANGE": \
 				type == REQ_TYPE_PLAYLIST_STATE_CHANGED? "PLAYLIST_STATE_CHANGED": \
 				type == REQ_TYPE_BROWSE_ALBUM? "BROWSE_ALBUM": \
 				type == REQ_TYPE_BROWSE_ARTIST? "BROWSE_ARTIST": \
