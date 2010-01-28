@@ -678,10 +678,10 @@ static size_t player_ov_read(void *dest, size_t size, size_t nmemb, void *privat
 
 		/* Deinterleave the 4x256 byte blocks */
 		ciphertext = plaintext + block * 1024;
-		w = data + block * 1024 + 0 * 256;
-		x = data + block * 1024 + 1 * 256;
-		y = data + block * 1024 + 2 * 256;
-		z = data + block * 1024 + 3 * 256;
+		w = (unsigned char *)data + block * 1024 + 0 * 256;
+		x = (unsigned char *)data + block * 1024 + 1 * 256;
+		y = (unsigned char *)data + block * 1024 + 2 * 256;
+		z = (unsigned char *)data + block * 1024 + 3 * 256;
 
 		for (i = 0; i < 1024 && (block * 1024 + i) < bytes_to_consume; i += 4) {
 			*ciphertext++ = *w++;
