@@ -1,11 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <string.h>
-#include <pthread.h>
-#include <assert.h>
+#include <unistd.h>
 #include <sys/time.h>
 #include <netinet/in.h>
+#include <pthread.h>
+#endif
+#include <assert.h>
 #include <spotify/api.h>
 #include <vorbis/vorbisfile.h>
 
@@ -28,7 +32,11 @@ struct player_substream_ctx {
 };
 
 
+#ifdef _WIN32
+static DWORD WINAPI player_main(LPVOID arg);
+#else
 static void *player_main(void *arg);
+#endif
 static int player_schedule(sp_session *session);
 static int player_deliver_pcm(sp_session *session, int ms);
 
@@ -53,8 +61,13 @@ int player_init(sp_session *session) {
 	if(session->player == NULL)
 		return -1;
 
+#ifdef _WIN32
+	session->player->mutex = CreateMutex(NULL, FALSE, NULL);
+	session->player->cond = CreateEvent(NULL, FALSE, FALSE, NULL);
+#else
 	pthread_mutex_init(&session->player->mutex, NULL);
 	pthread_cond_init(&session->player->cond, NULL);
+#endif
 	session->player->item_posted = 0;
 
 	session->player->items = NULL;
@@ -80,7 +93,11 @@ int player_init(sp_session *session) {
 	session->player->callbacks.tell_func = player_ov_tell;
 
 
+#ifdef _WIN32
+	session->player->thread = CreateThread(NULL, 0, player_main, session, 0, NULL);
+#else
 	pthread_create(&session->player->thread, NULL, player_main, session);
+#endif
 
 	return 0;
 }
@@ -91,11 +108,18 @@ int player_init(sp_session *session) {
  *
  */
 void player_free(sp_session *session) {
+#ifdef _WIN32
+	TerminateThread(session->player->thread, 0);
+
+	CloseHandle(session->player->cond);
+	CloseHandle(session->player->mutex);
+#else
 	pthread_cancel(session->player->thread);
 	pthread_join(session->player->thread, NULL);
 
 	pthread_cond_destroy(&session->player->cond);
 	pthread_mutex_destroy(&session->player->mutex);
+#endif
 
 	DSFYDEBUG("Releasing player resources\n");
 	if(session->player->vf) {
@@ -123,7 +147,11 @@ void player_free(sp_session *session) {
  *
  *
  */
+#ifdef _WIN32
+static DWORD WINAPI player_main(LPVOID arg) {
+#else
 static void *player_main(void *arg) {
+#endif
 	int ret;
 	ssize_t num_bytes;
 	char pcm[4096 * 4];
@@ -183,7 +211,11 @@ static void *player_main(void *arg) {
 		}
 	}
 
+#ifdef _WIN32
+	return 0;
+#else
 	return NULL;
+#endif
 }
 
 
@@ -197,7 +229,11 @@ int player_push(sp_session *session, enum player_item_type type, void *data, siz
 	struct player *player = session->player;
 	struct player_item *item;
 
+#ifdef _WIN32
+	WaitForSingleObject(player->mutex, INFINITE);
+#else
 	pthread_mutex_lock(&player->mutex);
+#endif
 
 
 	if((item = player->items) == NULL) {
@@ -227,10 +263,14 @@ int player_push(sp_session *session, enum player_item_type type, void *data, siz
 
 	/* Signal the condition */
 	player->item_posted = 1;
+
+#ifdef _WIN32
+	PulseEvent(player->cond);
+	ReleaseMutex(player->mutex);
+#else
 	pthread_cond_signal(&player->cond);
-
-
 	pthread_mutex_unlock(&player->mutex);
+#endif
 
 	return 0;
 }
@@ -248,12 +288,21 @@ static int player_schedule(sp_session *session) {
 	struct player_item *item;
 	int num_processed_items;
 	int ret;
+#ifdef WIN32
+	DWORD timeout;
+	DWORD wait_status;
+#else
 	struct timeval tv;
 	struct timespec ts;
+#endif
 	int cur_ms;
 	void **container;
 
+#ifdef _WIN32
+	WaitForSingleObject(player->mutex, INFINITE);
+#else
 	pthread_mutex_lock(&player->mutex);
+#endif
 	while(!player->item_posted) {
 
 		if(!player->is_loaded || !player->is_playing || player->is_paused || player->pcm->len == 0) {
@@ -261,7 +310,13 @@ static int player_schedule(sp_session *session) {
 			 * Nothing interesting is going on right now so we'll just sleep
 			 *
 			 */
+#ifdef _WIN32
+			ReleaseMutex(player->mutex);
+			WaitForSingleObject(player->cond, INFINITE);
+			WaitForSingleObject(player->mutex, INFINITE);
+#else
 			pthread_cond_wait(&player->cond, &player->mutex);
+#endif
 
 			/* Check condition variable and likely abort the loop */
 			continue;
@@ -275,6 +330,17 @@ static int player_schedule(sp_session *session) {
 		 *
 		 */
 		cur_ms = get_millisecs();
+#ifdef _WIN32
+		timeout = 0;
+		if(player->pcm_next_timeout_ms > cur_ms) {
+			timeout = player->pcm_next_timeout_ms - cur_ms;
+		}
+
+		ReleaseMutex(player->mutex);
+		wait_status = WaitForSingleObject(player->cond, timeout);
+		WaitForSingleObject(player->mutex, INFINITE);
+		if(wait_status == WAIT_TIMEOUT) {
+#else
 		gettimeofday(&tv, NULL);
 		ts.tv_sec = tv.tv_sec + 0;
 		ts.tv_nsec = 1000 * tv.tv_usec;
@@ -289,6 +355,7 @@ static int player_schedule(sp_session *session) {
 
 		DSFYDEBUG("WAIT timed: Waiting until %dms (max), time now is %dms\n", player->pcm_next_timeout_ms, cur_ms);;
 		if(pthread_cond_timedwait(&player->cond, &player->mutex, &ts) != 0) {
+#endif
 			if(player_deliver_pcm(session, 100)) {
 				/* FIXME: Is this really needed? */
 				DSFYDEBUG("WAIT timeout: Out of PCM-data, giving up\n");
@@ -320,7 +387,11 @@ static int player_schedule(sp_session *session) {
 	while((item = player->items) != NULL) {
 
 		player->items = item->next;
+#ifdef _WIN32
+		ReleaseMutex(player->mutex);
+#else
 		pthread_mutex_unlock(&player->mutex);
+#endif
 
 		/* Process request */
 		switch(item->type) {
@@ -486,11 +557,19 @@ static int player_schedule(sp_session *session) {
 			free(item->data);
 		free(item);
 
+#ifdef _WIN32
+		WaitForSingleObject(player->mutex, INFINITE);
+#else
 		pthread_mutex_lock(&player->mutex);
+#endif
 		num_processed_items++;
 	}
 
+#ifdef _WIN32
+	ReleaseMutex(player->mutex);
+#else
 	pthread_mutex_unlock(&player->mutex);
+#endif
 
 	return num_processed_items;
 }

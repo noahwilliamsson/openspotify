@@ -1,6 +1,12 @@
 #ifndef LIBOPENSPOTIFY_PLAYER_H
 #define LIBOPENSPOTIFY_PLAYER_H
 
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <pthread.h>
+#endif
+
 #include <spotify/api.h>
 #include <vorbis/vorbisfile.h>
 
@@ -40,6 +46,15 @@ struct player_item {
 
 
 struct player {
+#ifdef _WIN32
+	HANDLE thread;
+
+	/* Mutex protecting the action list */
+	HANDLE mutex;
+
+	/* Condition variables to signal the player there's work to do */
+	HANDLE cond;
+#else
 	pthread_t thread;
 
 	/* Mutex protecting the action list */
@@ -47,6 +62,8 @@ struct player {
 
 	/* Condition variables to signal the player there's work to do */
 	pthread_cond_t cond;
+#endif
+
 	int item_posted;
 	int is_recursive;	/* Only set when scheduling from player_ov_read() */
 
