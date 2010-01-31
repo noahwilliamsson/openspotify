@@ -722,7 +722,7 @@ static size_t player_ov_read(void *dest, size_t size, size_t nmemb, void *privat
 	 */
 	if(previous_bytes) {
 		bytes_to_consume -= previous_bytes;
-		memmove(dest, dest + previous_bytes, bytes_to_consume);
+		memmove(dest, (char *)dest + previous_bytes, bytes_to_consume);
 	}
 
 
@@ -744,7 +744,7 @@ static size_t player_ov_read(void *dest, size_t size, size_t nmemb, void *privat
 		player->stream_length -= 167;
 
 		bytes_to_consume -= 167;
-		memmove(dest, dest + 167, bytes_to_consume);
+		memmove(dest, (char *)dest + 167, bytes_to_consume);
 	}
 
 
