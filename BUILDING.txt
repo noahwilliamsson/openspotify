@@ -4,7 +4,7 @@ Download Microsoft Visual Studio C++ 2008 Express
 http://www.microsoft.com/express/
 
 You might need "Microsoft Visual C++ 2008 Redistributables" from
-http://www.slproweb.com/products/Win32OpenSSL.html
+http://google.com/search?q=Microsoft+Visual+C%2B%2B+2008+Redistributables
 
 Open openspotify.sln and choose Build->Build Solution from the menu.
 Depending on which configuration is selected, output will either be
@@ -23,11 +23,16 @@ A static build (/MD) of Zlib 1.2.3 is bundled in win32/{lib,include}
 http://www.winimage.com/zLibDll/
 It was built using the static release and debug configurations.
 
+Static builds (/MD) of libogg 1.1.4, libvorbis 1.2.3 and libvorbisfile 1.2.3
+are bundled in win32/{lib,include}. They were built using the Release_SSE
+and Debug configurations after switching from /MT to /MD.
+
 
 UNIX
 ====
-Requires openssl, zlib and libvorbisfile development headers and libraries.
-On Mac OS X all dependencies but libvorbisfile comes by default.
+Requires openssl, zlib, libogg and libvorbisfile development headers and
+libraries.
+On Mac OS X all dependencies but libogg and libvorbisfile comes by default.
 
 On Ubuntu Linux the dependencies can be installed with this command:
 $ sudo apt-get install libssl-dev libvorbisfile3 zlib1g-dev
