@@ -14,8 +14,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "example-test", "examples\te
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "example-browse", "examples\browse\browse.vcproj", "{12933A91-5A8A-466E-8A4B-9FF7CEFDCC7A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3D9572E6-ADD5-455F-9677-51470EBDB39D} = {3D9572E6-ADD5-455F-9677-51470EBDB39D}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ml_openspotify", "examples\winamp\ml_openspotify\ml_openspotify.vcproj", "{425F62FF-BF45-4B11-96BF-5C54FF05A00D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3D9572E6-ADD5-455F-9677-51470EBDB39D} = {3D9572E6-ADD5-455F-9677-51470EBDB39D}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

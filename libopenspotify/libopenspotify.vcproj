@@ -62,7 +62,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="dnsapi.lib ws2_32.lib libeay32MDd.lib ssleay32MDd.lib zlibd.lib"
+				AdditionalDependencies="dnsapi.lib ws2_32.lib libeay32MDd.lib ssleay32MDd.lib zlibd.lib liboggMDd.lib libvorbisMDd.lib libvorbisfileMDd.lib"
 				OutputFile="$(OutDir)\$(ProjectName).lib"
 				AdditionalLibraryDirectories="..\win32\lib"
 			/>
@@ -128,7 +128,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies="dnsapi.lib ws2_32.lib libeay32MD.lib ssleay32MD.lib zlib.lib"
+				AdditionalDependencies="dnsapi.lib ws2_32.lib libeay32MD.lib ssleay32MD.lib zlib.lib liboggMD.lib libvorbisMD.lib libvorbisfileMD.lib"
 				OutputFile="$(OutDir)\$(ProjectName).lib"
 				AdditionalLibraryDirectories="..\win32\lib"
 			/>
@@ -193,7 +193,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="dnsapi.lib ws2_32.lib libeay32MD.lib ssleay32MD.lib zlibd.lib"
+				AdditionalDependencies="dnsapi.lib ws2_32.lib libeay32MD.lib ssleay32MD.lib zlibd.lib liboggMDd.lib libvorbisMDd.lib libvorbisfileMDd.lib"
 				AdditionalLibraryDirectories="..\win32\lib"
 			/>
 			<Tool
@@ -264,7 +264,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="dnsapi.lib ws2_32.lib libeay32MD.lib ssleay32MD.lib zlib.lib"
+				AdditionalDependencies="dnsapi.lib ws2_32.lib libeay32MD.lib ssleay32MD.lib zlib.lib liboggMD.lib libvorbisMD.lib libvorbisfileMD.lib"
 				AdditionalLibraryDirectories="..\win32\lib"
 				IgnoreAllDefaultLibraries="false"
 				IgnoreDefaultLibraryNames=""
@@ -300,6 +300,10 @@
 			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
+			<File
+				RelativePath=".\aes.c"
+				>
+			</File>
 			<File
 				RelativePath=".\browse.c"
 				>
@@ -357,7 +361,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\player.c"
+				>
+			</File>
+			<File
 				RelativePath=".\playlist.c"
+				>
+			</File>
+			<File
+				RelativePath=".\rbuf.c"
 				>
 			</File>
 			<File
@@ -447,6 +459,10 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\aes.h"
+				>
+			</File>
+			<File
 				RelativePath=".\album.h"
 				>
 			</File>
@@ -499,6 +515,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\image.h"
+				>
+			</File>
+			<File
 				RelativePath=".\iothread.h"
 				>
 			</File>
@@ -516,6 +536,10 @@
 			</File>
 			<File
 				RelativePath=".\playlist.h"
+				>
+			</File>
+			<File
+				RelativePath=".\rbuf.h"
 				>
 			</File>
 			<File
