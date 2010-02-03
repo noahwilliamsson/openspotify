@@ -648,18 +648,23 @@ static int osfy_playlist_browse_callback(struct browse_callback_ctx *brctx) {
 	
 	/* Decompress the XML returned by track browsing */
 	xml = despotify_inflate(brctx->buf->ptr, brctx->buf->len);
+#ifdef DEBUG
 	{
 		FILE *fd;
 		char buf[35];
+		char filename[100];
+
 		hex_bytes_to_ascii(brctx->data.playlist->id, buf, 17);
-		DSFYDEBUG("Decompresed %d bytes data for playlist '%s', xml=%p, saving raw XML to browse-playlist.xml\n",
-			  brctx->buf->len, buf, xml);
-		fd = fopen("browse-playlists.xml", "w");
+		sprintf(filename, "browse-playlist-%s-%d-%d.xml", buf, brctx->num_browsed, brctx->num_in_request);
+		DSFYDEBUG("Decompresed %d bytes data for playlist '%s', xml=%p, saving raw XML to %s\n",
+			  brctx->buf->len, buf, xml, filename);
+		fd = fopen(filename, "w");
 		if(fd) {
-			fwrite(xml->ptr, xml->len, 1, fd);
+			(void)fwrite(xml->ptr, xml->len, 1, fd);
 			fclose(fd);
 		}
 	}
+#endif
 	
 
 	/* Load XML */
