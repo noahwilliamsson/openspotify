@@ -512,21 +512,21 @@ static int playlist_parse_xml(sp_session *session, sp_playlist *playlist) {
 	ezxml_t root, node;
 	sp_track *track;
 
-	/* NULL-terminate XML */
 	buf_append_data(playlist->buf, end_element, strlen(end_element));
-	buf_append_u8(playlist->buf, 0);
-
+#ifdef DEBUG
 	{
 		FILE *fd;
-		char buf[9 + 35];
+		char buf[9 + 34 + 4 + 1];
 		sprintf(buf, "playlist-");
 		hex_bytes_to_ascii(playlist->id, buf + 9, 17);
+		strcat(buf, ".xml");
 		fd = fopen(buf, "w");
 		if(fd) {
-			fwrite(playlist->buf->ptr, playlist->buf->len - 1, 1, fd);
+			fwrite(playlist->buf->ptr, playlist->buf->len, 1, fd);
 			fclose(fd);
 		}
 	}
+#endif
 
 	root = ezxml_parse_str((char *)playlist->buf->ptr, playlist->buf->len);
 
