@@ -264,7 +264,7 @@ static int playlistcontainer_parse_xml(sp_session *session) {
 
 	
 	buf_append_data(pc->buf, end_element, strlen(end_element));
-	buf_append_u8(pc->buf, 0);
+#ifdef DEBUG
 	{
 		FILE *fd;
 		fd = fopen("playlistcontainer.xml", "w");
@@ -273,6 +273,7 @@ static int playlistcontainer_parse_xml(sp_session *session) {
 			fclose(fd);
 		}
 	}
+#endif
 	
 	root = ezxml_parse_str((char *)pc->buf->ptr, pc->buf->len);
 	node = ezxml_get(root, "next-change", 0, "change", 0, "ops", 0, "add", 0, "items", -1);
