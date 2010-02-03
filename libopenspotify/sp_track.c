@@ -456,13 +456,15 @@ static int osfy_track_browse_callback(struct browse_callback_ctx *brctx) {
 		return -1;
 	}
 
+#ifdef DEBUG
 	{
-		FILE *fd = fopen("browse-track.xml", "w");
+		FILE *fd = fopen("browse-tracks.xml", "w");
 		if(fd) {
 			fwrite(xml->ptr, xml->len, 1, fd);
 			fclose(fd);
 		}
 	}
+#endif
 
 	root = ezxml_parse_str((char *) xml->ptr, xml->len);
 	if(root == NULL) {

@@ -490,6 +490,7 @@ static int osfy_album_browse_callback(struct browse_callback_ctx *brctx) {
 	ezxml_t root;
 	
 	xml = despotify_inflate(brctx->buf->ptr, brctx->buf->len);
+#ifdef DEBUG
 	{
 		FILE *fd;
 		DSFYDEBUG("Decompresed %d bytes data, xml=%p\n",
@@ -500,6 +501,7 @@ static int osfy_album_browse_callback(struct browse_callback_ctx *brctx) {
 			fclose(fd);
 		}
 	}
+#endif
 	
 	root = ezxml_parse_str((char *) xml->ptr, xml->len);
 	if(root == NULL) {

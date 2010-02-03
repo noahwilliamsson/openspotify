@@ -113,16 +113,18 @@ static int osfy_albumbrowse_browse_callback(struct browse_callback_ctx *brctx) {
 	ezxml_t root;
 	
 	xml = despotify_inflate(brctx->buf->ptr, brctx->buf->len);
+#ifdef DEBUG
 	{
 		FILE *fd;
 		DSFYDEBUG("Decompresed %d bytes data, xml=%p\n",
 			  brctx->buf->len, xml);
-		fd = fopen("browse-albumbrowses.xml", "w");
+		fd = fopen("browse-albumbrowse.xml", "w");
 		if(fd) {
 			fwrite(xml->ptr, xml->len, 1, fd);
 			fclose(fd);
 		}
 	}
+#endif
 	
 	root = ezxml_parse_str((char *) xml->ptr, xml->len);
 	if(root == NULL) {

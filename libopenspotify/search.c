@@ -106,6 +106,7 @@ static int search_parse_xml(struct search_ctx *search_ctx) {
 	if(xml == NULL)
 		return -1;
 	
+#ifdef DEBUG
 	{
 		FILE *fd;
 		fd = fopen("search.xml", "w");
@@ -114,6 +115,7 @@ static int search_parse_xml(struct search_ctx *search_ctx) {
 			fclose(fd);
 		}
 	}
+#endif
 
 	root = ezxml_parse_str((char *) xml->ptr, xml->len);
 	if(root == NULL) {

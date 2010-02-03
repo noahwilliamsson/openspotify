@@ -128,16 +128,18 @@ static int osfy_artistbrowse_browse_callback(struct browse_callback_ctx *brctx) 
 		return -1;
 	
 	xml = despotify_inflate(brctx->buf->ptr, brctx->buf->len);
+#ifdef DEBUG
 	{
 		FILE *fd;
 		DSFYDEBUG("Decompresed %d bytes data, xml=%p\n",
 			  brctx->buf->len, xml);
-		fd = fopen("browse-artistbrowses.xml", "w");
+		fd = fopen("browse-artistbrowse.xml", "w");
 		if(fd) {
 			fwrite(xml->ptr, xml->len, 1, fd);
 			fclose(fd);
 		}
 	}
+#endif
 	
 	root = ezxml_parse_str((char *) xml->ptr, xml->len);
 	if(root == NULL) {
