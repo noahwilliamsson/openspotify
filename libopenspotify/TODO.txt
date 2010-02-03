@@ -7,6 +7,23 @@ TODO list
   -- Adhere to paths configured in sp_session_init()
   -- Caching of data
 * Tracks
+  -- osfy_playlist_browse_callback() does not account for redirected track IDs
+     A playlist might contain the track spotify:track:3vYSRBMMaeX2JmuGvFLvMS 
+     which is internally represented as id 60c8881ca609458aa2675a65c86c6c4b01.
+     After a playlist has been loaded, all its tracks are browsed in order to
+     load metadata for them.
+     The response from the track browsing might return a different track id
+     (7384f83c82a041899d3e4f67399a730a) but note the requested track ID
+     (60c8881ca609458aa2675a65c86c6c4b01) among its 'redirect' elements.
+     The effect is that the original track with id 60c8.. is never loaded.
+     Example XML:
+     <track>
+       <id>7384f83c82a041899d3e4f67399a730a</id>
+       <redirect>60c8881ca609458aa2675a65c86c6c4b</redirect>
+       <redirect>a4c26769bb70428d848d8c0cac651804</redirect>
+       <redirect>282821ee66424f5aa47054b79f951db9</redirect>
+       <redirect>491f6858dab6426092463b5099332a9e</redirect>
+       <title>Welcome To The Jungle</title>
   -- Implement support for country restrictions
   -- Implement support for multiple bitrates and files. We should probably 
      select the one with the lowest bitrate (i.e, 96kbit/s)
