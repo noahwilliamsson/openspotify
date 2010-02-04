@@ -103,6 +103,75 @@
 		4FFD4B921030C32000935706 /* libopenspotify.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F5328E8103092D2004139C9 /* libopenspotify.dylib */; };
 		4FFD4B951030C34500935706 /* libopenspotify.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F5328E8103092D2004139C9 /* libopenspotify.dylib */; };
 		4FFD4B9F1030C42900935706 /* libopenspotify.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F5328E8103092D2004139C9 /* libopenspotify.dylib */; };
+		74CD41EE111ACB32008D9E35 /* api.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F53286A103092B0004139C9 /* api.h */; };
+		74CD41EF111ACB32008D9E35 /* album.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F53286E103092D2004139C9 /* album.h */; };
+		74CD41F0111ACB32008D9E35 /* artist.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F53286F103092D2004139C9 /* artist.h */; };
+		74CD41F1111ACB32008D9E35 /* browse.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F532871103092D2004139C9 /* browse.h */; };
+		74CD41F2111ACB32008D9E35 /* buf.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F532874103092D2004139C9 /* buf.h */; };
+		74CD41F3111ACB32008D9E35 /* cache.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F532877103092D2004139C9 /* cache.h */; };
+		74CD41F4111ACB32008D9E35 /* channel.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F53287A103092D2004139C9 /* channel.h */; };
+		74CD41F5111ACB32008D9E35 /* commands.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F53287D103092D2004139C9 /* commands.h */; };
+		74CD41F6111ACB32008D9E35 /* debug.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F53287F103092D2004139C9 /* debug.h */; };
+		74CD41F7111ACB32008D9E35 /* dns.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F532881103092D2004139C9 /* dns.h */; };
+		74CD41F8111ACB32008D9E35 /* ezxml.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F532884103092D2004139C9 /* ezxml.h */; };
+		74CD41F9111ACB32008D9E35 /* handlers.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F532887103092D2004139C9 /* handlers.h */; };
+		74CD41FA111ACB32008D9E35 /* hashtable.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F53288A103092D2004139C9 /* hashtable.h */; };
+		74CD41FB111ACB32008D9E35 /* hmac.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F53288D103092D2004139C9 /* hmac.h */; };
+		74CD41FC111ACB32008D9E35 /* link.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F532892103092D2004139C9 /* link.h */; };
+		74CD41FD111ACB32008D9E35 /* login.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F532895103092D2004139C9 /* login.h */; };
+		74CD41FE111ACB32008D9E35 /* iothread.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F532899103092D2004139C9 /* iothread.h */; };
+		74CD41FF111ACB32008D9E35 /* packet.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F53289C103092D2004139C9 /* packet.h */; };
+		74CD4200111ACB32008D9E35 /* playlist.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F53289F103092D2004139C9 /* playlist.h */; };
+		74CD4201111ACB32008D9E35 /* request.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F5328A2103092D2004139C9 /* request.h */; };
+		74CD4202111ACB32008D9E35 /* sha1.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F5328A5103092D2004139C9 /* sha1.h */; };
+		74CD4203111ACB32008D9E35 /* shn.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F5328A8103092D2004139C9 /* shn.h */; };
+		74CD4204111ACB32008D9E35 /* sp_opaque.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F5328B8103092D2004139C9 /* sp_opaque.h */; };
+		74CD4205111ACB32008D9E35 /* track.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F5328C2103092D2004139C9 /* track.h */; };
+		74CD4206111ACB32008D9E35 /* util.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F5328C4103092D2004139C9 /* util.h */; };
+		74CD4207111ACB32008D9E35 /* image.h in Headers */ = {isa = PBXBuildFile; fileRef = 4FD21CDD1031146400A0FE4E /* image.h */; };
+		74CD4208111ACB32008D9E35 /* search.h in Headers */ = {isa = PBXBuildFile; fileRef = 4FE84B171037FE5400840CBC /* search.h */; };
+		74CD4209111ACB32008D9E35 /* toplistbrowse.h in Headers */ = {isa = PBXBuildFile; fileRef = 4F8367011105069E007480FF /* toplistbrowse.h */; };
+		74CD420A111ACB32008D9E35 /* aes.h in Headers */ = {isa = PBXBuildFile; fileRef = 4FACED391109358E00444AC2 /* aes.h */; };
+		74CD420B111ACB32008D9E35 /* player.h in Headers */ = {isa = PBXBuildFile; fileRef = 4FACED3B1109358E00444AC2 /* player.h */; };
+		74CD420C111ACB32008D9E35 /* rbuf.h in Headers */ = {isa = PBXBuildFile; fileRef = 4FACED3D1109358E00444AC2 /* rbuf.h */; };
+		74CD420E111ACB32008D9E35 /* browse.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F532870103092D2004139C9 /* browse.c */; };
+		74CD420F111ACB32008D9E35 /* buf.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F532873103092D2004139C9 /* buf.c */; };
+		74CD4210111ACB32008D9E35 /* cache.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F532876103092D2004139C9 /* cache.c */; };
+		74CD4211111ACB32008D9E35 /* channel.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F532879103092D2004139C9 /* channel.c */; };
+		74CD4212111ACB32008D9E35 /* commands.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F53287C103092D2004139C9 /* commands.c */; };
+		74CD4213111ACB32008D9E35 /* dns.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F532880103092D2004139C9 /* dns.c */; };
+		74CD4214111ACB32008D9E35 /* ezxml.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F532883103092D2004139C9 /* ezxml.c */; };
+		74CD4215111ACB32008D9E35 /* handlers.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F532886103092D2004139C9 /* handlers.c */; };
+		74CD4216111ACB32008D9E35 /* hashtable.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F532889103092D2004139C9 /* hashtable.c */; };
+		74CD4217111ACB32008D9E35 /* hmac.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F53288C103092D2004139C9 /* hmac.c */; };
+		74CD4218111ACB32008D9E35 /* link.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F532891103092D2004139C9 /* link.c */; };
+		74CD4219111ACB32008D9E35 /* login.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F532894103092D2004139C9 /* login.c */; };
+		74CD421A111ACB32008D9E35 /* iothread.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F532898103092D2004139C9 /* iothread.c */; };
+		74CD421B111ACB32008D9E35 /* packet.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F53289B103092D2004139C9 /* packet.c */; };
+		74CD421C111ACB32008D9E35 /* playlist.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F53289E103092D2004139C9 /* playlist.c */; };
+		74CD421D111ACB32008D9E35 /* request.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F5328A1103092D2004139C9 /* request.c */; };
+		74CD421E111ACB32008D9E35 /* sha1.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F5328A4103092D2004139C9 /* sha1.c */; };
+		74CD421F111ACB32008D9E35 /* shn.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F5328A7103092D2004139C9 /* shn.c */; };
+		74CD4220111ACB32008D9E35 /* sp_album.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F5328AA103092D2004139C9 /* sp_album.c */; };
+		74CD4221111ACB32008D9E35 /* sp_albumbrowse.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F5328AC103092D2004139C9 /* sp_albumbrowse.c */; };
+		74CD4222111ACB32008D9E35 /* sp_artist.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F5328AE103092D2004139C9 /* sp_artist.c */; };
+		74CD4223111ACB32008D9E35 /* sp_artistbrowse.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F5328B0103092D2004139C9 /* sp_artistbrowse.c */; };
+		74CD4224111ACB32008D9E35 /* sp_error.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F5328B2103092D2004139C9 /* sp_error.c */; };
+		74CD4225111ACB32008D9E35 /* sp_image.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F5328B4103092D2004139C9 /* sp_image.c */; };
+		74CD4226111ACB32008D9E35 /* sp_link.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F5328B6103092D2004139C9 /* sp_link.c */; };
+		74CD4227111ACB32008D9E35 /* sp_playlist.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F5328B9103092D2004139C9 /* sp_playlist.c */; };
+		74CD4228111ACB32008D9E35 /* sp_session.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F5328BB103092D2004139C9 /* sp_session.c */; };
+		74CD4229111ACB32008D9E35 /* sp_track.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F5328BD103092D2004139C9 /* sp_track.c */; };
+		74CD422A111ACB32008D9E35 /* sp_user.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F5328BF103092D2004139C9 /* sp_user.c */; };
+		74CD422B111ACB32008D9E35 /* util.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F5328C3103092D2004139C9 /* util.c */; };
+		74CD422C111ACB32008D9E35 /* user.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F02CD9F1036205B00243248 /* user.c */; };
+		74CD422D111ACB32008D9E35 /* sp_search.c in Sources */ = {isa = PBXBuildFile; fileRef = 4FE84B0F1037DF4400840CBC /* sp_search.c */; };
+		74CD422E111ACB32008D9E35 /* search.c in Sources */ = {isa = PBXBuildFile; fileRef = 4FE84B161037FE5400840CBC /* search.c */; };
+		74CD422F111ACB32008D9E35 /* sp_toplistbrowse.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F8366FF1105069E007480FF /* sp_toplistbrowse.c */; };
+		74CD4230111ACB32008D9E35 /* toplistbrowse.c in Sources */ = {isa = PBXBuildFile; fileRef = 4F8367001105069E007480FF /* toplistbrowse.c */; };
+		74CD4231111ACB32008D9E35 /* aes.c in Sources */ = {isa = PBXBuildFile; fileRef = 4FACED381109358E00444AC2 /* aes.c */; };
+		74CD4232111ACB32008D9E35 /* player.c in Sources */ = {isa = PBXBuildFile; fileRef = 4FACED3A1109358E00444AC2 /* player.c */; };
+		74CD4233111ACB32008D9E35 /* rbuf.c in Sources */ = {isa = PBXBuildFile; fileRef = 4FACED3C1109358E00444AC2 /* rbuf.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -265,6 +334,7 @@
 		4FFD4B6A1030C22200935706 /* appkey.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = appkey.c; sourceTree = "<group>"; };
 		4FFD4B6B1030C22200935706 /* link.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = link.c; sourceTree = "<group>"; };
 		4FFD4B6D1030C22200935706 /* session.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = session.c; sourceTree = "<group>"; };
+		74CD4238111ACB32008D9E35 /* libopenspotify.a */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libopenspotify.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -328,6 +398,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				4FFD4B801030C2FC00935706 /* libopenspotify.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		74CD4234111ACB32008D9E35 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -499,6 +576,7 @@
 				4F2A3EF71033C7A2000622F8 /* example-test */,
 				4FD526E71035353900083306 /* example-jukebox */,
 				4FE84B28103809E800840CBC /* example-search */,
+				74CD4238111ACB32008D9E35 /* libopenspotify.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -587,6 +665,44 @@
 				4FACED3F1109358E00444AC2 /* aes.h in Headers */,
 				4FACED411109358E00444AC2 /* player.h in Headers */,
 				4FACED431109358E00444AC2 /* rbuf.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		74CD41ED111ACB32008D9E35 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				74CD41EE111ACB32008D9E35 /* api.h in Headers */,
+				74CD41EF111ACB32008D9E35 /* album.h in Headers */,
+				74CD41F0111ACB32008D9E35 /* artist.h in Headers */,
+				74CD41F1111ACB32008D9E35 /* browse.h in Headers */,
+				74CD41F2111ACB32008D9E35 /* buf.h in Headers */,
+				74CD41F3111ACB32008D9E35 /* cache.h in Headers */,
+				74CD41F4111ACB32008D9E35 /* channel.h in Headers */,
+				74CD41F5111ACB32008D9E35 /* commands.h in Headers */,
+				74CD41F6111ACB32008D9E35 /* debug.h in Headers */,
+				74CD41F7111ACB32008D9E35 /* dns.h in Headers */,
+				74CD41F8111ACB32008D9E35 /* ezxml.h in Headers */,
+				74CD41F9111ACB32008D9E35 /* handlers.h in Headers */,
+				74CD41FA111ACB32008D9E35 /* hashtable.h in Headers */,
+				74CD41FB111ACB32008D9E35 /* hmac.h in Headers */,
+				74CD41FC111ACB32008D9E35 /* link.h in Headers */,
+				74CD41FD111ACB32008D9E35 /* login.h in Headers */,
+				74CD41FE111ACB32008D9E35 /* iothread.h in Headers */,
+				74CD41FF111ACB32008D9E35 /* packet.h in Headers */,
+				74CD4200111ACB32008D9E35 /* playlist.h in Headers */,
+				74CD4201111ACB32008D9E35 /* request.h in Headers */,
+				74CD4202111ACB32008D9E35 /* sha1.h in Headers */,
+				74CD4203111ACB32008D9E35 /* shn.h in Headers */,
+				74CD4204111ACB32008D9E35 /* sp_opaque.h in Headers */,
+				74CD4205111ACB32008D9E35 /* track.h in Headers */,
+				74CD4206111ACB32008D9E35 /* util.h in Headers */,
+				74CD4207111ACB32008D9E35 /* image.h in Headers */,
+				74CD4208111ACB32008D9E35 /* search.h in Headers */,
+				74CD4209111ACB32008D9E35 /* toplistbrowse.h in Headers */,
+				74CD420A111ACB32008D9E35 /* aes.h in Headers */,
+				74CD420B111ACB32008D9E35 /* player.h in Headers */,
+				74CD420C111ACB32008D9E35 /* rbuf.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -729,6 +845,23 @@
 			productReference = 4FFD4B631030C1F600935706 /* link */;
 			productType = "com.apple.product-type.tool";
 		};
+		74CD41EC111ACB32008D9E35 /* openspotify-static */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 74CD4235111ACB32008D9E35 /* Build configuration list for PBXNativeTarget "openspotify-static" */;
+			buildPhases = (
+				74CD41ED111ACB32008D9E35 /* Headers */,
+				74CD420D111ACB32008D9E35 /* Sources */,
+				74CD4234111ACB32008D9E35 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "openspotify-static";
+			productName = libopenspotify;
+			productReference = 74CD4238111ACB32008D9E35 /* libopenspotify.a */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -753,6 +886,7 @@
 				4F2A3EF61033C7A2000622F8 /* example-test */,
 				4FD526E61035353900083306 /* example-jukebox */,
 				4FE84B27103809E800840CBC /* example-search */,
+				74CD41EC111ACB32008D9E35 /* openspotify-static */,
 			);
 		};
 /* End PBXProject section */
@@ -869,6 +1003,51 @@
 				4FFD4B6E1030C22200935706 /* appkey.c in Sources */,
 				4FFD4B6F1030C22200935706 /* link.c in Sources */,
 				4FFD4B711030C22200935706 /* session.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		74CD420D111ACB32008D9E35 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				74CD420E111ACB32008D9E35 /* browse.c in Sources */,
+				74CD420F111ACB32008D9E35 /* buf.c in Sources */,
+				74CD4210111ACB32008D9E35 /* cache.c in Sources */,
+				74CD4211111ACB32008D9E35 /* channel.c in Sources */,
+				74CD4212111ACB32008D9E35 /* commands.c in Sources */,
+				74CD4213111ACB32008D9E35 /* dns.c in Sources */,
+				74CD4214111ACB32008D9E35 /* ezxml.c in Sources */,
+				74CD4215111ACB32008D9E35 /* handlers.c in Sources */,
+				74CD4216111ACB32008D9E35 /* hashtable.c in Sources */,
+				74CD4217111ACB32008D9E35 /* hmac.c in Sources */,
+				74CD4218111ACB32008D9E35 /* link.c in Sources */,
+				74CD4219111ACB32008D9E35 /* login.c in Sources */,
+				74CD421A111ACB32008D9E35 /* iothread.c in Sources */,
+				74CD421B111ACB32008D9E35 /* packet.c in Sources */,
+				74CD421C111ACB32008D9E35 /* playlist.c in Sources */,
+				74CD421D111ACB32008D9E35 /* request.c in Sources */,
+				74CD421E111ACB32008D9E35 /* sha1.c in Sources */,
+				74CD421F111ACB32008D9E35 /* shn.c in Sources */,
+				74CD4220111ACB32008D9E35 /* sp_album.c in Sources */,
+				74CD4221111ACB32008D9E35 /* sp_albumbrowse.c in Sources */,
+				74CD4222111ACB32008D9E35 /* sp_artist.c in Sources */,
+				74CD4223111ACB32008D9E35 /* sp_artistbrowse.c in Sources */,
+				74CD4224111ACB32008D9E35 /* sp_error.c in Sources */,
+				74CD4225111ACB32008D9E35 /* sp_image.c in Sources */,
+				74CD4226111ACB32008D9E35 /* sp_link.c in Sources */,
+				74CD4227111ACB32008D9E35 /* sp_playlist.c in Sources */,
+				74CD4228111ACB32008D9E35 /* sp_session.c in Sources */,
+				74CD4229111ACB32008D9E35 /* sp_track.c in Sources */,
+				74CD422A111ACB32008D9E35 /* sp_user.c in Sources */,
+				74CD422B111ACB32008D9E35 /* util.c in Sources */,
+				74CD422C111ACB32008D9E35 /* user.c in Sources */,
+				74CD422D111ACB32008D9E35 /* sp_search.c in Sources */,
+				74CD422E111ACB32008D9E35 /* search.c in Sources */,
+				74CD422F111ACB32008D9E35 /* sp_toplistbrowse.c in Sources */,
+				74CD4230111ACB32008D9E35 /* toplistbrowse.c in Sources */,
+				74CD4231111ACB32008D9E35 /* aes.c in Sources */,
+				74CD4232111ACB32008D9E35 /* player.c in Sources */,
+				74CD4233111ACB32008D9E35 /* rbuf.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1281,6 +1460,72 @@
 			};
 			name = Release;
 		};
+		74CD4236111ACB32008D9E35 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				EXECUTABLE_EXTENSION = a;
+				EXECUTABLE_PREFIX = lib;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_VERSION = 4.2;
+				HEADER_SEARCH_PATHS = (
+					../vorbis/include,
+					../ogg/include,
+				);
+				INSTALL_PATH = /usr/local/lib;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/libopenspotify\"";
+				MACH_O_TYPE = staticlib;
+				OTHER_CFLAGS = (
+					"-Iinclude",
+					"-fPIC",
+					"-DDEBUG",
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = openspotify;
+			};
+			name = Debug;
+		};
+		74CD4237111ACB32008D9E35 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				EXECUTABLE_EXTENSION = a;
+				EXECUTABLE_PREFIX = lib;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_VERSION = 4.2;
+				HEADER_SEARCH_PATHS = (
+					../vorbis/include,
+					../ogg/include,
+				);
+				INSTALL_PATH = /usr/local/lib;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)/libopenspotify\"";
+				MACH_O_TYPE = staticlib;
+				OTHER_CFLAGS = (
+					"-Iinclude",
+					"-fPIC",
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = openspotify;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1361,6 +1606,15 @@
 			buildConfigurations = (
 				4FFD4B651030C1F600935706 /* Debug */,
 				4FFD4B661030C1F600935706 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		74CD4235111ACB32008D9E35 /* Build configuration list for PBXNativeTarget "openspotify-static" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				74CD4236111ACB32008D9E35 /* Debug */,
+				74CD4237111ACB32008D9E35 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
