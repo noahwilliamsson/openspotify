@@ -24,12 +24,17 @@ int toplistbrowse_process_request(sp_session *session, struct request *req) {
 	struct toplistbrowse_ctx *toplistbrowse_ctx = *(struct toplistbrowse_ctx **)req->input;
 	sp_toplistbrowse *toplistbrowse = toplistbrowse_ctx->toplistbrowse;
 	
-	toplistbrowse_ctx->req = req;
+	/*
+	 * Prevent request from happening again.
+	 * If there's an error the channel callback will reset the timeout
+	 *
+	 */
+	req->next_timeout = INT_MAX;
 	req->state = REQ_STATE_RUNNING;
-	req->next_timeout = get_millisecs() + TOPLISTBROWSE_RETRY_TIMEOUT;
+
+	toplistbrowse_ctx->req = req;
 	
 	DSFYDEBUG("Initiating toplistbrowse with type %d, region %d\n", toplistbrowse->type, toplistbrowse->region);
-	
 	
 	return cmd_toplistbrowse(session, toplistbrowse->type, toplistbrowse->region, toplistbrowse_callback, toplistbrowse_ctx);
 }
@@ -61,8 +66,9 @@ static int toplistbrowse_callback(CHANNEL *ch, unsigned char *payload, unsigned 
 			DSFYDEBUG("Got a channel ERROR, retrying within %d seconds\n", TOPLISTBROWSE_RETRY_TIMEOUT);
 			buf_free(toplistbrowse_ctx->buf);
 			toplistbrowse_ctx = buf_new();
-			
-			/* The request processor will retry this round */
+
+			/* Reset timeout so the request can be retried */
+			toplistbrowse_ctx->req->next_timeout = get_millisecs() + TOPLISTBROWSE_RETRY_TIMEOUT*1000;
 			break;
 			
 		case CHANNEL_END:

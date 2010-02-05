@@ -173,7 +173,14 @@ SP_LIBEXPORT(void) sp_image_release(sp_image *image) {
 int osfy_image_process_request(sp_session *session, struct request *req) {
 	struct image_ctx *image_ctx = *(struct image_ctx **)req->input;
 
+	/*
+	 * Prevent request from happening again.
+	 * If there's an error the channel callback will reset the timeout
+	 *
+	 */
+	req->next_timeout = INT_MAX;
 	req->state = REQ_STATE_RUNNING;
+
 	image_ctx->req = req;
 
 	{
@@ -184,8 +191,6 @@ int osfy_image_process_request(sp_session *session, struct request *req) {
 
 	assert(image_ctx->image->data == NULL);
 	image_ctx->image->data = buf_new();
-
-	req->next_timeout = get_millisecs() + IMAGE_RETRY_TIMEOUT * 1000;
 
 	return cmd_request_image(session, image_ctx->image->id, osfy_image_callback, image_ctx);
 }
@@ -204,7 +209,9 @@ static int osfy_image_callback(CHANNEL *ch, unsigned char *payload, unsigned sho
 			buf_free(image_ctx->image->data);
 			image_ctx->image->data = NULL;
 
-			/* The request processor will retry this round */
+			/* Reset timeout so the request can be retried */
+			image_ctx->req->next_timeout = get_millisecs() + IMAGE_RETRY_TIMEOUT*1000;
+
 			break;
 
 		case CHANNEL_END:

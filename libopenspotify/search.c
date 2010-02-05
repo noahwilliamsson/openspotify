@@ -24,9 +24,15 @@ int search_process_request(sp_session *session, struct request *req) {
 	struct search_ctx *search_ctx = *(struct search_ctx **)req->input;
 	sp_search *search = search_ctx->search;
 	
-	search_ctx->req = req;
+	/*
+	 * Prevent request from happening again.
+	 * If there's an error the channel callback will reset the timeout
+	 *
+	 */
+	req->next_timeout = INT_MAX;
 	req->state = REQ_STATE_RUNNING;
-	req->next_timeout = get_millisecs() + SEARCH_RETRY_TIMEOUT;
+
+	search_ctx->req = req;
 	
 	DSFYDEBUG("Initiating search with query '%s', track %d/%d, album %d/%d, artist %d/%d\n",
 		  search->query, search->track_offset, search->track_count,
@@ -66,7 +72,9 @@ static int search_callback(CHANNEL *ch, unsigned char *payload, unsigned short l
 			buf_free(search_ctx->buf);
 			search_ctx->buf = buf_new();
 			
-			/* The request processor will retry this round */
+			/* Reset timeout so the request can be retried */
+			search_ctx->req->next_timeout = get_millisecs() + SEARCH_RETRY_TIMEOUT*1000;
+
 			break;
 			
 		case CHANNEL_END:
