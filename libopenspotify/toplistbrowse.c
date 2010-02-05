@@ -65,7 +65,7 @@ static int toplistbrowse_callback(CHANNEL *ch, unsigned char *payload, unsigned 
 		case CHANNEL_ERROR:
 			DSFYDEBUG("Got a channel ERROR, retrying within %d seconds\n", TOPLISTBROWSE_RETRY_TIMEOUT);
 			buf_free(toplistbrowse_ctx->buf);
-			toplistbrowse_ctx = buf_new();
+			toplistbrowse_ctx->buf = buf_new();
 
 			/* Reset timeout so the request can be retried */
 			toplistbrowse_ctx->req->next_timeout = get_millisecs() + TOPLISTBROWSE_RETRY_TIMEOUT*1000;
