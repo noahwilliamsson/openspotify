@@ -123,9 +123,15 @@ void user_add_ref(sp_user *user) {
 int user_process_request(sp_session *session, struct request *req) {
 	struct user_ctx *user_ctx = *(struct user_ctx **)req->input;
 	
-	user_ctx->req = req;
+	/*
+	 * Prevent request from happening again.
+	 * If there's an error the channel callback will reset the timeout
+	 *
+	 */
+	req->next_timeout = INT_MAX;
 	req->state = REQ_STATE_RUNNING;
-	req->next_timeout = get_millisecs() + USER_RETRY_TIMEOUT;
+
+	user_ctx->req = req;
 	
 	DSFYDEBUG("Request details on sp_user '%s'\n", user_ctx->user->canonical_name);
 	return cmd_userinfo(session, user_ctx->user->canonical_name, user_callback, user_ctx);
@@ -158,8 +164,10 @@ static int user_callback(CHANNEL *ch, unsigned char *payload, unsigned short len
 			DSFYDEBUG("Got a channel ERROR, retrying within %d seconds\n", USER_RETRY_TIMEOUT);
 			buf_free(user_ctx->buf);
 			user_ctx->buf = buf_new();
-			
-			/* The request processor will retry this round */
+
+			/* Reset timeout so the request can be retried */
+			user_ctx->req->next_timeout = get_millisecs() + USER_RETRY_TIMEOUT*1000;
+
 			break;
 			
 		case CHANNEL_END:
