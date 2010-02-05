@@ -64,7 +64,7 @@ static int search_callback(CHANNEL *ch, unsigned char *payload, unsigned short l
 		case CHANNEL_ERROR:
 			DSFYDEBUG("Got a channel ERROR, retrying within %d seconds\n", SEARCH_RETRY_TIMEOUT);
 			buf_free(search_ctx->buf);
-			search_ctx = buf_new();
+			search_ctx->buf = buf_new();
 			
 			/* The request processor will retry this round */
 			break;
