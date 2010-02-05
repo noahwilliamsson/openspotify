@@ -97,6 +97,7 @@ static int toplistbrowse_parse_xml(struct toplistbrowse_ctx *toplistbrowse_ctx) 
 	if(xml == NULL)
 		return -1;
 	
+#ifdef DEBUG
 	{
 		FILE *fd;
 		fd = fopen("toplistbrowse.xml", "w");
@@ -105,6 +106,7 @@ static int toplistbrowse_parse_xml(struct toplistbrowse_ctx *toplistbrowse_ctx) 
 			fclose(fd);
 		}
 	}
+#endif
 
 	root = ezxml_parse_str((char *) xml->ptr, xml->len);
 	if(root == NULL) {
