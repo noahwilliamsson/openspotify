@@ -123,6 +123,7 @@ static int toplistbrowse_parse_xml(struct toplistbrowse_ctx *toplistbrowse_ctx) 
 
 
 	ezxml_free(root);
+	buf_free(xml);
 	
 	return 0;
 }
