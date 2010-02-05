@@ -219,7 +219,7 @@ static int playlistcontainer_callback(CHANNEL *ch, unsigned char *payload, unsig
 		DSFYDEBUG("Error on channel '%s' (playlist container), will retry request in %dms\n",
 			ch->name, PLAYLIST_RETRY_TIMEOUT*1000);
 
-		/* Reset timeout so the request can be retries */
+		/* Reset timeout so the request can be retried */
 		callback_ctx->req->next_timeout = get_millisecs() + PLAYLIST_RETRY_TIMEOUT*1000;
 
 		buf_free(callback_ctx->session->playlistcontainer->buf);
