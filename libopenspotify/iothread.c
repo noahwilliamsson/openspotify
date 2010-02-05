@@ -170,8 +170,8 @@ static int process_request(sp_session *session, struct request *req) {
 			  session->num_channels, REQUEST_TYPE_STR(req->type),
 			  REQUEST_STATE_STR(req->state), req->input);
 
-		if(req->next_timeout < now + 2000)
-			req->next_timeout = now + 2000;
+		if(req->next_timeout < now + 100)
+			req->next_timeout = now + 100;
 		
 		return 0;
 	}
