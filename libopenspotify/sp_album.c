@@ -295,6 +295,7 @@ int osfy_album_load_from_album_xml(sp_session *session, sp_album *album, ezxml_t
 /* Load an album from XML returned by searching */
 int osfy_album_load_from_search_xml(sp_session *session, sp_album *album, ezxml_t album_node) {
 	unsigned char id[20];
+	const char *str;
 	ezxml_t node;
 	
 	{
@@ -328,6 +329,38 @@ int osfy_album_load_from_search_xml(sp_session *session, sp_album *album, ezxml_
 		album->year = atoi(node->txt);
 	
 	
+	/* Country restrictions */
+	assert(album->allowed_countries == NULL);
+	assert(album->restricted_countries == NULL);
+	for(node = ezxml_get(album_node, "restrictions", 0, "restriction", -1);
+	    node;
+	    node = node->next) {
+		str = ezxml_attr(node, "catalogues");
+
+		/* There might be restrictions that do not apply for premium users */
+		if(!str || !strstr(str, "premium"))
+			continue;
+
+		if((str = ezxml_attr(node, "allowed")) != NULL) {
+			album->allowed_countries = realloc(album->allowed_countries, strlen(str) + 1);
+			strcpy(album->allowed_countries, str);
+
+			if(strstr(album->allowed_countries, session->country))
+				album->is_available = 1;
+		}
+
+		if((str = ezxml_attr(node, "forbidden")) != NULL) {
+			album->restricted_countries = realloc(album->restricted_countries, strlen(str) + 1);
+			strcpy(album->restricted_countries, str);
+
+			if(strstr(album->restricted_countries, session->country))
+				album->is_available = 0;
+			else
+				album->is_available = 1;
+		}
+	}
+
+
 	/* Album artist */
 	if((node = ezxml_get(album_node, "artist-id", -1)) == NULL) {
 		DSFYDEBUG("Failed to find element 'artist-id'\n");
