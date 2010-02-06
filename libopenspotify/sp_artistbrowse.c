@@ -208,6 +208,8 @@ static int osfy_artistbrowse_load_from_xml(sp_session *session, sp_artistbrowse 
 		
 		arb->biography = strdup(node->txt);
 	}
+	else
+		arb->biography = strdup("");
 
 
 	/* Load similar artists */
