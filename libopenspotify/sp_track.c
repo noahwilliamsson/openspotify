@@ -302,6 +302,8 @@ int osfy_track_load_from_xml(sp_session *session, sp_track *track, ezxml_t track
 
 
 	/* Country restrictions */
+	assert(track->allowed_countries == NULL);
+	assert(track->restricted_countries == NULL);
 	for(node = ezxml_get(track_node, "restrictions", 0, "restriction", -1);
 	    node;
 	    node = node->next) {
