@@ -57,6 +57,7 @@ SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_sess
 	s->connectionstate = SP_CONNECTION_STATE_UNDEFINED;
 
 	s->user = NULL;
+	memset(s->country, 0, sizeof(s->country));
 	
 	/* Login context, needed by network.c and login.c */
 	s->login = NULL;

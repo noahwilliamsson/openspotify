@@ -332,6 +332,7 @@ struct sp_session {
 	sp_session_callbacks *callbacks;
 	
 	sp_user *user;
+	char country[2];
 
 	/* Low-level network stuff */
 	int sock;

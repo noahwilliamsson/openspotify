@@ -359,6 +359,9 @@ static int process_logout_request(sp_session *session, struct request *req) {
                 session->user = NULL;
         }
 
+	memset(session->country, 0, sizeof(session->country));
+
+
 	if(session->sock != -1) {
 #ifdef _WIN32
 		closesocket(session->sock);

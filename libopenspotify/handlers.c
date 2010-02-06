@@ -110,14 +110,11 @@ int handle_aeskey (sp_session *session, unsigned char *payload, int len)
 	return ret;
 }
 
-static int handle_countrycode (sp_session * session, unsigned char *payload, int len)
-{
-#if 0 /* FIXME */
-	int i;
-	for (i = 0; i < len && i < (int)sizeof session->user_info.country; i++)
-		session->user_info.country[i] = payload[i];
-	session->user_info.country[i] = 0;
-#endif
+static int handle_countrycode (sp_session * session, unsigned char *payload, int len) {
+
+	for(i = 0; i < len && i < (int)sizeof(session->country); i++)
+		session->country[i] = (char)payload[i];
+
 	return 0;
 }
 
