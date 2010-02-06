@@ -65,9 +65,13 @@ SP_LIBEXPORT(const char *) sp_playlist_name (sp_playlist *playlist) {
 }
 
 
+char *ezxml_ampencode(const char *s, size_t len, char **dst, size_t *dlen, size_t *max, short a);
 SP_LIBEXPORT(sp_error) sp_playlist_rename (sp_playlist *playlist, const char *new_name) {
 	char buf[1024];
+	char *encoded;
+	size_t enclen, encmaxlen;
 	sp_playlist **container;
+
 
 	if(!sp_playlist_is_loaded(playlist))
 		return SP_ERROR_RESOURCE_NOT_LOADED;
@@ -85,14 +89,17 @@ SP_LIBEXPORT(sp_error) sp_playlist_rename (sp_playlist *playlist, const char *ne
 	playlist->is_dirty = 1;
 	playlist_set_name(playlist->session, playlist, new_name);
 
-	/* FIXME: XML-escape with ezxml_ampencode */
+	encoded = NULL;
+	enclen = encmaxlen = 0;
+	encoded = ezxml_ampencode(new_name, strlen(new_name), &encoded, &enclen, &encmaxlen, 0);
+	encoded[enclen] = 0;
 	sprintf(buf,	"<change>"
 				"<ops><name>%s</name></ops>"
 				"<time>%ld</time>"
 				"<user>%s</user>"
 			"</change>"
 			"<version>%010d,%010d,%010d,%d</version>",
-			new_name, time(NULL), playlist->session->username,
+			encoded, time(NULL), playlist->session->username,
 			playlist->revision + 1, playlist->num_tracks, playlist->checksum, playlist->shared);
 
 
