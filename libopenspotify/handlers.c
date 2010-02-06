@@ -111,6 +111,7 @@ int handle_aeskey (sp_session *session, unsigned char *payload, int len)
 }
 
 static int handle_countrycode (sp_session * session, unsigned char *payload, int len) {
+	int i;
 
 	for(i = 0; i < len && i < (int)sizeof(session->country); i++)
 		session->country[i] = (char)payload[i];
