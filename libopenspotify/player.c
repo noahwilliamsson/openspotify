@@ -87,6 +87,7 @@ int player_init(sp_session *session) {
 	session->player->is_downloading = 0;
 
 	session->player->vf = NULL;
+	session->player->vi = NULL;
 	session->player->callbacks.read_func = player_ov_read;
 	session->player->callbacks.seek_func = player_ov_seek;
 	session->player->callbacks.close_func = NULL;
@@ -537,8 +538,8 @@ static int player_schedule(sp_session *session) {
 				ov_clear(player->vf);
 				free(player->vf);
 				player->vf = NULL;
+				player->vi = NULL;
 			}
-			/* Fall through */
 
 			rbuf_free(player->ogg);
 			player->ogg = rbuf_new();
