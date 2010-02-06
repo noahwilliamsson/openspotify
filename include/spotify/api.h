@@ -23,7 +23,11 @@ extern "C" {
 /* Calling conventions */
 #ifdef _WIN32
 # define SP_CALLCONV __stdcall
+#ifdef SPOTIFY_DLL
+# define SP_LIBEXPORT(x) __declspec(dllexport) x __stdcall
+#else
 # define SP_LIBEXPORT(x) x __stdcall
+#endif
 #else
 # define SP_CALLCONV
 # define SP_LIBEXPORT(x) x
