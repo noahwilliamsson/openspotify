@@ -385,17 +385,20 @@ int osfy_track_load_from_xml(sp_session *session, sp_track *track, ezxml_t track
 
 		/* Load album from XML if necessary */
 		if(sp_album_is_loaded(track->album) == 0) {
-			{
-				char buf[33];
-				hex_bytes_to_ascii(track->album->id, buf, 16);
-				DSFYDEBUG("Album '%s' not yet loaded, trying to load from XML\n", buf);
-			}
+			char buf[33];
+			hex_bytes_to_ascii(track->album->id, buf, 16);
+			DSFYDEBUG("Album '%s' not yet loaded, trying to load from XML\n", buf);
+
 			osfy_album_load_from_track_xml(session, track->album, track_node);
+			
+			/* FIXME: Assume that the album is available if the track is available */
+			if(track->is_available && !track->album->is_available) {
+				DSFYDEBUG("Track is available but its album '%s' is not, force-marking the album as available", buf);
+				track->album->is_available = 1;
+			}
 		}
 		
 		assert(sp_album_is_loaded(track->album));
-		
-		
 	}
 	
 	
