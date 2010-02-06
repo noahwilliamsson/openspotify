@@ -59,7 +59,10 @@ int packet_read_and_process(sp_session *session) {
 	while(session->packet->len >= 3) {
 
 		/* Set nonce for Shannon */
-		*(unsigned int *)nonce = htonl(session->key_recv_IV);
+		nonce[0] = (session->key_recv_IV >> 24) & 0xff; 
+		nonce[1] = (session->key_recv_IV >> 16) & 0xff; 
+		nonce[2] = (session->key_recv_IV >> 8) & 0xff; 
+		nonce[3] = session->key_recv_IV & 0xff; 
 		shn_nonce(&session->shn_recv, nonce, 4);
 
 
@@ -108,7 +111,10 @@ int packet_write (sp_session * session, unsigned char cmd,
 	PHEADER *h;
 	int ret;
 
-	*(unsigned int *) nonce = htonl (session->key_send_IV);
+	nonce[0] = (session->key_send_IV >> 24) & 0xff; 
+	nonce[1] = (session->key_send_IV >> 16) & 0xff; 
+	nonce[2] = (session->key_send_IV >> 8) & 0xff; 
+	nonce[3] = session->key_send_IV & 0xff; 
 	shn_nonce (&session->shn_send, nonce, 4);
 
 	buf = (unsigned char *) malloc (3 + len + 4);
