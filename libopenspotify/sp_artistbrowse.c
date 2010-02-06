@@ -202,12 +202,9 @@ static int osfy_artistbrowse_load_from_xml(sp_session *session, sp_artistbrowse 
 	
 	
 	/* Load biography */
-	if((node = ezxml_get(root, "bios", 0, "bio", 0, "text", -1)) != NULL) {
-		if(arb->biography != NULL)
-			free(arb->biography);
-		
+	assert(arb->biography == NULL);
+	if((node = ezxml_get(root, "bios", 0, "bio", 0, "text", -1)) != NULL)
 		arb->biography = strdup(node->txt);
-	}
 	else
 		arb->biography = strdup("");
 
