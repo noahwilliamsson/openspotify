@@ -189,8 +189,13 @@ SP_LIBEXPORT(void) sp_session_process_events(sp_session *session, int *next_time
 	int i, value;
 
 	while((request = request_fetch_next_result(session, next_timeout)) != NULL) {
-		DSFYDEBUG("Processing finished request of type %d, error %d\n",
-			request->type, request->error);
+		DSFYDEBUG("Event processing for request <type %s, state %s, input %p, timeout %d>"
+				" with output <error %d, output %p>\n",
+				REQUEST_TYPE_STR(request->type),
+				REQUEST_STATE_STR(request->state),
+				request->input, request->next_timeout,
+				request->error, request->output);
+
 
 		/* FIXME: Verify that these callbacks are indeed called from the main thread! */
 		switch(request->type) {
