@@ -273,6 +273,7 @@ static int osfy_albumbrowse_load_from_xml(sp_session *session, sp_albumbrowse *a
 	}
 	
 	/* Add review */
+	assert(alb->review == NULL);
 	if((node = ezxml_get(root, "review", -1)) != NULL)
 		alb->review = strdup(node->txt);
 	else
