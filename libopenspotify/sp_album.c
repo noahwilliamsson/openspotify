@@ -300,7 +300,7 @@ int osfy_album_load_from_search_xml(sp_session *session, sp_album *album, ezxml_
 	{
 		char buf[33];
 		hex_bytes_to_ascii(album->id, buf, 16);
-		DSFYDEBUG("Loading album '%s' from XML returned by album browsing\n", buf);
+		DSFYDEBUG("Loading album '%s' from XML returned by a search\n", buf);
 	}
 	
 	/* Verify we're loading XML for the expected album ID */
