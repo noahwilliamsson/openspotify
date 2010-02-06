@@ -22,8 +22,8 @@
 #include "user.h"
 
 
-SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_session **sess) {
-	sp_session *s;
+SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_session **psession) {
+	sp_session *session;
 
 	if(!config) // XXX - verify
 		return SP_ERROR_INVALID_INDATA;
@@ -42,93 +42,93 @@ SP_LIBEXPORT(sp_error) sp_session_init (const sp_session_config *config, sp_sess
 		return SP_ERROR_BAD_APPLICATION_KEY;
 
 	/* Allocate memory for our session. */
-	if((s = (sp_session *)malloc(sizeof(sp_session))) == NULL)
+	if((session = (sp_session *)malloc(sizeof(sp_session))) == NULL)
 		return SP_ERROR_API_INITIALIZATION_FAILED;
 
-	memset(s, 0, sizeof(sp_session));
+	memset(session, 0, sizeof(sp_session));
 	
 	/* Allocate memory for callbacks and copy them to our session. */
-	s->userdata        = config->userdata;
-	s->callbacks = (sp_session_callbacks *)malloc(sizeof(sp_session_callbacks));
-	memcpy(s->callbacks, config->callbacks, sizeof(sp_session_callbacks));
+	session->userdata = config->userdata;
+	session->callbacks = (sp_session_callbacks *)malloc(sizeof(sp_session_callbacks));
+	memcpy(session->callbacks, config->callbacks, sizeof(sp_session_callbacks));
 
 	
 	/* Connection state is undefined (We were never logged in).*/
-	s->connectionstate = SP_CONNECTION_STATE_UNDEFINED;
+	session->connectionstate = SP_CONNECTION_STATE_UNDEFINED;
 
-	s->user = NULL;
-	memset(s->country, 0, sizeof(s->country));
+	session->user = NULL;
+	memset(session->country, 0, sizeof(session->country));
 	
 	/* Login context, needed by network.c and login.c */
-	s->login = NULL;
-	memset(s->username, 0, sizeof(s->username));
-	memset(s->password, 0, sizeof(s->password));
+	session->login = NULL;
+	memset(session->username, 0, sizeof(session->username));
+	memset(session->password, 0, sizeof(session->password));
 
 	
 	/* Playlist container object */
-	playlistcontainer_create(s);
+	playlistcontainer_create(session);
 
 	/* Albums/artists/tracks memory management */
-	s->hashtable_albums = hashtable_create(16);
-	s->hashtable_albumbrowses = hashtable_create(16);
-	s->hashtable_artistbrowses = hashtable_create(16);
-	s->hashtable_toplistbrowses = hashtable_create(4);
-	s->hashtable_artists = hashtable_create(16);
-	s->hashtable_images = hashtable_create(20);
-	s->hashtable_tracks = hashtable_create(16);
-	s->hashtable_searches = hashtable_create(256);
-	s->hashtable_users = hashtable_create(256);
+	session->hashtable_albums = hashtable_create(16);
+	session->hashtable_albumbrowses = hashtable_create(16);
+	session->hashtable_artistbrowses = hashtable_create(16);
+	session->hashtable_toplistbrowses = hashtable_create(4);
+	session->hashtable_artists = hashtable_create(16);
+	session->hashtable_images = hashtable_create(20);
+	session->hashtable_tracks = hashtable_create(16);
+	session->hashtable_searches = hashtable_create(256);
+	session->hashtable_users = hashtable_create(256);
 
 	/* Allocate memory for user info. */
-	if((s->user = (sp_user *)malloc(sizeof(sp_user))) == NULL)
+	if((session->user = (sp_user *)malloc(sizeof(sp_user))) == NULL)
 		return SP_ERROR_API_INITIALIZATION_FAILED;
 
 	/* Low-level networking stuff. */
-	s->sock = -1;
+	session->sock = -1;
 
 	/* Incoming packet buffer */
-	s->packet = NULL;
+	session->packet = NULL;
 
 	/* To allow main thread to communicate with network thread */
-	s->requests = NULL;
+	session->requests = NULL;
 
 	/* Channels */
-	s->channels = NULL;
-	s->next_channel_id = 0;
-	s->num_channels = 0;
+	session->channels = NULL;
+	session->next_channel_id = 0;
+	session->num_channels = 0;
 
 
 	/* Spawn networking thread. */
 #ifdef _WIN32
-	s->request_mutex = CreateMutex(NULL, FALSE, NULL);
-	s->idle_wakeup = CreateEvent(NULL, FALSE, FALSE, NULL);
-	s->thread_main = GetCurrentThread();
-	s->thread_io = CreateThread(NULL, 0, iothread, s, 0, NULL);
+	session->request_mutex = CreateMutex(NULL, FALSE, NULL);
+	session->idle_wakeup = CreateEvent(NULL, FALSE, FALSE, NULL);
+	session->thread_main = GetCurrentThread();
+	session->thread_io = CreateThread(NULL, 0, iothread, session, 0, NULL);
 #else
-	pthread_mutex_init(&s->request_mutex, NULL);
-	pthread_cond_init(&s->idle_wakeup, NULL);
+	pthread_mutex_init(&session->request_mutex, NULL);
+	pthread_cond_init(&session->idle_wakeup, NULL);
 
-	s->thread_main = pthread_self();
-	if(pthread_create(&s->thread_io, NULL, iothread, s))
+	session->thread_main = pthread_self();
+	if(pthread_create(&session->thread_io, NULL, iothread, session))
 		return SP_ERROR_OTHER_TRANSIENT;
 #endif
 
 	/* Player thread */
-	if(player_init(s))
+	if(player_init(session))
 		return SP_ERROR_OTHER_TRANSIENT;
 
 	/* Helper function for sp_link_create_from_string() */
-	libopenspotify_link_init(s);
+	libopenspotify_link_init(session);
 
 	/* Load album, artist and track cache */
-	cache_init(s);
+	cache_init(session);
 
 	/* Run garbage collector and save metadata to disk periodically */
-	request_post(s, REQ_TYPE_CACHE_PERIODIC, NULL);
+	request_post(session, REQ_TYPE_CACHE_PERIODIC, NULL);
 
-	DSFYDEBUG("Session initialized at %p\n", s);
+	DSFYDEBUG("Session initialized at %p\n", session);
 	
-	*sess = s;
+	*psession = session;
 
 	return SP_ERROR_OK;
 }
