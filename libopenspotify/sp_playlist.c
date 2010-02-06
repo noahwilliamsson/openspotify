@@ -87,7 +87,7 @@ SP_LIBEXPORT(sp_error) sp_playlist_rename (sp_playlist *playlist, const char *ne
 
 	/* FIXME: XML-escape with ezxml_ampencode */
 	sprintf(buf,	"<change>"
-				"<ops><name>%s</name><description>c64 music!</description></ops>"
+				"<ops><name>%s</name></ops>"
 				"<time>%ld</time>"
 				"<user>%s</user>"
 			"</change>"
