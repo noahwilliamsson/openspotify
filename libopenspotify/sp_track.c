@@ -140,7 +140,6 @@ sp_track *osfy_track_add(sp_session *session, unsigned char id[16]) {
 	track->num_artists = 0;
 	track->artists = NULL;
 
-	/* FIXME: */
 	track->is_available = 0;
 	track->restricted_countries = NULL;
 	track->allowed_countries = NULL;
@@ -262,20 +261,6 @@ int osfy_track_load_from_xml(sp_session *session, sp_track *track, ezxml_t track
 	sscanf(node->txt, "%lf", &popularity);
 	track->popularity = (int)(100 * popularity);
 
-
-	/* Country restrictions */
-	node = ezxml_get(track_node, "restrictions", 0, "restriction", -1);
-	if(node && (str = ezxml_attr(node, "forbidden")) != NULL) {
-		track->restricted_countries = realloc(track->restricted_countries, strlen(str) + 1);
-		strcpy(track->restricted_countries, str);
-	}
-
-	node = ezxml_get(track_node, "restrictions", 0, "restriction", -1);
-	if(node && (str = ezxml_attr(node, "allowed")) != NULL) {
-		track->allowed_countries = realloc(track->allowed_countries, strlen(str) + 1);
-		strcpy(track->allowed_countries, str);
-	}
-	
 	
 	/*
 	 * Grab ID of file
@@ -314,6 +299,42 @@ int osfy_track_load_from_xml(sp_session *session, sp_track *track, ezxml_t track
 		/* Track duration defaults to zero so no update is needed */
 		DSFYDEBUG("Track has no length, files are not available\n");
 	}
+
+
+	/* Country restrictions */
+	for(node = ezxml_get(track_node, "restrictions", 0, "restriction", -1);
+	    node;
+	    node = node->next) {
+	    	str = ezxml_attr(node, "catalogues");
+
+
+		/* There might be restrictions that do not apply for premium users */
+		if(!str || !strstr(str, "premium"))
+			continue;
+
+		if((str = ezxml_attr(node, "allowed")) != NULL) {
+			track->allowed_countries = realloc(track->allowed_countries, strlen(str) + 1);
+			strcpy(track->allowed_countries, str);
+
+			if(strstr(track->allowed_countries, session->country))
+				track->is_available = 1;
+		}
+
+		if((str = ezxml_attr(node, "forbidden")) != NULL) {
+			track->restricted_countries = realloc(track->restricted_countries, strlen(str) + 1);
+			strcpy(track->restricted_countries, str);
+
+			if(strstr(track->restricted_countries, session->country))
+				track->is_available = 0;
+			else
+				track->is_available = 1;
+		}
+	}
+
+
+	/* Tracks with no files can't be played */
+	if(track->duration == 0)
+		track->is_available = 0;
 
 
 	/* Add artists */
@@ -376,17 +397,6 @@ int osfy_track_load_from_xml(sp_session *session, sp_track *track, ezxml_t track
 	}
 	
 	
-	/*
-	 * FIXME: Determine if the track is available or not.
-	 * It might not be available due to being forbidden in the user's
-	 * country or because it's not explicity allowed or because the
-	 * track have no files associated.
-	 *
-	 */
-	if(track->duration > 0) {
-		track->is_available = 1;
-	}
-
 	track->is_loaded = 1;
 	track->error = SP_ERROR_OK;
 
