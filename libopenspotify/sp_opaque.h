@@ -42,7 +42,10 @@ struct sp_album {
 
 	sp_artist *artist;
 
+	char *restricted_countries;
+	char *allowed_countries;
 	int is_available;
+
 	int is_loaded;
 	int ref_count;
 

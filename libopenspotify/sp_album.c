@@ -70,8 +70,8 @@ SP_LIBEXPORT(void) sp_album_release(sp_album *album) {
 	if(--album->ref_count)
 		return;
 
-        DSFYDEBUG("Freeing album %p because of zero ref count\n", album);
-        osfy_album_free(album);
+	DSFYDEBUG("Freeing album %p because of zero ref count\n", album);
+	osfy_album_free(album);
 }
 
 
@@ -99,7 +99,10 @@ sp_album *sp_album_add(sp_session *session, unsigned char id[16]) {
 	album->year = 0;
 	album->type = SP_ALBUMTYPE_UNKNOWN;
 
-	album->is_available = 1; /* FIXME: */
+	album->restricted_countries = NULL;
+	album->allowed_countries = NULL;
+	album->is_available = 0;
+
 	album->is_loaded = 0;
 	album->ref_count = 0;
 
@@ -127,6 +130,12 @@ void osfy_album_free(sp_album *album) {
 	if(album->image)
 		sp_image_release(album->image);
 
+	if(album->restricted_countries)
+		free(album->restricted_countries);
+
+	if(album->allowed_countries)
+		free(album->allowed_countries);
+
 	DSFYDEBUG("Deallocated album at %p\n", album);
 	free(album);
 }
@@ -135,6 +144,7 @@ void osfy_album_free(sp_album *album) {
 /* Load an album from XML returned by album browsing */
 int osfy_album_load_from_album_xml(sp_session *session, sp_album *album, ezxml_t album_node) {
 	unsigned char id[20];
+	const char *str;
 	ezxml_t node;
 	
 	{
@@ -180,6 +190,35 @@ int osfy_album_load_from_album_xml(sp_session *session, sp_album *album, ezxml_t
 	album->year = atoi(node->txt);
 	
 	
+	/* Country restrictions */
+	for(node = ezxml_get(album_node, "restrictions", 0, "restriction", -1);
+	    node;
+	    node = node->next) {
+		str = ezxml_attr(node, "catalogues");
+
+		/* There might be restrictions that do not apply for premium users */
+		if(!str || !strstr(str, "premium"))
+			continue;
+
+		if((str = ezxml_attr(node, "allowed")) != NULL) {
+			album->allowed_countries = realloc(album->allowed_countries, strlen(str) + 1);
+			strcpy(album->allowed_countries, str);
+
+			if(strstr(album->allowed_countries, session->country))
+				album->is_available = 1;
+		}
+
+		if((str = ezxml_attr(node, "forbidden")) != NULL) {
+			album->restricted_countries = realloc(album->restricted_countries, strlen(str) + 1);
+			strcpy(album->restricted_countries, str);
+
+			if(strstr(album->restricted_countries, session->country))
+				album->is_available = 0;
+			else
+				album->is_available = 1;
+		}
+	}
+
 	/* Album artist */
 	if((node = ezxml_get(album_node, "artist-id", -1)) == NULL) {
 		DSFYDEBUG("Failed to find element 'artist-id'\n");
