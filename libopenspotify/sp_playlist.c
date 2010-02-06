@@ -72,7 +72,7 @@ SP_LIBEXPORT(sp_error) sp_playlist_rename (sp_playlist *playlist, const char *ne
 	if(!sp_playlist_is_loaded(playlist))
 		return SP_ERROR_RESOURCE_NOT_LOADED;
 	
-	if(strcmp(playlist->owner->display_name, playlist->session->username))
+	if(strcmp(playlist->owner->canonical_name, playlist->session->username))
 		return SP_ERROR_OTHER_PERMANENT;
 
 	/* FIXME: Will fail on multiple calls */
