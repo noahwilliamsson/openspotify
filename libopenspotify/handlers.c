@@ -116,6 +116,8 @@ static int handle_countrycode (sp_session * session, unsigned char *payload, int
 	for(i = 0; i < len && i < (int)sizeof(session->country) - 1; i++)
 		session->country[i] = (char)payload[i];
 
+	session->country[i] = 0;
+
 	return 0;
 }
 
