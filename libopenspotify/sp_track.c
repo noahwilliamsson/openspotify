@@ -393,7 +393,7 @@ int osfy_track_load_from_xml(sp_session *session, sp_track *track, ezxml_t track
 			
 			/* FIXME: Assume that the album is available if the track is available */
 			if(track->is_available && !track->album->is_available) {
-				DSFYDEBUG("Track is available but its album '%s' is not, force-marking the album as available", buf);
+				DSFYDEBUG("Track is available but its album '%s' is not, force-marking the album as available\n", buf);
 				track->album->is_available = 1;
 			}
 		}
