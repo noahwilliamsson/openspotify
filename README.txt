@@ -31,7 +31,7 @@ http://developer.spotify.com/en/libspotify/docs/modules.html
 * Artist subsystem	- Completed
 * Album browsing	- Completed
 * Artist browsing	- Completed
-* Toplist browsing	- Stubs, untested
+* Toplist browsing	- Completed
 * Image handling	- Completed
 * Search subsysten	- Completed
 * Playlist subsystem	- Read-only (loading), no support for create/modify/remove playlists or tracks
