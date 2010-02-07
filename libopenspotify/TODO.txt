@@ -2,8 +2,6 @@ TODO list
 =========
 * Initialize PRNG
 * Session
-  -- Implement support for play tokens. We should send such notifications and
-     stop the player if we receive them ourselves.
   -- Adhere to paths configured in sp_session_init()
   -- Caching of data
 * Tracks
@@ -24,7 +22,6 @@ TODO list
        <redirect>282821ee66424f5aa47054b79f951db9</redirect>
        <redirect>491f6858dab6426092463b5099332a9e</redirect>
        <title>Welcome To The Jungle</title>
-  -- Implement support for country restrictions
   -- Implement support for multiple bitrates and files. We should probably 
      select the one with the lowest bitrate (i.e, 96kbit/s)
 * Playlists
@@ -47,6 +44,5 @@ KNOWN ISSUES
 1. Apparently there's a race between posting of requests and
    sleeping while waiting for new.. seen on Mac OS X
 2. The Windows event/mutex stuff in iothread.c vs request.c is broken
-3. The Windows build is currently broken after commit 8fcf56ad03bd8b5884ef41a7642b4f0c56515cfb
-   The use of pthread in player.c needs to be ported to Windows APIs, VS project files needs
-   to be updated and libvorbisfile needs to be built and possibly distributed with openspotify
+3. Loading and unloading tracks in the player too fast will cause a crash
+   due to a race in player.c 
