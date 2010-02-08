@@ -248,8 +248,8 @@ static int osfy_albumbrowse_load_from_xml(sp_session *session, sp_albumbrowse *a
 
 			/* Mark track as available if the album is available and the album has a non-zero duration (i.e, associated files) */
 			if(!track->is_available && track->duration) {
-				DSFYDEBUG("Album is available but list track '%s' is not, force-marking the track as %savailable\n",
-						!alb->album->is_available? "not ": "", node->txt);
+				DSFYDEBUG("Track '%s' marked as not available but has files, force-marking track as %savailable\n",
+						node->txt, !alb->album->is_available? "not ": "");
 				track->is_available = alb->album->is_available;
 			}
 			
