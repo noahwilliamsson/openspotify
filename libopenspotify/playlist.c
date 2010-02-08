@@ -688,29 +688,51 @@ static int osfy_playlist_browse_callback(struct browse_callback_ctx *brctx) {
 		
 		/* We'll simply use ofsy_track_add() to find a track by its ID */
 		track = osfy_track_add(brctx->session, id);
-		{
-			char buf[33];
-			hex_bytes_to_ascii(track->id, buf, 16);
-			DSFYDEBUG("osfy_track_add(%s) gave track with ID '%s'\n", node->txt, buf);
-		}
-		
-		
 		
 		/* Skip loading of already loaded tracks */
-		if(sp_track_is_loaded(track)) {
-			DSFYDEBUG("Track '%s' (%d in playlist) is already loaded\n", node->txt, i);
-			continue;
-		}
-		
-		{
-		char buf[35];
-		hex_bytes_to_ascii(brctx->data.playlist->id, buf, 17);
-		DSFYDEBUG("Loading track '%s' (ref_count %d) in playlist '%s' (track number %d)\n", node->txt, track->ref_count, buf, i);
-		
+		if(!sp_track_is_loaded(track)) {
+			/* Load the track from XML */
+			osfy_track_load_from_xml(brctx->session, track, track_node);
 		}
 
-		/* Load the track from XML */
-		osfy_track_load_from_xml(brctx->session, track, track_node);
+
+		/*
+		 * FIXME:
+		 * A request for track with id X might return a different track
+		 * (i.e, the 'id' element differs from the id of the track requested)
+		 * with one of the 'redirect' elements set to the requested track's id.
+		 *
+		 * Below is an example where track with id '3c1919e237ca4f2c9b5fc686b7a6f6c3'
+		 * was browsed but a different track returned (a5a43c74af924171a50f0668aee36b43)
+		 * '3c1919e237ca4f2c9b5fc686b7a6f6c3' appears in the redirect element.
+		 *
+		 * <id>a5a43c74af924171a50f0668aee36b43</id>
+		 * <redirect>3c1919e237ca4f2c9b5fc686b7a6f6c3</redirect>
+		 * <redirect>93934b1df8984c6586a63d18cd6ecfa6</redirect>
+		 * <redirect>2e0d3f5a98014c40932a014b2a9eca69</redirect>
+		 * <title>Insane in the Brain</title>
+		 * <artist-id>9e74e7856a07496190ef2180d26003db</artist-id>
+		 * <artist>Cypress Hill</artist>
+		 * <album>Black Sunday</album>
+		 * <album-id>c3711d81999b48529903bf708b8192da</album-id>
+		 * <album-artist>Cypress Hill</album-artist>
+		 * <album-artist-id>9e74e7856a07496190ef2180d26003db</album-artist-id>
+		 * <year>1993</year>
+		 * <track-number>3</track-number>
+		 *
+		 */
+		for(node = ezxml_get(track_node, "redirect", -1); node; node = node->next) {
+			hex_ascii_to_bytes(node->txt, id, 16);
+		
+			/* We'll simply use ofsy_track_add() to find a track by its ID */
+			track = osfy_track_add(brctx->session, id);
+		
+			/* Skip loading of already loaded tracks */
+			if(!sp_track_is_loaded(track)) {
+				/* Load the track from XML */
+				osfy_track_load_from_xml(brctx->session, track, track_node);
+			}
+		}
 	}
 
 	/* Free XML structures and buffer */
