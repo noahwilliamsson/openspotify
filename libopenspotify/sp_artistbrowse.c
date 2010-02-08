@@ -317,6 +317,13 @@ static int osfy_artistbrowse_load_from_xml(sp_session *session, sp_artistbrowse 
 				assert(sp_track_is_loaded(track));
 
 
+				/* Mark track as available if the album is available and the album has a non-zero duration (i.e, associated files) */
+				if(!track->is_available && track->duration) {
+					DSFYDEBUG("Track '%s' marked as not available but has files, force-marking track as %savailable\n",
+							node->txt, !album->is_available? "not ": "");
+					track->is_available = album->is_available;
+				}
+
 				/* Add track to artistbrowse and increase the track's ref count */
 				arb->tracks = realloc(arb->tracks, sizeof(sp_track *) * (1 + arb->num_tracks));
 				arb->tracks[arb->num_tracks] = track;
