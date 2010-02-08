@@ -120,12 +120,12 @@ static int osfy_artistbrowse_browse_callback(struct browse_callback_ctx *brctx) 
 
 		/* Set defaults */
 		arb->is_loaded = 0;
-		arb->error = SP_ERROR_OTHER_PERMANENT;
+		arb->error = SP_ERROR_OTHER_TRANSIENT;
 	}
 
 	/* Might happen because of a channel error */
 	if(brctx->buf == NULL)
-		return -1;
+		return 0;
 	
 	xml = despotify_inflate(brctx->buf->ptr, brctx->buf->len);
 #ifdef DEBUG

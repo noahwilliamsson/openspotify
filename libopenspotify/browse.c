@@ -63,8 +63,19 @@ struct callback_ctx {
 int browse_process(sp_session *session, struct request *req) {
 	int ret;
 
-	
-	req->next_timeout = get_millisecs() + BROWSE_RETRY_TIMEOUT*1000;
+        if(req->state == REQ_STATE_NEW)
+                req->state = REQ_STATE_RUNNING;
+        
+	if(req->next_timeout > get_millisecs())
+		return 0;
+
+	/*
+	 * Prevent request from happening again.
+	 * If there's an error the channel callback will reset the timeout
+	 *
+	 */
+	req->next_timeout = INT_MAX;
+
 
 	switch(req->type) {
 		case REQ_TYPE_BROWSE_TRACK:
@@ -99,7 +110,6 @@ static int browse_send_generic_request(sp_session *session, struct request *req)
 	brctx = *(struct browse_callback_ctx **)req->input;
 	
 	/* FIXME: Should probably move this one? */
-	req->state = REQ_STATE_RUNNING;
 	brctx->req = req;
 
 	
@@ -244,11 +254,27 @@ static int browse_generic_callback(CHANNEL *ch, unsigned char *payload, unsigned
 			break;
 			
 		case CHANNEL_ERROR:
-			DSFYDEBUG("Got a channel ERROR, freeing buffer and retrying within %d seconds\n", BROWSE_RETRY_TIMEOUT);
 			buf_free(brctx->buf);
 			brctx->buf = NULL;
+
+			if(brctx->type == REQ_TYPE_ARTISTBROWSE) {
+				DSFYDEBUG("Got a channel ERROR, failing artist browse\n");
+
+				/* Force SP_ERROR_OTHER_TRANSIENT and !loaded */
+				brctx->browse_parser(brctx);
+
+				/* Increase number of items processed */
+				brctx->num_browsed += brctx->num_in_request;
 			
-			/* The request will be retried as soon as req->next_timeout expires */
+				/* Force the next browse request to happen immediately */
+				brctx->req->next_timeout = 0;
+			}
+			else {
+				DSFYDEBUG("Got a channel ERROR, retrying within %d seconds\n", BROWSE_RETRY_TIMEOUT);
+
+				/* The request will be retried as soon as req->next_timeout expires */
+				brctx->req->next_timeout = get_millisecs() + BROWSE_RETRY_TIMEOUT;
+			}
 			break;
 			
 		case CHANNEL_END:
