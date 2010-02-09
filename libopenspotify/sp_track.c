@@ -442,8 +442,9 @@ static int osfy_track_browse_callback(struct browse_callback_ctx *brctx) {
 #ifdef DEBUG
 	{
 		char buf[64];
+		FILE *fd;
 		sprintf(buf, "browse-tracks-%d-%d.xml", brctx->num_browsed, brctx->num_in_request);
-		FILE *fd = fopen(buf, "w");
+		fd = fopen(buf, "w");
 		if(fd) {
 			fwrite(xml->ptr, xml->len, 1, fd);
 			fclose(fd);
