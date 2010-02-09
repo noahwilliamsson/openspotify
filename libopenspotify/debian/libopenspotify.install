@@ -1,2 +1,3 @@
 usr/lib/lib*.so
+usr/lib/pkgconfig/openspotify.pc
 usr/share/doc/libopenspotify/README.txt
