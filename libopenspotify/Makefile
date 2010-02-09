@@ -41,6 +41,9 @@ install: all
 	install -m 0755 $(LIB_NAME) $(DESTDIR)$(prefix)/lib
 	install -m 0755 -d $(DESTDIR)$(prefix)/include/spotify
 	install -m 0644 ../include/spotify/api.h $(DESTDIR)$(prefix)/include/spotify/api.h
+	sed -e "s:^prefix=.*:prefix=$(prefix):" -e "s:@@VER@@:$(shell date +%Y%m%d):" < openspotify.pc.in > openspotify.pc
+	install -m 0755 -d $(DESTDIR)$(prefix)/lib/pkgconfig
+	install -m 0644 openspotify.pc $(DESTDIR)$(prefix)/lib/pkgconfig/openspotify.pc
 
 clean:
 	rm -f $(CORE_OBJS) $(LIB_OBJS) $(LIB_NAME)

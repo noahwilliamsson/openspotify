@@ -1,0 +1,12 @@
+prefix=/usr
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: libopenspotify
+Description: Open source Spotify client library
+Version: @@VER@@
+URL: http://github.com/noahwilliamsson/openspotify
+Requires:
+Conflicts: libspotify >= 0.0.1
+Libs: -L${libdir} -lopenspotify
+Cflags: -I${includedir}
