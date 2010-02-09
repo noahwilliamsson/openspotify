@@ -199,6 +199,12 @@ int handle_packet (sp_session * session,
 		error = handle_aeskey (session, payload, len);
 		break;
 
+	case CMD_KEYFAILED:
+		DSFYDEBUG("AES key for the file specified was rejected. This is a bug in the geo restriction code in libopenspotify\n");
+		DSFYDEBUG("Please note which track was played and where it came from (playlist, search, albumbrowse, artistbrowse)\n");
+		assert(cmd != CMD_KEYFAILED);
+		break;
+
 	case CMD_SHAHASH:
 		break;
 
