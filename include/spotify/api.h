@@ -35,7 +35,13 @@ extern "C" {
 
 
 #ifndef __bool_true_false_are_defined
+#ifdef _WIN32
+#ifndef __cplusplus
+#define bool unsigned char
+#endif
+#else
 typedef unsigned char bool;
+#endif
 #endif
 #define byte unsigned char
 
