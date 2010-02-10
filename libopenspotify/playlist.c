@@ -277,16 +277,18 @@ static int playlistcontainer_parse_xml(sp_session *session) {
 	
 	root = ezxml_parse_str((char *)pc->buf->ptr, pc->buf->len);
 	node = ezxml_get(root, "next-change", 0, "change", 0, "ops", 0, "add", 0, "items", -1);
-	id_list = node->txt;
-
-	for(idstr = strtok(id_list, ",\n"); idstr; idstr = strtok(NULL, ",\n")) {
-		DSFYDEBUG("Playlist ID '%s'\n", idstr);
+	if(node != NULL) {
+		id_list = node->txt;
+		for(idstr = strtok(id_list, ",\n"); idstr; idstr = strtok(NULL, ",\n")) {
+			DSFYDEBUG("Playlist ID '%s'\n", idstr);
 	
-		hex_ascii_to_bytes(idstr, id, 17);
-		playlist = playlist_create(session, id);
+			hex_ascii_to_bytes(idstr, id, 17);
+			playlist = playlist_create(session, id);
 
-		playlistcontainer_add_playlist(session, playlist);
+			playlistcontainer_add_playlist(session, playlist);
+		}
 	}
+
 
 	node = ezxml_get(root, "next-change", 0, "version", -1);
 	if(node) {
