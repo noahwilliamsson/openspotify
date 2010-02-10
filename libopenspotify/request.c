@@ -171,6 +171,7 @@ static void request_notify_main_thread(sp_session *session, struct request *requ
 	case REQ_TYPE_BROWSE_ALBUM:
 	case REQ_TYPE_BROWSE_ARTIST:
 	case REQ_TYPE_BROWSE_TRACK:
+        case REQ_TYPE_SEARCH:
 		session->callbacks->notify_main_thread(session);
 		DSFYDEBUG("Notified main thread for <type %s, state %s, input %p>\n",
 			REQUEST_TYPE_STR(request->type), REQUEST_STATE_STR(request->state),
