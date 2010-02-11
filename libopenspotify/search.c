@@ -131,9 +131,8 @@ static int search_parse_xml(struct search_ctx *search_ctx) {
 		buf_free(xml);
 		return -1;
 	}
-	
 
-	
+
 	/* Version check */
 	if((node = ezxml_get(root, "version", -1)) == NULL
 		|| atoi(node->txt) != 1) {
@@ -141,7 +140,7 @@ static int search_parse_xml(struct search_ctx *search_ctx) {
 		buf_free(xml);
 		return -1;
 	}
-	
+
 
 	/* Search hint */
 	if(search->did_you_mean)
@@ -152,8 +151,7 @@ static int search_parse_xml(struct search_ctx *search_ctx) {
 	else
 		search->did_you_mean = strdup("");
 
-	
-	
+
 	/*
 	 * Get number of total artists
 	 * The value of the 'total-artists' element might be larger than the
@@ -164,7 +162,7 @@ static int search_parse_xml(struct search_ctx *search_ctx) {
 		return -1;
 	
 	count = atoi(node->txt);
-	search->artists = realloc(search->artists, count * sizeof(sp_artist *));
+	search->artists = malloc(search->artists, count * sizeof(sp_artist *));
 	
 	
 	/* Load artists */
@@ -194,7 +192,7 @@ static int search_parse_xml(struct search_ctx *search_ctx) {
 		return -1;
 	
 	count = atoi(node->txt);
-	search->albums = realloc(search->albums, count * sizeof(sp_album *));
+	search->albums = malloc(search->albums, count * sizeof(sp_album *));
 	
 	
 	/* Load albums */

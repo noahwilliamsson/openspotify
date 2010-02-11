@@ -255,8 +255,6 @@ struct sp_search {
 	sp_error error;
 	
 	int ref_count;
-	
-	struct hashtable *hashtable;
 };
 
 
@@ -380,7 +378,6 @@ struct sp_session {
 	struct hashtable *hashtable_albums;
 	struct hashtable *hashtable_artists;
 	struct hashtable *hashtable_images;
-	struct hashtable *hashtable_searches;
 	struct hashtable *hashtable_tracks;
 	struct hashtable *hashtable_users;
 

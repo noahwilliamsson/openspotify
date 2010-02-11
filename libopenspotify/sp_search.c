@@ -9,7 +9,6 @@
 #include "browse.h"
 #include "debug.h"
 #include "ezxml.h"
-#include "hashtable.h"
 #include "request.h"
 #include "sp_opaque.h"
 #include "track.h"
@@ -17,32 +16,15 @@
 #include "search.h"
 
 
-SP_LIBEXPORT(sp_search *) sp_search_create (sp_session *session, const char *query, int track_offset, int track_count, int album_offset, int album_count, int artist_offset, int artist_count, search_complete_cb *callback, void *userdata) {
-	char query_key[256];
+SP_LIBEXPORT(sp_search *) sp_search_create(sp_session *session, const char *query, int track_offset, int track_count, int album_offset, int album_count, int artist_offset, int artist_count, search_complete_cb *callback, void *userdata) {
 	sp_search *search;
 	void **container;
 	struct search_ctx *search_ctx;
-
-	/* FIXME: Should hash on all input parameters! */
-	strncpy(query_key, query, sizeof(query_key) - 1);
-	query_key[sizeof(query_key) - 1] = 0;
-	
-	search = (sp_search *)hashtable_find(session->hashtable_searches, query_key);
-	if(search) {
-		sp_search_add_ref(search);
-
-		/* Only send result notification if the search has completed */
-		if(search->error != SP_ERROR_IS_LOADING)
-			request_post_result(session, REQ_TYPE_SEARCH, search->error, search);
-
-		return search;
-	}
 
 	search = malloc(sizeof(sp_search));
 	if(search == NULL)
 		return NULL;
 	
-
 	search->query = strdup(query);
 	search->did_you_mean = NULL;
 
@@ -71,10 +53,7 @@ SP_LIBEXPORT(sp_search *) sp_search_create (sp_session *session, const char *que
 	search->is_loaded = 0;
 	search->ref_count = 1;
 
-	search->hashtable = session->hashtable_searches;
-	hashtable_insert(search->hashtable, query_key, search);
 
-	
 	/*
 	 * Temporarily increase ref count for the albumbrowse so it's not free'd
 	 * accidentily. It will be decreaed by the chanel callback.
@@ -183,7 +162,6 @@ SP_LIBEXPORT(void) sp_search_add_ref(sp_search *search) {
 
 SP_LIBEXPORT(void) sp_search_release(sp_search *search) {
 	int i;
-	char query_key[256];
 	
 	assert(search->ref_count > 0);
 	search->ref_count--;
@@ -192,10 +170,6 @@ SP_LIBEXPORT(void) sp_search_release(sp_search *search) {
 		return;
 
 	
-	strncpy(query_key, search->query, sizeof(query_key) - 1);
-	query_key[sizeof(query_key) - 1] = 0;
-
-	hashtable_remove(search->hashtable, query_key);
 	free(search->query);
 
 	
