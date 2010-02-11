@@ -74,8 +74,6 @@ struct sp_albumbrowse {
 
 	int is_loaded;
 	int ref_count;
-
-	struct hashtable *hashtable;
 };
 
 
@@ -372,7 +370,6 @@ struct sp_session {
 	sp_playlistcontainer *playlistcontainer;
 
 	/* Album/artist/track/.. memory memory management */
-	struct hashtable *hashtable_albumbrowses;
 	struct hashtable *hashtable_artistbrowses;
 	struct hashtable *hashtable_toplistbrowses;
 	struct hashtable *hashtable_albums;

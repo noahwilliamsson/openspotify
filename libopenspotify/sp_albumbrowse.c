@@ -24,28 +24,16 @@ SP_LIBEXPORT(sp_albumbrowse *) sp_albumbrowse_create(sp_session *session, sp_alb
 	void **container;
 	struct browse_callback_ctx *brctx;
 
-	alb = (sp_albumbrowse *)hashtable_find(session->hashtable_albumbrowses, album->id);
-	if(alb) {
-		sp_albumbrowse_add_ref(alb);
-
-		/* Only send result notification if the album browsing has completed */
-		if(alb->error != SP_ERROR_IS_LOADING)
-			request_post_result(session, REQ_TYPE_ALBUMBROWSE, alb->error, alb);
-
-		return alb;
-	}
 
 	alb = malloc(sizeof(sp_albumbrowse));
+	DSFYDEBUG("Allocated albumbrowse at %p\n", alb);
 	if(alb == NULL)
 		return NULL;
 
-	DSFYDEBUG("Allocated albumbrowse at %p\n", alb);
-	
 	alb->album = album;
 	sp_album_add_ref(alb->album);
 	DSFYDEBUG("Referenced album at %p\n", alb->album);
 
-	
 	alb->artist = NULL;
 
 	alb->num_tracks = 0;
@@ -64,11 +52,7 @@ SP_LIBEXPORT(sp_albumbrowse *) sp_albumbrowse_create(sp_session *session, sp_alb
 	alb->is_loaded = 0;
 	alb->ref_count = 1;
 
-	alb->hashtable = session->hashtable_albumbrowses;
-	hashtable_insert(alb->hashtable, album->id, alb);
 
-
-	
 	/*
 	 * Temporarily increase ref count for the albumbrowse so it's not free'd
 	 * accidentily. It will be decreaed by the chanel callback.
@@ -112,6 +96,19 @@ static int osfy_albumbrowse_browse_callback(struct browse_callback_ctx *brctx) {
 	struct buf *xml;
 	ezxml_t root;
 	
+	for(i = 0; i < brctx->num_in_request; i++) {
+		alb = brctx->data.albumbrowses[brctx->num_browsed + i];
+
+		/* Set defaults */
+		alb->is_loaded = 0;
+		alb->error = SP_ERROR_OTHER_TRANSIENT;
+	}
+
+	/* Might happen because of a channel error */
+	if(brctx->buf == NULL)
+		return 0;
+
+
 	xml = despotify_inflate(brctx->buf->ptr, brctx->buf->len);
 #ifdef DEBUG
 	{
@@ -157,11 +154,10 @@ static int osfy_albumbrowse_load_from_xml(sp_session *session, sp_albumbrowse *a
 	int disc_number, i;
 	sp_track *track;
 	ezxml_t node, loop_node, track_node;
-	
 
-	DSFYDEBUG("Loading from XML\n");
-	
+
 	/* Load album from XML if not yet loaded */
+	DSFYDEBUG("Loading from XML\n");
 	if(sp_album_is_loaded(alb->album) == 0)
 		osfy_album_load_from_album_xml(session, alb->album, root);
 
@@ -185,21 +181,19 @@ static int osfy_albumbrowse_load_from_xml(sp_session *session, sp_albumbrowse *a
 		alb->error = SP_ERROR_OTHER_PERMANENT;
 		return -1;
 	}
-	
-	if(alb->artist != NULL)
-		sp_artist_release(alb->artist);
-	
+
+
 	hex_ascii_to_bytes(node->txt, id, 16);
 	alb->artist = osfy_artist_add(session, id);
 	sp_artist_add_ref(alb->artist);
-	
 	if(sp_artist_is_loaded(alb->artist) == 0) {
 		DSFYDEBUG("Loading artist '%s' from XML returned by album browsing\n", node->txt);
 		osfy_artist_load_track_artist_from_xml(session, alb->artist, root);
 	}
 	
 	assert(sp_artist_is_loaded(alb->artist));
-	
+
+
 	/* Loop over each disc and add tracks */
 	assert(alb->num_tracks == 0);
 	for(loop_node = ezxml_get(root, "discs", 0, "disc", -1);
@@ -271,7 +265,6 @@ static int osfy_albumbrowse_load_from_xml(sp_session *session, sp_albumbrowse *a
 	
 
 	/* Loop over each copyright and add copyright text */
-	assert(alb->num_copyrights == 0);
 	for(node = ezxml_get(root, "copyright", 0, "c", -1);
 	    node;
 	    node = node->next) {
@@ -279,15 +272,14 @@ static int osfy_albumbrowse_load_from_xml(sp_session *session, sp_albumbrowse *a
 		alb->copyrights[alb->num_copyrights] = strdup(node->txt);
 		alb->num_copyrights++;
 	}
-	
+
+
 	/* Add review */
-	assert(alb->review == NULL);
 	if((node = ezxml_get(root, "review", -1)) != NULL)
 		alb->review = strdup(node->txt);
 	else
 		alb->review = strdup("");
 
-	
 
 	alb->is_loaded = 1;
 	alb->error = SP_ERROR_OK;
@@ -372,8 +364,6 @@ SP_LIBEXPORT(void) sp_albumbrowse_release(sp_albumbrowse *alb) {
 	if(alb->ref_count)
 		return;
 
-	hashtable_remove(alb->hashtable, alb->album->id);
-
 
 	for(i = 0; i < alb->num_tracks; i++)
 		sp_track_release(alb->tracks[i]);
@@ -402,7 +392,7 @@ SP_LIBEXPORT(void) sp_albumbrowse_release(sp_albumbrowse *alb) {
 	if(alb->artist)
 		sp_artist_release(alb->artist);
 
-	DSFYDEBUG("Deallocated albumbrowse at %p\n", alb);
 
+	DSFYDEBUG("Deallocating albumbrowse at %p\n", alb);
 	free(alb);
 }
