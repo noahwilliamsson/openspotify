@@ -41,7 +41,7 @@ SP_LIBEXPORT(sp_search *) sp_search_create(sp_session *session, const char *quer
 	search->userdata = userdata;
 	
 	search->num_albums = 0;
-	search->albums = 0;
+	search->albums = NULL;
 
 	search->num_artists = 0;
 	search->artists = NULL;
