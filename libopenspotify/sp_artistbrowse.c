@@ -9,7 +9,6 @@
 #include "browse.h"
 #include "debug.h"
 #include "ezxml.h"
-#include "hashtable.h"
 #include "request.h"
 #include "sp_opaque.h"
 #include "track.h"
@@ -25,22 +24,12 @@ SP_LIBEXPORT(sp_artistbrowse *) sp_artistbrowse_create(sp_session *session, sp_a
 	void **container;
 	struct browse_callback_ctx *brctx;
 
-	arb = (sp_artistbrowse *)hashtable_find(session->hashtable_artistbrowses, artist->id);
-	if(arb) {
-		sp_artistbrowse_add_ref(arb);
-
-		/* Only send result notification if the artist browsing has completed */
-		if(arb->error != SP_ERROR_IS_LOADING)
-			request_post_result(session, REQ_TYPE_ARTISTBROWSE, arb->error, arb);
-
-		return arb;
-	}
 
 	arb = malloc(sizeof(sp_artistbrowse));
+	DSFYDEBUG("Allocated artistbrowse at %p\n", arb);
 	if(arb == NULL)
 		return NULL;
-	
-	DSFYDEBUG("Allocated artistbrowse at %p\n", arb);
+
 
 	arb->artist = artist;
 	sp_artist_add_ref(artist);
@@ -68,10 +57,6 @@ SP_LIBEXPORT(sp_artistbrowse *) sp_artistbrowse_create(sp_session *session, sp_a
 	arb->is_loaded = 0;
 	arb->ref_count = 1;
 
-	arb->hashtable = session->hashtable_artistbrowses;
-	hashtable_insert(arb->hashtable, arb->artist->id, arb);
-
-	
 	/*
 	 * Temporarily increase ref count for the albumbrowse so it's not free'd
 	 * accidentily. It will be decreaed by the chanel callback.
@@ -202,7 +187,6 @@ static int osfy_artistbrowse_load_from_xml(sp_session *session, sp_artistbrowse 
 	
 	
 	/* Load biography */
-	assert(arb->biography == NULL);
 	if((node = ezxml_get(root, "bios", 0, "bio", 0, "text", -1)) != NULL)
 		arb->biography = strdup(node->txt);
 	else
@@ -234,12 +218,9 @@ static int osfy_artistbrowse_load_from_xml(sp_session *session, sp_artistbrowse 
 		
 		arb->num_similar_artists++;
 	}
-	
-	
-	
-	
+
+
 	/* Loop over each album listed */
-	assert(arb->num_tracks == 0);
 	for(album_node = ezxml_get(root, "albums", 0, "album", -1);
 	    album_node;
 	    album_node = album_node->next) {
@@ -336,9 +317,8 @@ static int osfy_artistbrowse_load_from_xml(sp_session *session, sp_artistbrowse 
 
 
 	} /* for each album */
-	
-	assert(arb->num_tracks != 0);
-	
+
+
 	return 0;
 }
 
@@ -438,7 +418,6 @@ SP_LIBEXPORT(void) sp_artistbrowse_release(sp_artistbrowse *arb) {
 	if(arb->ref_count)
 		return;
 
-	hashtable_remove(arb->hashtable, arb->artist->id);
 
 	if(arb->artist) {
 		sp_artist_release(arb->artist);
@@ -474,6 +453,6 @@ SP_LIBEXPORT(void) sp_artistbrowse_release(sp_artistbrowse *arb) {
 		free(arb->albums);
 
 
-	DSFYDEBUG("Deallocated artistbrowse at %p\n", arb);
+	DSFYDEBUG("Deallocating artistbrowse at %p\n", arb);
 	free(arb);
 }
