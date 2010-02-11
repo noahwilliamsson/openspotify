@@ -162,7 +162,7 @@ static int search_parse_xml(struct search_ctx *search_ctx) {
 		return -1;
 
 	count = atoi(node->txt);
-	search->artists = malloc(search->artists, count * sizeof(sp_artist *));
+	search->artists = malloc(count * sizeof(sp_artist *));
 
 
 	/* Load artists */
@@ -192,7 +192,7 @@ static int search_parse_xml(struct search_ctx *search_ctx) {
 		return -1;
 
 	count = atoi(node->txt);
-	search->albums = malloc(search->albums, count * sizeof(sp_album *));
+	search->albums = malloc(count * sizeof(sp_album *));
 
 
 	/* Load albums */
