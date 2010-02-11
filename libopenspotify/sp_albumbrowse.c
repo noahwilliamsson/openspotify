@@ -59,30 +59,30 @@ SP_LIBEXPORT(sp_albumbrowse *) sp_albumbrowse_create(sp_session *session, sp_alb
 	 *
 	 */
 	sp_albumbrowse_add_ref(alb);
-	
-	
+
+
 	/* The album callback context */
 	brctx = (struct browse_callback_ctx *)malloc(sizeof(struct browse_callback_ctx));
-	
+
 	brctx->session = session;
 	brctx->req = NULL; /* Filled in by the request processor */
 	brctx->buf = NULL; /* Filled in by the request processor */
-	
+
 	brctx->type = REQ_TYPE_ALBUMBROWSE;
 	brctx->data.albumbrowses = (sp_albumbrowse **)malloc(sizeof(sp_albumbrowse *));
 	brctx->data.albumbrowses[0] = alb;
 	brctx->num_total = 1;
 	brctx->num_browsed = 0;
 	brctx->num_in_request = 0;
-	
-	
+
+
 	/* Our gzip'd XML parser */
 	brctx->browse_parser = osfy_albumbrowse_browse_callback;
-	
+
 	/* Request input container. Will be free'd when the request is finished. */
 	container = (void **)malloc(sizeof(void *));
 	*container = brctx;
-	
+
 	DSFYDEBUG("requesting REQ_TYPE_ALBUMBROWSE with container %p\n", container);
 	request_post(session, REQ_TYPE_ALBUMBROWSE, container);	
 
@@ -95,7 +95,7 @@ static int osfy_albumbrowse_browse_callback(struct browse_callback_ctx *brctx) {
 	int i;
 	struct buf *xml;
 	ezxml_t root;
-	
+
 	for(i = 0; i < brctx->num_in_request; i++) {
 		alb = brctx->data.albumbrowses[brctx->num_browsed + i];
 
@@ -122,29 +122,29 @@ static int osfy_albumbrowse_browse_callback(struct browse_callback_ctx *brctx) {
 		}
 	}
 #endif
-	
+
 	root = ezxml_parse_str((char *) xml->ptr, xml->len);
 	if(root == NULL) {
 		DSFYDEBUG("Failed to parse XML\n");
 		buf_free(xml);
 		return -1;
 	}
-	
+
 	for(i = 0; i < brctx->num_in_request; i++) {
 		alb = brctx->data.albumbrowses[brctx->num_browsed + i];
 		osfy_albumbrowse_load_from_xml(brctx->session, alb, root);
 	}
-	
-	
+
+
 	ezxml_free(root);
 	buf_free(xml);
-	
-	
+
+
 	/* Release references made in sp_albumbrowse_create() */
 	for(i = 0; i < brctx->num_in_request; i++)
 		sp_albumbrowse_release(brctx->data.albumbrowses[brctx->num_browsed + i]);
-	
-	
+
+
 	return 0;
 }
 
@@ -190,7 +190,7 @@ static int osfy_albumbrowse_load_from_xml(sp_session *session, sp_albumbrowse *a
 		DSFYDEBUG("Loading artist '%s' from XML returned by album browsing\n", node->txt);
 		osfy_artist_load_track_artist_from_xml(session, alb->artist, root);
 	}
-	
+
 	assert(sp_artist_is_loaded(alb->artist));
 
 
@@ -205,34 +205,34 @@ static int osfy_albumbrowse_load_from_xml(sp_session *session, sp_albumbrowse *a
 			DSFYDEBUG("BUG: Found no 'disc-numner' under discs -> disc\n");
 			continue;
 		}
-		
+
 		disc_number = atoi(node->txt);
 
-		
+
 		/* Loop over each track and add it to the albumbrowse tracks list */
 		for(track_node = ezxml_get(loop_node, "track", -1), i = 1;
 		    track_node;
 		    track_node = track_node->next, i++) {
-		
+
 			/* Extract track ID and add it */
 			if((node = ezxml_get(track_node, "id", -1)) == NULL)
 				continue;
-				
+
 			hex_ascii_to_bytes(node->txt, id, 16);
 			track = osfy_track_add(session, id);
 
-			
+
 			/* Load track details from XML if not already loaded */
 			if(sp_track_is_loaded(track) == 0)
 				osfy_track_load_from_xml(session, track, track_node);
-			
+
 			assert(sp_track_is_loaded(track));
 
-			
+
 			/* Set disc number */
 			track->disc = disc_number;
-			
-			
+
+
 			/* Set album (as it's not available under the track node) */
 			if(track->album == NULL) {
 				track->album = alb->album;
@@ -246,23 +246,23 @@ static int osfy_albumbrowse_load_from_xml(sp_session *session, sp_albumbrowse *a
 						node->txt, !alb->album->is_available? "not ": "");
 				track->is_available = alb->album->is_available;
 			}
-			
-			
+
+
 			/* Set track index on disc */
 			if(track->index == 0)
 				track->index = i;
-			
-			
+
+
 			/* Add track to albumbrowse and increase the track's ref count */
 			alb->tracks = realloc(alb->tracks, sizeof(sp_track *) * (1 + alb->num_tracks));
 			alb->tracks[alb->num_tracks] = track;
 			sp_track_add_ref(alb->tracks[alb->num_tracks]);
 			alb->num_tracks++;
 		}
-		
+
 		assert(alb->num_tracks > 0);
 	}
-	
+
 
 	/* Loop over each copyright and add copyright text */
 	for(node = ezxml_get(root, "copyright", 0, "c", -1);
@@ -283,7 +283,7 @@ static int osfy_albumbrowse_load_from_xml(sp_session *session, sp_albumbrowse *a
 
 	alb->is_loaded = 1;
 	alb->error = SP_ERROR_OK;
-	
+
 	return 0;
 }
 
