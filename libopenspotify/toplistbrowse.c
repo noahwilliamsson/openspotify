@@ -23,7 +23,7 @@ static int toplistbrowse_parse_xml(struct toplistbrowse_ctx *toplistbrowse_ctx);
 int toplistbrowse_process_request(sp_session *session, struct request *req) {
 	struct toplistbrowse_ctx *toplistbrowse_ctx = *(struct toplistbrowse_ctx **)req->input;
 	sp_toplistbrowse *toplistbrowse = toplistbrowse_ctx->toplistbrowse;
-	
+
 	/*
 	 * Prevent request from happening again.
 	 * If there's an error the channel callback will reset the timeout
@@ -33,9 +33,9 @@ int toplistbrowse_process_request(sp_session *session, struct request *req) {
 	req->state = REQ_STATE_RUNNING;
 
 	toplistbrowse_ctx->req = req;
-	
+
 	DSFYDEBUG("Initiating toplistbrowse with type %d, region %d\n", toplistbrowse->type, toplistbrowse->region);
-	
+
 	return cmd_toplistbrowse(session, toplistbrowse->type, toplistbrowse->region, toplistbrowse_callback, toplistbrowse_ctx);
 }
 
@@ -43,7 +43,7 @@ int toplistbrowse_process_request(sp_session *session, struct request *req) {
 static int toplistbrowse_callback(CHANNEL *ch, unsigned char *payload, unsigned short len) {
 	int skip_len;
 	struct toplistbrowse_ctx *toplistbrowse_ctx = (struct toplistbrowse_ctx *)ch->private;
-	
+
 	switch(ch->state) {
 		case CHANNEL_DATA:
 			/* Skip a minimal gzip header */
@@ -54,14 +54,14 @@ static int toplistbrowse_callback(CHANNEL *ch, unsigned char *payload, unsigned 
 					len--;
 					payload++;
 				}
-				
+
 				if (len == 0)
 					break;
 			}
-			
+
 			buf_append_data(toplistbrowse_ctx->buf, payload, len);
 			break;
-			
+
 		case CHANNEL_ERROR:
 			DSFYDEBUG("Got a channel ERROR, retrying within %d seconds\n", TOPLISTBROWSE_RETRY_TIMEOUT);
 			buf_free(toplistbrowse_ctx->buf);
@@ -70,7 +70,7 @@ static int toplistbrowse_callback(CHANNEL *ch, unsigned char *payload, unsigned 
 			/* Reset timeout so the request can be retried */
 			toplistbrowse_ctx->req->next_timeout = get_millisecs() + TOPLISTBROWSE_RETRY_TIMEOUT*1000;
 			break;
-			
+
 		case CHANNEL_END:
 			if(toplistbrowse_parse_xml(toplistbrowse_ctx) == 0) {
 				toplistbrowse_ctx->toplistbrowse->error = SP_ERROR_OK;
@@ -87,13 +87,13 @@ static int toplistbrowse_callback(CHANNEL *ch, unsigned char *payload, unsigned 
 			buf_free(toplistbrowse_ctx->buf);
 			free(toplistbrowse_ctx);
 			break;
-			
+
 		default:
 			break;
 	}
-	
+
 	return 0;
-	
+
 }
 
 
@@ -105,11 +105,11 @@ static int toplistbrowse_parse_xml(struct toplistbrowse_ctx *toplistbrowse_ctx) 
 	sp_artist *artist;
 	sp_album *album;
 	sp_track *track;
-	
+
 	xml = despotify_inflate(toplistbrowse_ctx->buf->ptr, toplistbrowse_ctx->buf->len);
 	if(xml == NULL)
 		return -1;
-	
+
 #ifdef DEBUG
 	{
 		FILE *fd;
@@ -137,13 +137,13 @@ static int toplistbrowse_parse_xml(struct toplistbrowse_ctx *toplistbrowse_ctx) 
 
 		if((node = ezxml_get(listnode, "id", -1)) == NULL)
 			continue;
-		
+
 		hex_ascii_to_bytes(node->txt, id, 16);
 		artist = osfy_artist_add(toplistbrowse_ctx->session, id);
-		
+
 		if(!sp_artist_is_loaded(artist))
 			osfy_artist_load_artist_from_xml(toplistbrowse_ctx->session, artist, listnode);
-		
+
 		sp_artist_add_ref(artist);
 		toplistbrowse->artists = (sp_artist **)realloc(toplistbrowse->artists, (toplistbrowse->num_artists + 1) * sizeof(sp_artist *));
 		toplistbrowse->artists[toplistbrowse->num_artists++] = artist;
@@ -156,13 +156,13 @@ static int toplistbrowse_parse_xml(struct toplistbrowse_ctx *toplistbrowse_ctx) 
 
 		if((node = ezxml_get(listnode, "id", -1)) == NULL)
 			continue;
-		
+
 		hex_ascii_to_bytes(node->txt, id, 16);
 		album = sp_album_add(toplistbrowse_ctx->session, id);
-		
+
 		if(!sp_album_is_loaded(album))
 			osfy_album_load_from_search_xml(toplistbrowse_ctx->session, album, listnode);
-		
+
 		sp_album_add_ref(album);
 		toplistbrowse->albums = (sp_album **)realloc(toplistbrowse->albums, (toplistbrowse->num_albums + 1) * sizeof(sp_album *));
 		toplistbrowse->albums[toplistbrowse->num_albums++] = album;
@@ -175,13 +175,13 @@ static int toplistbrowse_parse_xml(struct toplistbrowse_ctx *toplistbrowse_ctx) 
 
 		if((node = ezxml_get(listnode, "id", -1)) == NULL)
 			continue;
-		
+
 		hex_ascii_to_bytes(node->txt, id, 16);
 		track = osfy_track_add(toplistbrowse_ctx->session, id);
-		
+
 		if(!sp_track_is_loaded(track))
 			osfy_track_load_from_xml(toplistbrowse_ctx->session, track, listnode);
-		
+
 		sp_track_add_ref(track);
 		toplistbrowse->tracks = (sp_track **)realloc(toplistbrowse->tracks, (toplistbrowse->num_tracks + 1) * sizeof(sp_track *));
 		toplistbrowse->tracks[toplistbrowse->num_tracks++] = track;
@@ -190,6 +190,6 @@ static int toplistbrowse_parse_xml(struct toplistbrowse_ctx *toplistbrowse_ctx) 
 
 	ezxml_free(root);
 	buf_free(xml);
-	
+
 	return 0;
 }
