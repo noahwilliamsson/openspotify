@@ -275,8 +275,6 @@ struct sp_toplistbrowse {
 	sp_error error;
 	
 	int ref_count;
-	
-	struct hashtable *hashtable;
 };
 
 
@@ -368,7 +366,6 @@ struct sp_session {
 	sp_playlistcontainer *playlistcontainer;
 
 	/* Album/artist/track/.. memory memory management */
-	struct hashtable *hashtable_toplistbrowses;
 	struct hashtable *hashtable_albums;
 	struct hashtable *hashtable_artists;
 	struct hashtable *hashtable_images;

@@ -9,7 +9,6 @@
 #include "browse.h"
 #include "debug.h"
 #include "ezxml.h"
-#include "hashtable.h"
 #include "request.h"
 #include "sp_opaque.h"
 #include "track.h"
@@ -18,33 +17,15 @@
 
 
 SP_LIBEXPORT(sp_toplistbrowse *) sp_toplistbrowse_create (sp_session *session, sp_toplisttype type, sp_toplistregion region, toplistbrowse_complete_cb *callback, void *userdata) {
-	unsigned char browse_key[4];
 	sp_toplistbrowse *toplistbrowse;
 	void **container;
 	struct toplistbrowse_ctx *toplistbrowse_ctx;
 
 
-	browse_key[0] = (type >> 8) & 0xff;
-	browse_key[1] = (type >> 0) & 0xff;
-	browse_key[2] = (region >> 8) & 0xff;
-	browse_key[3] = (region >> 0) & 0xff;
-
-	toplistbrowse = (sp_toplistbrowse *)hashtable_find(session->hashtable_toplistbrowses, browse_key);
-	if(toplistbrowse) {
-		sp_toplistbrowse_add_ref(toplistbrowse);
-
-		/* Only send result notification if the toplistbrowse has completed */
-		if(toplistbrowse->error != SP_ERROR_IS_LOADING)
-			request_post_result(session, REQ_TYPE_TOPLISTBROWSE, toplistbrowse->error, toplistbrowse);
-
-		return toplistbrowse;
-	}
-
 	toplistbrowse = malloc(sizeof(sp_toplistbrowse));
+	DSFYDEBUG("Allocated toplistbrowse at %p\n", toplistbrowse);
 	if(toplistbrowse == NULL)
 		return NULL;
-	
-	DSFYDEBUG("Allocated toplistbrowse at %p\n", toplistbrowse);
 
 
 	toplistbrowse->callback = callback;
@@ -65,9 +46,6 @@ SP_LIBEXPORT(sp_toplistbrowse *) sp_toplistbrowse_create (sp_session *session, s
 	toplistbrowse->error = SP_ERROR_IS_LOADING;
 	toplistbrowse->is_loaded = 0;
 	toplistbrowse->ref_count = 1;
-
-	toplistbrowse->hashtable = session->hashtable_toplistbrowses;
-	hashtable_insert(toplistbrowse->hashtable, browse_key, toplistbrowse);
 
 	
 	/*
@@ -160,8 +138,7 @@ SP_LIBEXPORT(void) sp_toplistbrowse_add_ref(sp_toplistbrowse *toplistbrowse) {
 
 SP_LIBEXPORT(void) sp_toplistbrowse_release(sp_toplistbrowse *toplistbrowse) {
 	int i;
-	unsigned char browse_key[4];
-	
+
 	assert(toplistbrowse->ref_count > 0);
 	toplistbrowse->ref_count--;
 
@@ -169,15 +146,6 @@ SP_LIBEXPORT(void) sp_toplistbrowse_release(sp_toplistbrowse *toplistbrowse) {
 		return;
 
 
-	browse_key[0] = (toplistbrowse->type >> 8) & 0xff;
-	browse_key[1] = (toplistbrowse->type >> 0) & 0xff;
-	browse_key[2] = (toplistbrowse->region >> 8) & 0xff;
-	browse_key[3] = (toplistbrowse->region >> 0) & 0xff;
-	
-
-	hashtable_remove(toplistbrowse->hashtable, browse_key);
-
-	
 	for(i = 0; i < toplistbrowse->num_tracks; i++)
 		sp_track_release(toplistbrowse->tracks[i]);
 	
@@ -199,6 +167,6 @@ SP_LIBEXPORT(void) sp_toplistbrowse_release(sp_toplistbrowse *toplistbrowse) {
 		free(toplistbrowse->albums);
 	
 	
-	DSFYDEBUG("Deallocated toplistbrowse at %p\n", toplistbrowse);
+	DSFYDEBUG("Deallocating toplistbrowse at %p\n", toplistbrowse);
 	free(toplistbrowse);
 }
