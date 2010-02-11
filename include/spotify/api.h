@@ -232,6 +232,7 @@ SP_LIBEXPORT(void) sp_link_release(sp_link *link);
 SP_LIBEXPORT(bool) sp_track_is_loaded(sp_track *track);
 SP_LIBEXPORT(sp_error) sp_track_error(sp_track *track);
 SP_LIBEXPORT(bool) sp_track_is_available(sp_track *track);
+SP_LIBEXPORT(bool) opensp_track_has_explicit_lyrics(sp_track *track);
 SP_LIBEXPORT(const char *) sp_track_name(sp_track *track);
 SP_LIBEXPORT(int) sp_track_duration(sp_track *track);
 SP_LIBEXPORT(int) sp_track_popularity(sp_track *track);

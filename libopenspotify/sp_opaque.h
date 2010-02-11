@@ -298,9 +298,11 @@ struct sp_track {
 	int num_artists;
 	sp_artist **artists;
 
+	int has_explicit_lyrics;
+
+	int is_available;
 	char *restricted_countries;
 	char *allowed_countries;
-	int is_available;
 
 	int index;
 	int disc;

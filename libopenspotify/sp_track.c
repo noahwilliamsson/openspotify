@@ -32,6 +32,13 @@ SP_LIBEXPORT(bool) sp_track_is_available(sp_track *track) {
 }
 
 
+/* Not available in libopenspotify 0.0.3 */
+SP_LIBEXPORT(bool) opensp_track_has_explicit_lyrics(sp_track *track) {
+
+	return track->has_explicit_lyrics;
+}
+
+
 SP_LIBEXPORT(sp_error) sp_track_error(sp_track *track) {
 
 	return track->error;
@@ -140,6 +147,7 @@ sp_track *osfy_track_add(sp_session *session, unsigned char id[16]) {
 	track->num_artists = 0;
 	track->artists = NULL;
 
+	track->has_explicit_lyrics = 0;
 	track->is_available = 0;
 	track->restricted_countries = NULL;
 	track->allowed_countries = NULL;
@@ -218,7 +226,14 @@ int osfy_track_load_from_xml(sp_session *session, sp_track *track, ezxml_t track
 
 	track->name = realloc(track->name, strlen(node->txt) + 1);
 	strcpy(track->name, node->txt);
-	
+
+
+	/* Explicit lyrics? */
+	if((node = ezxml_get(track_node, "explicit", -1)) != NULL) {
+		if(!strcasecmp(node->txt, "true"))
+			track->has_explicit_lyrics = 1;
+	}
+
 
 	/* Track popularity */
 	if((node = ezxml_get(track_node, "popularity", -1)) == NULL) {
