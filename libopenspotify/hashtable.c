@@ -110,12 +110,12 @@ void hashtable_remove(struct hashtable *hashtable, void *key) {
 
 	if(entry == NULL)
 		return;
-	
+
 	if(prev == NULL)
 		hashtable->entries[index] = entry->next;
 	else
 		prev->next = entry->next;
-		
+
 	free(entry->key);
 	if(entry->dont_free) {
 		hashtable->freelist = realloc(hashtable->freelist, sizeof(struct hashentry *) * (1 + hashtable->num_to_free));
@@ -163,7 +163,7 @@ void *hashtable_find(struct hashtable *hashtable, const void *key) {
 #else
 	pthread_mutex_unlock(&hashtable->mutex);
 #endif
-	
+
 	return value;
 }
 
