@@ -230,7 +230,11 @@ int osfy_track_load_from_xml(sp_session *session, sp_track *track, ezxml_t track
 
 	/* Explicit lyrics? */
 	if((node = ezxml_get(track_node, "explicit", -1)) != NULL) {
+#ifdef _WIN32
+		if(!stricmp(node->txt, "true"))
+#else
 		if(!strcasecmp(node->txt, "true"))
+#endif
 			track->has_explicit_lyrics = 1;
 	}
 
