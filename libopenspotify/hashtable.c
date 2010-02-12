@@ -238,7 +238,6 @@ void hashtable_free(struct hashtable *hashtable) {
 
 		do {
 			free(entry->key);
-			free(entry->value);
 			next = entry->next;
 			free(entry);
 		} while((entry = next) != NULL);
