@@ -420,8 +420,8 @@ SP_LIBEXPORT(void) sp_artistbrowse_release(sp_artistbrowse *arb) {
 
 
 	if(arb->artist) {
+		DSFYDEBUG("Unreferencing artist at %p\n", arb->artist);
 		sp_artist_release(arb->artist);
-		DSFYDEBUG("Unreferenced artist at %p\n", arb->artist);
 	}
 
 

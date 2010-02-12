@@ -384,8 +384,8 @@ SP_LIBEXPORT(void) sp_albumbrowse_release(sp_albumbrowse *alb) {
 
 
 	if(alb->album) {
+		DSFYDEBUG("Unreferencing album at %p\n", alb->album);
 		sp_album_release(alb->album);
-		DSFYDEBUG("Unreferenced album at %p\n", alb->album);
 	}
 
 
