@@ -181,20 +181,24 @@ static void request_notify_main_thread(sp_session *session, struct request *requ
 	case REQ_TYPE_PLAYLIST_LOAD:
 		{
 			char idstr[35];
-			hex_bytes_to_ascii(((sp_playlist *)request->output)->id, idstr, 17);
-			DSFYDEBUG("Request <type %s, state %s, input %p>, playlist '%s' is LISTED\n",
-				REQUEST_TYPE_STR(request->type), REQUEST_STATE_STR(request->state),
-				request->input, idstr);
+			if(request->output != NULL) {
+				hex_bytes_to_ascii(((sp_playlist *)request->output)->id, idstr, 17);
+				DSFYDEBUG("Request <type %s, state %s, input %p>, playlist '%s' is LISTED\n",
+					REQUEST_TYPE_STR(request->type), REQUEST_STATE_STR(request->state),
+					request->input, idstr);
+			}
 		}
 		break;
 
 	case REQ_TYPE_BROWSE_PLAYLIST_TRACKS:
 		{
 			char idstr[35];
-			hex_bytes_to_ascii(((sp_playlist *)request->output)->id, idstr, 17);
-			DSFYDEBUG("Request <type %s, state %s, input %p>, playlist '%s' is LOADED\n",
-				REQUEST_TYPE_STR(request->type), REQUEST_STATE_STR(request->state),
-				request->input, idstr);
+			if(request->output != NULL) {
+				hex_bytes_to_ascii(((sp_playlist *)request->output)->id, idstr, 17);
+				DSFYDEBUG("Request <type %s, state %s, input %p>, playlist '%s' is LOADED\n",
+					REQUEST_TYPE_STR(request->type), REQUEST_STATE_STR(request->state),
+					request->input, idstr);
+			}
 		}
 		break;
 
