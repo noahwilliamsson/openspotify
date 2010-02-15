@@ -6,7 +6,7 @@ prefix ?= /usr
 CC = gcc
 CFLAGS = -Wall -ggdb -I../include -fPIC -O2
 LDFLAGS = -lcrypto -lresolv -lz -lvorbisfile
-SHLIB_FLAGS =
+SHLIB_FLAGS = -Wl,-x
 LIB_NAME = libopenspotify.so
 
 
@@ -19,17 +19,26 @@ endif
 ifeq ($(shell uname -s),Linux)
 	# Linux specific flags
 	LDFLAGS += -lpthread -lrt
-	SHLIB_FLAGS = -shared
+	SHLIB_FLAGS += -shared
 endif
 ifeq ($(shell uname -s),Darwin)
 	# Mac OS X specific flags
 	LIB_NAME = libopenspotify.dylib
-	SHLIB_FLAGS = -dynamiclib -dylib
+	SHLIB_FLAGS += -dynamiclib -dylib
 endif
 
 
 CORE_OBJS = aes.o browse.o buf.o cache.o channel.o commands.o dns.o ezxml.o handlers.o hashtable.o hmac.o link.o login.o iothread.o packet.o player.o playlist.o rbuf.o request.o search.o sha1.o shn.o toplistbrowse.o user.o util.o
 LIB_OBJS = sp_album.o sp_artist.o sp_albumbrowse.o sp_artistbrowse.o sp_error.o sp_image.o sp_link.o sp_playlist.o sp_search.o sp_session.o sp_toplistbrowse.o sp_track.o sp_user.o
+
+
+# Expose symbols in sp_*.c
+sp_%.o: sp_%.c
+	gcc $(CFLAGS) -c -o $@ $<
+
+# Hide symbols in all other files
+%.o: %.c
+	gcc -fvisibility=hidden $(CFLAGS) -c -o $@ $<
 
 
 all: $(CORE_OBJS) $(LIB_OBJS)
