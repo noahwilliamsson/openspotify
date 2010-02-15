@@ -6,30 +6,31 @@ prefix ?= /usr
 CC = gcc
 CFLAGS = -Wall -ggdb -I../include -fPIC -O2
 LDFLAGS = -lcrypto -lresolv -lz -lvorbisfile
+SHLIB_FLAGS =
+LIB_NAME = libopenspotify.so
 
-# Default symbol visibility in the library; we only need to export the sp_*() functions
-#CFLAGS += -fvisibility=hidden
-#LDFLAGS += -Wl,-x
 
+# 'make nodebug=1 all' will turn off -DDEBUG 
 ifneq ($(nodebug), 1)
 	CFLAGS += -DDEBUG
 endif
 
-CORE_OBJS = aes.o browse.o buf.o cache.o channel.o commands.o dns.o ezxml.o handlers.o hashtable.o hmac.o link.o login.o iothread.o packet.o player.o playlist.o rbuf.o request.o search.o sha1.o shn.o toplistbrowse.o user.o util.o
-LIB_OBJS = sp_album.o sp_artist.o sp_albumbrowse.o sp_artistbrowse.o sp_error.o sp_image.o sp_link.o sp_playlist.o sp_search.o sp_session.o sp_toplistbrowse.o sp_track.o sp_user.o
 
-# Linux
-LIB_NAME = libopenspotify.so
-SHLIB_FLAGS = -shared -lpthread
-
-# Mac OS X
+ifeq ($(shell uname -s),Linux)
+	# Linux specific flags
+	LDFLAGS += -lpthread -lrt
+	SHLIB_FLAGS = -shared
+endif
 ifeq ($(shell uname -s),Darwin)
+	# Mac OS X specific flags
 	LIB_NAME = libopenspotify.dylib
 	SHLIB_FLAGS = -dynamiclib -dylib
 endif
-ifeq ($(shell uname -s),Linux)
-	LDFLAGS += -lrt
-endif
+
+
+CORE_OBJS = aes.o browse.o buf.o cache.o channel.o commands.o dns.o ezxml.o handlers.o hashtable.o hmac.o link.o login.o iothread.o packet.o player.o playlist.o rbuf.o request.o search.o sha1.o shn.o toplistbrowse.o user.o util.o
+LIB_OBJS = sp_album.o sp_artist.o sp_albumbrowse.o sp_artistbrowse.o sp_error.o sp_image.o sp_link.o sp_playlist.o sp_search.o sp_session.o sp_toplistbrowse.o sp_track.o sp_user.o
+
 
 all: $(CORE_OBJS) $(LIB_OBJS)
 	gcc -o $(LIB_NAME) $(SHLIB_FLAGS) $(LDFLAGS) $(CORE_OBJS) $(LIB_OBJS)
