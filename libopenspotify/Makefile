@@ -7,7 +7,8 @@ CC = gcc
 CFLAGS = -Wall -ggdb -I../include -fPIC -O2
 LDFLAGS = -lcrypto -lresolv -lz -lvorbisfile
 SHLIB_FLAGS = -Wl,-x
-LIB_NAME = libopenspotify.so
+LIB_NAME = libopenspotify.so.3
+LIB_ALTNAMES = 
 
 
 # 'make nodebug=1 all' will turn off -DDEBUG 
@@ -18,13 +19,15 @@ endif
 
 ifeq ($(shell uname -s),Linux)
 	# Linux specific flags
+	LIB_ALTNAMES = libopenspotify.so
 	LDFLAGS += -lpthread -lrt
-	SHLIB_FLAGS += -shared
+	SHLIB_FLAGS += -shared -Wl,-soname=$(LIB_NAME)
 endif
 ifeq ($(shell uname -s),Darwin)
 	# Mac OS X specific flags
-	LIB_NAME = libopenspotify.dylib
-	SHLIB_FLAGS += -dynamiclib -dylib
+	LIB_NAME = libopenspotify.3.dylib
+	LIB_ALTNAMES = libopenspotify.dylib
+	SHLIB_FLAGS += -dynamiclib -Wl,-install_name,$(prefix)/lib/$(LIB_NAME) -current_version $(shell date +%y.%m.%d) -compatibility_version $(shell date +%y.%m)
 endif
 
 
@@ -49,6 +52,7 @@ install: all
 	install -m 0644 TODO.txt ../README.txt ../LICENSE.txt $(DESTDIR)$(prefix)/share/doc/libopenspotify
 	install -m 0755 -d $(DESTDIR)$(prefix)/lib
 	install -m 0755 $(LIB_NAME) $(DESTDIR)$(prefix)/lib
+	for altname in $(LIB_ALTNAMES); do ln -sf $(LIB_NAME) $(DESTDIR)$(prefix)/lib/$${altname}; done
 	install -m 0755 -d $(DESTDIR)$(prefix)/include/spotify
 	install -m 0644 ../include/spotify/api.h $(DESTDIR)$(prefix)/include/spotify/api.h
 	install -m 0755 -d $(DESTDIR)$(prefix)/lib/pkgconfig
