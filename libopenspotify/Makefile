@@ -14,6 +14,7 @@ LIB_ALTNAMES =
 # 'make nodebug=1 all' will turn off -DDEBUG 
 ifneq ($(nodebug), 1)
 	CFLAGS += -DDEBUG
+	#LDFLAGS += -s
 endif
 
 
