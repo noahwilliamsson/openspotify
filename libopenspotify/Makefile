@@ -37,15 +37,15 @@ LIB_OBJS = sp_album.o sp_artist.o sp_albumbrowse.o sp_artistbrowse.o sp_error.o 
 
 # Expose symbols in sp_*.c
 sp_%.o: sp_%.c
-	gcc $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 # Hide symbols in all other files
 %.o: %.c
-	gcc -fvisibility=hidden $(CFLAGS) -c -o $@ $<
+	$(CC) -fvisibility=hidden $(CFLAGS) -c -o $@ $<
 
 
 all: $(CORE_OBJS) $(LIB_OBJS)
-	gcc -o $(LIB_NAME) $(SHLIB_FLAGS) $(LDFLAGS) $(CORE_OBJS) $(LIB_OBJS)
+	$(CC) -o $(LIB_NAME) $(SHLIB_FLAGS) $(LDFLAGS) $(CORE_OBJS) $(LIB_OBJS)
 
 install: all
 	install -m 0755 -d $(DESTDIR)$(prefix)/share/doc/libopenspotify
