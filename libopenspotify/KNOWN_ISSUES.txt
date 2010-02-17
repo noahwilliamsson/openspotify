@@ -1,0 +1,8 @@
+KNOWN ISSUES
+============
+1. The Windows event/mutex stuff in iothread.c vs request.c is broken and
+   may cause deadlocks under certain conditions.
+2. Loading and unloading tracks in the player too fast will cause a crash
+   due to a race in player.c 
+3. sp_link_create_from_string() does not support playlist URIs
+4. Not all playlist APIs are actually implemented
