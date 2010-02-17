@@ -32,8 +32,6 @@ int request_post(sp_session *session, request_type type, void *input) {
 	struct request *req;
 
 #ifdef _WIN32
-	/* Wake up the network thread if it's sleeping */
-	PulseEvent(session->idle_wakeup);
 	WaitForSingleObject(session->request_mutex, INFINITE);
 #else
 	pthread_mutex_lock(&session->request_mutex);
@@ -57,6 +55,8 @@ int request_post(sp_session *session, request_type type, void *input) {
 	req->next_timeout = 0;
 
 #ifdef _WIN32
+	/* Notify the network thread if it's waiting for something to do */
+	PulseEvent(session->idle_wakeup);
 	ReleaseMutex(session->request_mutex);
 #else
 	/* Notify the network thread if it's waiting for something to do */

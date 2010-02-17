@@ -102,7 +102,9 @@ void *iothread(void *data) {
 			if(s->requests == NULL) {
 				DSFYDEBUG("Sleeping because there's nothing to do\n");
 #ifdef _WIN32
+				ReleaseMutex(s->request_mutex);
 				WaitForSingleObject(s->idle_wakeup, INFINITE);
+				WaitForSingleObject(s->request_mutex, INFINITE);
 #else
 				pthread_cond_wait(&s->idle_wakeup, &s->request_mutex);
 #endif
